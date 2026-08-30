@@ -14,8 +14,10 @@
   "access": "public",
   "expected_participants": 7,
   "modalities": ["fmri", "behavior"],
-  "estimated_bytes": 153344263696,
+  "snapshot_reported_bytes": 153344263696,
+  "expected_manifest_files": 1314,
+  "expected_manifest_bytes": 159327593574,
+  "estimated_bytes": 159327593574,
   "construct_map": "conf/construct_maps/masked_content_fmri.yaml",
   "split_units": ["subject", "run"]
 }
-

@@ -102,7 +102,11 @@ def synthesize_scores(paths: list[str | Path], output: str | Path) -> dict[str, 
         factorized = np.asarray(scores["M4"]["replicate_log_scores"], dtype=float)
         comparator = np.asarray(scores[alternative]["replicate_log_scores"], dtype=float)
         differences = factorized - comparator
-        standard_error = float(differences.std(ddof=1) / np.sqrt(len(differences))) if len(differences) > 1 else 1.0
+        standard_error = (
+            float(differences.std(ddof=1) / np.sqrt(len(differences)))
+            if len(differences) > 1
+            else 1.0
+        )
         standard_error = max(standard_error, 1e-6)
         families.append(
             {
@@ -137,4 +141,3 @@ def synthesize_scores(paths: list[str | Path], output: str | Path) -> dict[str, 
     }
     atomic_write_json(output, report)
     return report
-

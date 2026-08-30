@@ -6,6 +6,9 @@ repo_root="$(factorcon_repo_root)"
 config_path="$repo_root/conf/base.yaml"
 commit="${1:-$(git -C "$repo_root" rev-parse HEAD 2>/dev/null || true)}"
 [[ "$commit" =~ ^[0-9a-f]{40}$ ]] || factorcon_die "usage: create_environment.sh [40-character-git-commit]"
+deployment_scope="$(factorcon_config_value "$config_path" server deployment_scope)"
+[[ "$deployment_scope" == "full" ]] || \
+  factorcon_die "scientific environment creation is disabled while deployment_scope=$deployment_scope"
 
 expected_host="$(factorcon_config_value "$config_path" server expected_hostname)"
 expected_user="$(factorcon_config_value "$config_path" server expected_user)"
@@ -32,4 +35,3 @@ mkdir -p -- "$canonical_root/manifests/generated/environments"
 "$temporary/bin/python" -m pip freeze --all > "$canonical_root/manifests/generated/environments/$commit.txt"
 mv -- "$temporary" "$environment"
 printf '%s\n' "$environment"
-

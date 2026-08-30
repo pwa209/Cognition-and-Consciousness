@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Hashable, Sequence
 from itertools import permutations
-from typing import Hashable, Sequence
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -92,4 +92,3 @@ def crossnobis_rdm(
                 values.append(float(delta_first @ metric @ delta_second / x.shape[1]))
             result[i, j] = result[j, i] = float(np.mean(values))
     return condition_levels, result
-

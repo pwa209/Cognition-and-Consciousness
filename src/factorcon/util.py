@@ -143,7 +143,9 @@ def ensure_within(root: str | Path, candidate: str | Path) -> Path:
     try:
         resolved_candidate.relative_to(resolved_root)
     except ValueError as exc:
-        raise IntegrityError(f"Path escapes root: {resolved_candidate} not in {resolved_root}") from exc
+        raise IntegrityError(
+            f"Path escapes root: {resolved_candidate} not in {resolved_root}"
+        ) from exc
     return resolved_candidate
 
 

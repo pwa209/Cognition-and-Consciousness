@@ -21,4 +21,3 @@ def test_repeats_derive_distinct_allocations() -> None:
     folds = repeated_group_folds(groups, 5, 3, seed=91)
     assert len(folds) == 15
     assert any(not np.array_equal(folds[0].test, fold.test) for fold in folds[5:])
-

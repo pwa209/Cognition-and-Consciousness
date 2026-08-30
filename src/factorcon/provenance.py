@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import hashlib
 import json
-import os
 import platform
 import sys
 from collections.abc import Mapping, Sequence
@@ -79,4 +78,3 @@ def write_provenance(
     )
     atomic_write_json(path, asdict(record))
     return record
-

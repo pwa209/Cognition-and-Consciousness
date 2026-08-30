@@ -10,7 +10,9 @@ from factorcon.simulation import simulate_rdms
 
 
 def _write(path: Path, truth: str, seed: int) -> None:
-    design, train, test = simulate_rdms(truth, seed=seed, condition_count=30, train_replicates=6, test_replicates=6)
+    design, train, test = simulate_rdms(
+        truth, seed=seed, condition_count=30, train_replicates=6, test_replicates=6
+    )
     names = np.asarray(list(design), dtype="U32")
     values = np.stack([design[name] for name in names])
     np.savez_compressed(
@@ -19,7 +21,9 @@ def _write(path: Path, truth: str, seed: int) -> None:
         test_rdms=test,
         design_names=names,
         design_values=values,
-        condition_labels=np.asarray([f"condition-{index}" for index in range(values.shape[1])], dtype="U32"),
+        condition_labels=np.asarray(
+            [f"condition-{index}" for index in range(values.shape[1])], dtype="U32"
+        ),
     )
 
 
@@ -47,4 +51,3 @@ def test_synthesis_keeps_every_family(tmp_path: Path) -> None:
     report = synthesize_scores(score_paths, tmp_path / "synthesis.json")
     assert report["family_count"] == 2
     assert {item["family"] for item in report["families"]} == {"family-0", "family-1"}
-

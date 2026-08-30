@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Sequence
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -27,14 +27,23 @@ def _log_likelihood(
 ) -> float:
     weights = np.exp(parameters[:-1])
     noise = float(np.exp(parameters[-1]))
-    covariance = sum(weight * component for weight, component in zip(weights, components, strict=True))
+    covariance = sum(
+        weight * component for weight, component in zip(weights, components, strict=True)
+    )
     covariance = covariance + np.eye(len(covariance)) * noise
     sign, logdet = np.linalg.slogdet(covariance)
     if sign <= 0:
         return -np.inf
     solved = np.linalg.solve(covariance, patterns)
     feature_count = patterns.shape[1]
-    return float(-0.5 * (feature_count * logdet + np.sum(patterns * solved) + len(covariance) * feature_count * np.log(2 * np.pi)))
+    return float(
+        -0.5
+        * (
+            feature_count * logdet
+            + np.sum(patterns * solved)
+            + len(covariance) * feature_count * np.log(2 * np.pi)
+        )
+    )
 
 
 def fit_pcm(
@@ -60,8 +69,12 @@ def fit_pcm(
     if patterns.ndim != 2 or not components:
         raise ValueError("condition_patterns must be a matrix and components non-empty")
     for component in components:
-        if component.shape != (len(patterns), len(patterns)) or not np.allclose(component, component.T):
-            raise ValueError("every covariance component must be symmetric conditions-by-conditions")
+        if component.shape != (len(patterns), len(patterns)) or not np.allclose(
+            component, component.T
+        ):
+            raise ValueError(
+                "every covariance component must be symmetric conditions-by-conditions"
+            )
     start = np.full(len(components) + 1, np.log(max(initial_variance, 1e-8)), dtype=float)
     result = minimize(
         lambda parameter: -_log_likelihood(parameter, patterns, components),
@@ -77,4 +90,3 @@ def fit_pcm(
         converged=bool(result.success),
         iterations=int(result.nit),
     )
-

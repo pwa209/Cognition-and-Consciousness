@@ -22,7 +22,11 @@ class _ArchiveParser(HTMLParser):
             return
         values = {key.lower(): value for key, value in attrs}
         candidate = values.get("value") if tag.lower() == "input" else values.get("href")
-        if candidate and candidate.startswith("https://bmvp.projects.nitrc.org/") and candidate.endswith(".tar"):
+        if (
+            candidate
+            and candidate.startswith("https://bmvp.projects.nitrc.org/")
+            and candidate.endswith(".tar")
+        ):
             self.urls.append(candidate)
 
 
@@ -44,22 +48,30 @@ def resolve_bmvp(config: DatasetConfig) -> list[FileRecord]:
         if name in names:
             raise IntegrityError(f"Duplicate BMVP archive basename: {name}")
         names.add(name)
-        group = "unclassified"
         lowered = name.lower()
         if "nrp" in lowered:
-            group = "no_report"
+            report_context = "no_report"
         elif "rp" in lowered:
-            group = "report"
-        elif "eeg" in lowered:
-            group = "eeg"
+            report_context = "report"
+        else:
+            report_context = "unclassified"
+        if "eeg" in lowered:
+            archive_modality = "eeg"
+        elif "mri" in lowered:
+            archive_modality = "mri"
+        else:
+            archive_modality = "multimodal_or_unspecified"
         records.append(
             FileRecord(
                 family=config.family,
                 snapshot=config.snapshot_label,
-                relative_path=f"archives/{group}/{name}",
+                relative_path=f"archives/{report_context}/{name}",
                 url=url,
-                metadata={"archive_group": group, "retain_archive": True},
+                metadata={
+                    "report_context": report_context,
+                    "archive_modality": archive_modality,
+                    "retain_archive": True,
+                },
             )
         )
     return records
-

@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import hashlib
 import json
+import shutil
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 from factorcon.acquire.bmvp import resolve_bmvp
 from factorcon.acquire.dream import parse_dream_registry, resolve_dream_registry
@@ -14,8 +16,16 @@ from factorcon.acquire.openneuro import resolve_openneuro
 from factorcon.acquire.osf import resolve_osf
 from factorcon.acquire.records import FileRecord
 from factorcon.config import DatasetConfig, ProjectConfig
-from factorcon.errors import AccessRequired, ConfigError, IntegrityError
-from factorcon.util import atomic_write_json, hash_file, read_jsonl, slug, utc_now, write_jsonl
+from factorcon.errors import ConfigError, IntegrityError
+from factorcon.util import (
+    atomic_write_json,
+    hash_file,
+    read_jsonl,
+    safe_relative_path,
+    slug,
+    utc_now,
+    write_jsonl,
+)
 
 Resolver = Callable[[DatasetConfig], list[FileRecord]]
 
@@ -101,14 +111,102 @@ def resolve_manifests(
         }
         atomic_write_json(summary_path, summary)
         summaries[dataset.family] = summary
+    index_path = output_root / "manifests" / "generated" / "index.json"
+    indexed_families: dict[str, Any] = {}
+    if families is not None and index_path.is_file():
+        try:
+            existing_index = json.loads(index_path.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError) as exc:
+            raise IntegrityError(f"Cannot merge existing manifest index: {index_path}") from exc
+        existing_families = existing_index.get("families")
+        if not isinstance(existing_families, dict):
+            raise IntegrityError(f"Existing manifest index lacks family records: {index_path}")
+        indexed_families.update(existing_families)
+    indexed_families.update(summaries)
     index = {
         "generated_utc": utc_now(),
-        "families": summaries,
+        "families": indexed_families,
         "registration": project.analysis_spec["registration"],
         "scientific_gates": project.analysis_spec["scientific_gates"],
     }
-    atomic_write_json(output_root / "manifests" / "generated" / "index.json", index)
+    atomic_write_json(index_path, index)
     return index
+
+
+def acquisition_capacity(
+    project: ProjectConfig,
+    root: str | Path,
+    *,
+    families: set[str] | None = None,
+) -> dict[str, Any]:
+    """Estimate remaining NAS bytes and enforce the configured free-space reserve."""
+
+    output_root = Path(root)
+    output_root.mkdir(parents=True, exist_ok=True)
+    family_reports: dict[str, Any] = {}
+    total_remaining = 0
+    total_unknown_files = 0
+    for dataset in _selected(project, families):
+        manifest_path, _ = _manifest_paths(output_root, dataset)
+        if dataset.access == "account_and_terms_required":
+            family_reports[dataset.family] = {
+                "status": "waiting_access",
+                "estimated_remaining_bytes": 0,
+            }
+            continue
+        if not manifest_path.is_file():
+            raise ConfigError(f"Missing manifest for capacity check: {manifest_path}")
+        records = [FileRecord.from_dict(value) for value in read_jsonl(manifest_path)]
+        destination = (
+            output_root / "data" / "raw" / slug(dataset.family) / slug(dataset.snapshot_label)
+        )
+        present_bytes = 0
+        known_missing_bytes = 0
+        unknown_files = 0
+        for record in records:
+            path = destination / safe_relative_path(record.relative_path)
+            if path.is_file() and (record.size is None or path.stat().st_size == record.size):
+                present_bytes += path.stat().st_size
+            elif record.size is None:
+                unknown_files += 1
+            else:
+                known_missing_bytes += record.size
+        configured_total = int(dataset.values.get("estimated_bytes") or 0)
+        estimated_remaining = max(
+            known_missing_bytes,
+            configured_total - present_bytes,
+            0,
+        )
+        total_remaining += estimated_remaining
+        total_unknown_files += unknown_files
+        family_reports[dataset.family] = {
+            "status": "estimated",
+            "manifest_files": len(records),
+            "present_bytes": present_bytes,
+            "known_missing_bytes": known_missing_bytes,
+            "unknown_size_files_remaining": unknown_files,
+            "configured_total_bytes": configured_total,
+            "estimated_remaining_bytes": estimated_remaining,
+        }
+    free_bytes = shutil.disk_usage(output_root).free
+    reserve_bytes = int(project.server.get("nas_reserve_bytes", 0))
+    sufficient = total_remaining + reserve_bytes <= free_bytes
+    report = {
+        "checked_utc": utc_now(),
+        "root": str(output_root),
+        "free_bytes": free_bytes,
+        "reserve_bytes": reserve_bytes,
+        "estimated_remaining_bytes": total_remaining,
+        "unknown_size_files_remaining": total_unknown_files,
+        "sufficient_known_capacity": sufficient,
+        "families": family_reports,
+    }
+    if families is not None and len(families) == 1:
+        capacity_name = f"CAPACITY.{slug(next(iter(families)))}.json"
+    else:
+        capacity_name = "CAPACITY.json"
+    atomic_write_json(output_root / "run_state" / "P02" / capacity_name, report)
+    return report
 
 
 def acquire_families(
@@ -133,15 +231,30 @@ def acquire_families(
         if not manifest_path.is_file():
             raise ConfigError(f"Missing manifest for {dataset.family}: {manifest_path}")
         records = [FileRecord.from_dict(value) for value in read_jsonl(manifest_path)]
-        destination = output_root / "data" / "raw" / slug(dataset.family) / slug(dataset.snapshot_label)
-        ledger = output_root / "run_state" / "P02" / f"{slug(dataset.family)}.downloads.json"
+        destination = (
+            output_root / "data" / "raw" / slug(dataset.family) / slug(dataset.snapshot_label)
+        )
+        manifest_sha256 = hash_file(manifest_path)
+        ledger = (
+            output_root
+            / "run_state"
+            / "P02"
+            / f"{slug(dataset.family)}.{slug(dataset.snapshot_label)}.downloads.json"
+        )
         family_workers = int(
             workers
             or dataset.values.get("max_parallel_downloads")
             or project.server.get("max_parallel_downloads", 4)
         )
         try:
-            result = download_many(records, destination, ledger, workers=family_workers)
+            result = download_many(
+                records,
+                destination,
+                ledger,
+                workers=family_workers,
+                reserve_bytes=int(project.server.get("nas_reserve_bytes", 0)),
+                source_manifest_sha256=manifest_sha256,
+            )
         except Exception as exc:
             status = {
                 "family": dataset.family,
@@ -149,25 +262,35 @@ def acquire_families(
                 "error": f"{type(exc).__name__}: {exc}",
                 "updated_utc": utc_now(),
             }
-            atomic_write_json(output_root / "run_state" / "P02" / f"{slug(dataset.family)}.FAILED.json", status)
+            atomic_write_json(
+                output_root / "run_state" / "P02" / f"{slug(dataset.family)}.FAILED.json", status
+            )
             statuses[dataset.family] = status
             continue
 
         if dataset.source_type == "dream_registry":
             registry_path = destination / "registry" / "Datasets.csv"
             direct, unresolved = parse_dream_registry(registry_path, dataset)
-            constituent_manifest = manifest_path.with_name(manifest_path.stem + ".constituents.jsonl")
+            constituent_manifest = manifest_path.with_name(
+                manifest_path.stem + ".constituents.jsonl"
+            )
             write_jsonl(constituent_manifest, (item.as_dict() for item in direct))
             atomic_write_json(
                 constituent_manifest.with_suffix(".unresolved.json"),
                 {"updated_utc": utc_now(), "records": unresolved},
             )
             if direct:
+                constituent_sha256 = hash_file(constituent_manifest)
                 result["constituents"] = download_many(
                     direct,
                     destination,
-                    output_root / "run_state" / "P02" / "dream.constituents.downloads.json",
+                    output_root
+                    / "run_state"
+                    / "P02"
+                    / f"dream.{slug(dataset.snapshot_label)}.constituents.downloads.json",
                     workers=family_workers,
+                    reserve_bytes=int(project.server.get("nas_reserve_bytes", 0)),
+                    source_manifest_sha256=constituent_sha256,
                 )
             result["unresolved_constituents"] = len(unresolved)
         status = {
@@ -176,15 +299,29 @@ def acquire_families(
             "updated_utc": utc_now(),
             **result,
         }
-        atomic_write_json(output_root / "run_state" / "P02" / f"{slug(dataset.family)}.SUCCESS.json", status)
+        atomic_write_json(
+            output_root / "run_state" / "P02" / f"{slug(dataset.family)}.SUCCESS.json", status
+        )
         statuses[dataset.family] = status
+    summary_path = output_root / "run_state" / "P02" / "SUMMARY.json"
+    indexed_statuses: dict[str, Any] = {}
+    if families is not None and summary_path.is_file():
+        try:
+            existing_summary = json.loads(summary_path.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError) as exc:
+            raise IntegrityError(f"Cannot merge acquisition summary: {summary_path}") from exc
+        existing_statuses = existing_summary.get("families")
+        if not isinstance(existing_statuses, dict):
+            raise IntegrityError(f"Acquisition summary lacks family records: {summary_path}")
+        indexed_statuses.update(existing_statuses)
+    indexed_statuses.update(statuses)
     summary = {
         "updated_utc": utc_now(),
-        "families": statuses,
+        "families": indexed_statuses,
         "all_public_success": all(
-            value.get("status") in {"success", "waiting_access"} for value in statuses.values()
+            value.get("status") in {"success", "waiting_access"}
+            for value in indexed_statuses.values()
         ),
     }
-    atomic_write_json(output_root / "run_state" / "P02" / "SUMMARY.json", summary)
+    atomic_write_json(summary_path, summary)
     return summary
-

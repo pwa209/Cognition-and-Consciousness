@@ -22,4 +22,3 @@ def test_nuisance_coefficients_are_unchanged_by_test_targets() -> None:
     before = model.coefficients_.copy()  # type: ignore[union-attr]
     model.transform(np.array([[100.0], [200.0]]), np.array([[999.0, -999.0], [999.0, -999.0]]))
     assert np.array_equal(before, model.coefficients_)
-

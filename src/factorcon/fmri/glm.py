@@ -56,4 +56,3 @@ def fit_runwise_glm(
         condition_count=conditions.shape[1],
         censored_volumes=int((~keep).sum()),
     )
-

@@ -69,4 +69,3 @@ def request_json(
     if not isinstance(value, dict):
         raise SourceError(f"Expected a JSON object from {url}")
     return value
-

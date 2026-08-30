@@ -40,7 +40,9 @@ def inventory_bids(root: str | Path) -> BIDSInventory:
     participants = tuple(sorted(path.name[4:] for path in source.glob("sub-*") if path.is_dir()))
     if not participants:
         raise IntegrityError(f"No subject directories found in {source}")
-    event_files = tuple(sorted(str(path.relative_to(source)) for path in source.rglob("*_events.tsv")))
+    event_files = tuple(
+        sorted(str(path.relative_to(source)) for path in source.rglob("*_events.tsv"))
+    )
     modalities = tuple(
         name
         for name in ("anat", "func", "dwi", "fmap", "eeg", "meg", "ieeg", "beh", "pet")
@@ -76,4 +78,3 @@ def read_events(path: str | Path) -> list[dict[str, str]]:
             raise IntegrityError(f"Nonmonotonic onset or negative duration at {source}:{index}")
         previous = onset
     return rows
-

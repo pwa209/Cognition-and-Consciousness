@@ -18,7 +18,9 @@ def high_gamma_envelope(
     try:
         from scipy.signal import butter, hilbert, sosfiltfilt  # type: ignore[import-not-found]
     except ImportError as exc:
-        raise RuntimeError("high_gamma_envelope requires the 'analysis' optional dependencies") from exc
+        raise RuntimeError(
+            "high_gamma_envelope requires the 'analysis' optional dependencies"
+        ) from exc
     data = np.asarray(signals, dtype=float)
     nyquist = sampling_rate_hz / 2
     envelopes = []
@@ -27,6 +29,7 @@ def high_gamma_envelope(
             raise ValueError(f"invalid high-gamma band {(low, high)} at fs={sampling_rate_hz}")
         sos = butter(4, [low / nyquist, high / nyquist], btype="bandpass", output="sos")
         filtered = sosfiltfilt(sos, data, axis=axis)
-        envelopes.append(np.log(np.maximum(np.abs(hilbert(filtered, axis=axis)), np.finfo(float).tiny)))
+        envelopes.append(
+            np.log(np.maximum(np.abs(hilbert(filtered, axis=axis)), np.finfo(float).tiny))
+        )
     return np.mean(envelopes, axis=0)
-

@@ -38,4 +38,3 @@ def test_connectivity_and_participation_contracts() -> None:
     assert np.allclose(matrix, matrix.T)
     participation = participation_coefficient(matrix, [0, 0, 1, 1])
     assert participation.shape == (4,)
-

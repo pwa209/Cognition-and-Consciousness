@@ -96,9 +96,18 @@ def load_project(path: str | Path) -> ProjectConfig:
     analysis = load_structured(analysis_path)
     _require(
         server,
-        {"expected_hostname", "expected_user", "canonical_root", "fast_root", "restart_root"},
+        {
+            "expected_hostname",
+            "expected_user",
+            "canonical_root",
+            "fast_root",
+            "restart_root",
+            "deployment_scope",
+        },
         str(server_path),
     )
+    if server["deployment_scope"] not in {"acquisition_only", "full"}:
+        raise ConfigError("deployment_scope must be acquisition_only or full")
     if analysis.get("registration") is not None:
         raise ConfigError("Project contract requires registration=null")
     if analysis.get("scientific_gates") is not False:
@@ -127,7 +136,9 @@ def load_project(path: str | Path) -> ProjectConfig:
     for item in values["construct_maps"]:
         map_path = _resolve(root, str(item))
         construct_map = load_structured(map_path)
-        _require(construct_map, {"schema_version", "family", "mappings", "contrasts"}, str(map_path))
+        _require(
+            construct_map, {"schema_version", "family", "mappings", "contrasts"}, str(map_path)
+        )
         family = str(construct_map["family"])
         if family in map_families:
             raise ConfigError(f"Duplicate construct map: {family}")
@@ -137,13 +148,23 @@ def load_project(path: str | Path) -> ProjectConfig:
                 raise ConfigError(f"{map_path}: mapping {index} is not an object")
             _require(
                 mapping,
-                {"observed", "construct", "direction", "scale", "uncertainty", "held_constant", "alternative", "enters"},
+                {
+                    "observed",
+                    "construct",
+                    "direction",
+                    "scale",
+                    "uncertainty",
+                    "held_constant",
+                    "alternative",
+                    "enters",
+                },
                 f"{map_path}:mapping[{index}]",
             )
         maps.append(construct_map)
     if seen_families != map_families:
         raise ConfigError(
-            f"Dataset/construct-map family mismatch: datasets={sorted(seen_families)}, maps={sorted(map_families)}"
+            "Dataset/construct-map family mismatch: "
+            f"datasets={sorted(seen_families)}, maps={sorted(map_families)}"
         )
 
     candidate_models = tuple(values.get("candidate_models", ()))
@@ -173,5 +194,5 @@ def validate_project(path: str | Path) -> dict[str, Any]:
         "dataset_families": [item.family for item in project.datasets],
         "candidate_models": list(project.values["candidate_models"]),
         "roots_status": project.server.get("roots_status"),
+        "deployment_scope": project.server["deployment_scope"],
     }
-

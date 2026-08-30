@@ -35,6 +35,7 @@ def participation_coefficient(weights: ArrayLike, communities: ArrayLike) -> NDA
     result = np.zeros(len(matrix), dtype=float)
     for community in np.unique(labels):
         within = absolute[:, labels == community].sum(axis=1)
-        result += np.square(np.divide(within, strength, out=np.zeros_like(within), where=strength > 0))
+        result += np.square(
+            np.divide(within, strength, out=np.zeros_like(within), where=strength > 0)
+        )
     return 1.0 - result
-

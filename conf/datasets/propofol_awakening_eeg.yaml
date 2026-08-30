@@ -15,8 +15,10 @@
   "expected_participants": 20,
   "expected_attempted_awakenings": 52,
   "modalities": ["eeg", "tms_eeg", "reports"],
-  "estimated_bytes": 83002662733,
+  "snapshot_reported_bytes": 83002662733,
+  "expected_manifest_files": 1442,
+  "expected_manifest_bytes": 83002663223,
+  "estimated_bytes": 83002663223,
   "construct_map": "conf/construct_maps/propofol_awakening_eeg.yaml",
   "split_units": ["subject", "awakening"]
 }
-

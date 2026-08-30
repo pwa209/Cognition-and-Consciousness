@@ -78,11 +78,11 @@ def recover_architecture(truth: str, *, seed: int = 260830) -> RecoveryResult:
     """Fit M0-M5 to independent synthetic train/test RDMs and rank M0-M4."""
 
     design, train, test = simulate_rdms(truth, seed=seed)
-    scores = {
-        model: evaluate_architecture(model, design, train, test)
-        for model in ARCHITECTURES
-    }
-    theory_winner = max((model for model in ARCHITECTURES if model != "M5"), key=lambda model: scores[model].log_score)
+    scores = {model: evaluate_architecture(model, design, train, test) for model in ARCHITECTURES}
+    theory_winner = max(
+        (model for model in ARCHITECTURES if model != "M5"),
+        key=lambda model: scores[model].log_score,
+    )
     return RecoveryResult(
         truth=truth,
         seed=seed,
@@ -99,7 +99,10 @@ def run_recovery_suite(
 ) -> dict[str, Any]:
     """Run deterministic recovery cases and write a machine-readable report."""
 
-    results = [recover_architecture(model, seed=seed + index * 1009) for index, model in enumerate(architectures)]
+    results = [
+        recover_architecture(model, seed=seed + index * 1009)
+        for index, model in enumerate(architectures)
+    ]
     report = {
         "generated_utc": utc_now(),
         "seed": seed,
@@ -111,4 +114,3 @@ def run_recovery_suite(
     target.mkdir(parents=True, exist_ok=True)
     atomic_write_json(target / "architecture_recovery.json", report)
     return report
-

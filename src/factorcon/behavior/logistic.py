@@ -17,7 +17,7 @@ class LogisticCalibrator:
     tolerance: float = 1e-8
     coefficients_: NDArray[np.float64] | None = None
 
-    def fit(self, x: ArrayLike, y: ArrayLike) -> "LogisticCalibrator":
+    def fit(self, x: ArrayLike, y: ArrayLike) -> LogisticCalibrator:
         features = np.asarray(x, dtype=float)
         labels = np.asarray(y, dtype=float)
         if features.ndim != 2 or labels.shape != (len(features),):
@@ -45,6 +45,7 @@ class LogisticCalibrator:
         features = np.asarray(x, dtype=float)
         if features.ndim != 2 or self.coefficients_ is None:
             raise RuntimeError("calibrator is not fit or x is invalid")
-        linear = np.clip(np.column_stack([np.ones(len(features)), features]) @ self.coefficients_, -30, 30)
+        linear = np.clip(
+            np.column_stack([np.ones(len(features)), features]) @ self.coefficients_, -30, 30
+        )
         return 1.0 / (1.0 + np.exp(-linear))
-

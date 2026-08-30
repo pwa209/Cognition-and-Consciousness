@@ -2,11 +2,19 @@
 
 This roadmap is operational, not a scientific stop/go tree. Every phase proceeds when its inputs are technically available; unfavorable or null results never block later work. Access-controlled families can remain `WAITING_ACCESS` while public families continue.
 
+## Current server authorization
+
+Only acquisition is authorized for deployment. P01 (source resolution) and P02 (direct-to-NAS
+download) may be deployed and queued after the owner confirms the three server roots. P03-P10 are
+fully mapped and remain in GitHub/local source only; they must not be deployed or queued without a
+new explicit owner instruction. P00 is limited to the identity/storage checks embedded in the
+acquisition runner.
+
 | Phase | Purpose | Main command | Canonical output | Compute / storage | Completion evidence |
 |---|---|---|---|---|---|
 | P00 | Verify host identity, roots, storage, tools, licenses, and repository commit | `scripts/server/run_phase.sh P00` | `run_state/P00/` | minutes; negligible | `SUCCESS.json` plus preflight report |
 | P01 | Resolve immutable source metadata and per-file inventories | `factorcon manifest resolve` | `manifests/generated/` | minutes-hours; MB | source IDs, versions, URLs, sizes, licenses, access states, hashes where supplied |
-| P02 | Acquire all eligible public raw data directly to NAS | `factorcon acquire --eligible-only` | `data/raw/<family>/<snapshot>/` | ~1.75 TB plus open DREAM subsets; network/I/O bound | per-file size/checksum ledger and atomic family marker |
+| P02 | Acquire all eligible public raw data directly to NAS | `factorcon acquire --eligible-only` | `data/raw/<family>/<snapshot>/` | ~3.44 TB plus open DREAM subsets; network/I/O bound | per-file size/checksum ledger and atomic family marker |
 | P03 | Validate archives, BIDS structures, expected counts, and metadata identity | Snakemake target `validate_data` | `reports/generated/data_validation/` | CPU-light, I/O-heavy | errors/warnings report; invalid inputs quarantined, never deleted |
 | P04 | Normalize behavior/events to the common schema and generate deterministic grouped splits | Snakemake target `harmonize` | `data/derived/common_schema/` | hours-days | schema, count, rank, and split-isolation reports |
 | P05 | Run synthetic recovery and one-subject/one-site pilot execution for every available family | Snakemake target `pilot` | `reports/generated/pilot/` | days; controlled sample | runtime/memory benchmarks, numerical tests, all model outputs retained |
@@ -30,7 +38,14 @@ This roadmap is operational, not a scientific stop/go tree. Every phase proceeds
 
 ## Queue topology on this server
 
-The host has no Slurm. `scripts/server/queue_phase.sh` launches one named `tmux` session per phase. `run_phase.sh` obtains an exclusive lock, writes logs under the canonical NAS root, records `RUNNING.json`, and atomically replaces it with `SUCCESS.json` or `FAILED.json`. P02 uses a maximum of two high-I/O family jobs and four file transfers per family. Compute phases use explicit thread budgets so 256 CPUs and 1 TiB RAM are not oversubscribed.
+The host has no Slurm. For the currently authorized scope,
+`scripts/server/queue_acquisition.sh` launches named `tmux` sessions for P01 and P02.
+`run_acquisition.sh` verifies host/user/root identity, obtains an exclusive lock, writes logs under
+the canonical NAS root, records `RUNNING.json`, and atomically replaces it with `SUCCESS.json` or
+`FAILED.json`. The default batch is sequential by family and uses at most eight file transfers for
+the 119,120-object propofol release, four elsewhere, and two for BMVP, avoiding uncontrolled
+high-I/O concurrency.
 
-P02 may overlap P04/P05 for a completed family; the global roadmap does not wait for access-controlled COGITATE. P07-P10 consume every technically valid family available at run time and record unavailable families rather than replacing them post hoc.
-
+No compute phase is currently deployed. If that authorization changes later, P04/P05 may overlap
+P02 for completed families, and P07-P10 will consume every technically valid family available at
+run time while recording unavailable families rather than replacing them post hoc.

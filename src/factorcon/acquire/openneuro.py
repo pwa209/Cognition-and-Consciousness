@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Any
 from urllib.parse import urlparse
 
 from factorcon.acquire.net import request_json
@@ -23,6 +22,7 @@ def resolve_openneuro(config: DatasetConfig) -> list[FileRecord]:
       snapshot(datasetId: $datasetId, tag: $tag) {
         id
         tag
+        hexsha
         created
         size
         files(recursive: true) {
@@ -51,6 +51,20 @@ def resolve_openneuro(config: DatasetConfig) -> list[FileRecord]:
     if str(snapshot_record.get("tag")) != snapshot:
         raise IntegrityError(
             f"OpenNeuro tag mismatch: expected {snapshot}, got {snapshot_record.get('tag')}"
+        )
+    expected_sha = config.values.get("git_sha")
+    if expected_sha is not None and str(snapshot_record.get("hexsha")) != str(expected_sha):
+        raise IntegrityError(
+            f"OpenNeuro Git SHA mismatch for {dataset_id} {snapshot}: "
+            f"configured {expected_sha}, API {snapshot_record.get('hexsha')}"
+        )
+    expected_snapshot_bytes = config.values.get("snapshot_reported_bytes")
+    if expected_snapshot_bytes is not None and int(snapshot_record.get("size") or -1) != int(
+        expected_snapshot_bytes
+    ):
+        raise IntegrityError(
+            f"OpenNeuro snapshot-size mismatch for {dataset_id} {snapshot}: "
+            f"configured {expected_snapshot_bytes}, API {snapshot_record.get('size')}"
         )
     files = snapshot_record.get("files")
     if not isinstance(files, list):
@@ -96,12 +110,17 @@ def resolve_openneuro(config: DatasetConfig) -> list[FileRecord]:
             )
         )
     records.sort(key=lambda item: item.relative_path)
-    expected = config.values.get("estimated_bytes")
+    expected_files = config.values.get("expected_manifest_files")
+    if expected_files is not None and len(records) != int(expected_files):
+        raise IntegrityError(
+            f"OpenNeuro file-count mismatch for {dataset_id} {snapshot}: "
+            f"configured {expected_files}, API {len(records)}"
+        )
+    expected = config.values.get("expected_manifest_bytes")
     known_total = sum(item.size or 0 for item in records)
     if expected is not None and known_total != int(expected):
         raise IntegrityError(
-            f"OpenNeuro inventory-size mismatch for {dataset_id} {snapshot}: "
+            f"OpenNeuro manifest-size mismatch for {dataset_id} {snapshot}: "
             f"configured {expected}, API {known_total}"
         )
     return records
-

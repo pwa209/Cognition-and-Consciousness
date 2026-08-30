@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import csv
 import re
 from dataclasses import asdict
 from pathlib import Path
@@ -86,14 +87,24 @@ def harmonize_bids_events(
                 stimulus_id=_first(row, ("stimulus_id", "stim_file", "stimulus", "image")),
                 stimulus_features={
                     key: row[key]
-                    for key in ("category", "orientation", "duration", "contrast", "stimulus_present")
+                    for key in (
+                        "category",
+                        "orientation",
+                        "duration",
+                        "contrast",
+                        "stimulus_present",
+                    )
                     if row.get(key) not in {None, "", "n/a"}
                 },
                 response=response,
                 response_time=_float(_first(row, ("response_time", "reaction_time", "rt"))),
                 correctness=_float(_first(row, ("correct", "correctness", "accuracy"))),
-                observed_experience=_float(awareness) if awareness is not None and _float(awareness) is not None else awareness,
-                arousal_state=_float(arousal) if arousal is not None and _float(arousal) is not None else arousal,
+                observed_experience=_float(awareness)
+                if awareness is not None and _float(awareness) is not None
+                else awareness,
+                arousal_state=_float(arousal)
+                if arousal is not None and _float(arousal) is not None
+                else arousal,
                 report_availability=report_availability,
                 qc_status="pending",
                 metadata={
@@ -105,6 +116,113 @@ def harmonize_bids_events(
             record.validate()
             records.append(record)
     return records, {"event_files": len(files), "records": len(records)}
+
+
+def harmonize_multisite_working_memory(
+    dataset: DatasetConfig,
+    data_root: Path,
+) -> tuple[list[TrialRecord], dict[str, Any]]:
+    """Normalize the official OSF clean trial table without reproducing its hard PAS binning."""
+
+    source = data_root / "Data" / "uWM_012_Clean_Data.csv"
+    if not source.is_file():
+        raise IntegrityError(f"Expected official clean table is missing: {source}")
+    required = {
+        "laboratory",
+        "participant",
+        "subjID",
+        "session",
+        "trial",
+        "phase",
+        "cueType",
+        "oriMemo",
+        "gyre",
+        "oriTest",
+        "contrast",
+        "WMresp",
+        "WMacc",
+        "PASresp",
+    }
+    records: list[TrialRecord] = []
+    laboratories: set[str] = set()
+    subjects: set[str] = set()
+    phase_counts: dict[str, int] = {}
+    with source.open(encoding="utf-8-sig", newline="") as handle:
+        reader = csv.DictReader(handle)
+        missing = required - set(reader.fieldnames or ())
+        if missing:
+            raise IntegrityError(f"Working-memory clean table lacks columns: {sorted(missing)}")
+        for index, row in enumerate(reader, start=2):
+            lab = row["laboratory"]
+            subject = row["subjID"]
+            phase = row["phase"]
+            laboratories.add(lab)
+            subjects.add(subject)
+            phase_counts[phase] = phase_counts.get(phase, 0) + 1
+            cue = _float(row.get("cueType"))
+            cue_label = {0.0: "cue_absent", 1.0: "cue_present", 2.0: "supraliminal"}.get(
+                cue, "not_applicable"
+            )
+            trial = _float(row.get("trial"))
+            record = TrialRecord(
+                dataset_family=dataset.family,
+                modality="behavior",
+                site=f"laboratory-{lab}",
+                subject=f"subj-{subject}",
+                session=f"ses-{row['session']}",
+                run=f"phase-{phase}",
+                event_id=f"row-{index}",
+                time_reference=float(trial if trial is not None else index - 2),
+                condition=f"{phase}:{cue_label}",
+                stimulus_id=None,
+                stimulus_features={
+                    "cue_type": cue,
+                    "memory_orientation_deg": _float(row.get("oriMemo")),
+                    "test_orientation_deg": _float(row.get("oriTest")),
+                    "rotation_direction": _float(row.get("gyre")),
+                    "contrast": _float(row.get("contrast")),
+                },
+                response=row.get("WMresp") if row.get("WMresp") not in {None, "", "NA"} else None,
+                response_time=None,
+                correctness=_float(row.get("WMacc")),
+                observed_experience=_float(row.get("PASresp")),
+                arousal_state=None,
+                report_availability="available"
+                if _float(row.get("PASresp")) is not None
+                else "not_requested",
+                qc_status="pending",
+                metadata={
+                    "source_file": "Data/uWM_012_Clean_Data.csv",
+                    "source_row": index,
+                    "participant_within_laboratory": row["participant"],
+                    "block": _float(row.get("block")),
+                    "language": row.get("language"),
+                    "payment": row.get("payment"),
+                    "age": _float(row.get("age")),
+                    "gender": row.get("gender"),
+                    "time_reference_unit": "trial_index",
+                },
+            )
+            record.validate()
+            records.append(record)
+    expected_participants = dataset.values.get("expected_participants")
+    expected_sites = dataset.values.get("expected_sites")
+    if isinstance(expected_participants, int) and len(subjects) != expected_participants:
+        raise IntegrityError(
+            f"Working-memory participant count {len(subjects)} "
+            f"!= configured {expected_participants}"
+        )
+    if isinstance(expected_sites, int) and len(laboratories) != expected_sites:
+        raise IntegrityError(
+            f"Working-memory laboratory count {len(laboratories)} != configured {expected_sites}"
+        )
+    return records, {
+        "source_file": str(source),
+        "records": len(records),
+        "participants": len(subjects),
+        "laboratories": len(laboratories),
+        "phase_counts": phase_counts,
+    }
 
 
 def harmonize_family(
@@ -132,8 +250,14 @@ def harmonize_family(
         report["status"] = "waiting_access"
         atomic_write_json(report_path, report)
         return report
-    if dataset.source_type == "openneuro" or (
-        dataset.source_type == "cogitate_account" and (data_root / "dataset_description.json").exists()
+    if dataset.family == "multisite_working_memory":
+        records, details = harmonize_multisite_working_memory(dataset, data_root)
+        write_jsonl(output_path, (asdict(record) for record in records))
+        report.update(details)
+        report["status"] = "harmonized"
+    elif dataset.source_type == "openneuro" or (
+        dataset.source_type == "cogitate_account"
+        and (data_root / "dataset_description.json").exists()
     ):
         records, details = harmonize_bids_events(dataset, data_root)
         write_jsonl(output_path, (asdict(record) for record in records))
@@ -142,6 +266,8 @@ def harmonize_family(
     else:
         write_jsonl(output_path, [])
         report["status"] = "adapter_requires_downloaded_schema_inspection"
-        report["reason"] = "non-BIDS adapter remains explicit until the downloaded release schema is validated"
+        report["reason"] = (
+            "non-BIDS adapter remains explicit until the downloaded release schema is validated"
+        )
     atomic_write_json(report_path, report)
     return report

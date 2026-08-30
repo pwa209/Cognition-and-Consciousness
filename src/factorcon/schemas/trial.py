@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import math
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, fields
-from typing import Any, Iterable, Mapping
+from typing import Any
 
 from factorcon.errors import IntegrityError
 
@@ -82,7 +83,7 @@ class TrialRecord:
             raise IntegrityError(f"Invalid qc_status={self.qc_status!r}")
 
     @classmethod
-    def from_mapping(cls, value: Mapping[str, Any]) -> "TrialRecord":
+    def from_mapping(cls, value: Mapping[str, Any]) -> TrialRecord:
         """Construct from a mapping while rejecting absent required fields."""
 
         missing = [name for name in REQUIRED_TRIAL_FIELDS if name not in value]
@@ -90,7 +91,9 @@ class TrialRecord:
             raise IntegrityError(f"Missing trial fields: {missing}")
         known = {field.name for field in fields(cls)}
         payload = {key: value[key] for key in known if key in value}
-        payload.setdefault("metadata", {key: item for key, item in value.items() if key not in known})
+        payload.setdefault(
+            "metadata", {key: item for key, item in value.items() if key not in known}
+        )
         record = cls(**payload)
         record.validate()
         return record
@@ -121,4 +124,3 @@ def validate_trial_records(records: Iterable[Mapping[str, Any]]) -> list[TrialRe
         last_times[run_key] = record.time_reference
         validated.append(record)
     return validated
-

@@ -13,6 +13,7 @@ def test_project_is_explicitly_non_preregistered_and_gate_free() -> None:
     assert project.analysis_spec["scientific_gates"] is False
     assert project.analysis_spec["report_all_candidate_models"] is True
     assert project.analysis_spec["policy"]["negative_results_continue"] is True
+    assert project.server["deployment_scope"] == "acquisition_only"
 
 
 def test_all_dataset_families_have_construct_maps() -> None:
@@ -20,4 +21,3 @@ def test_all_dataset_families_have_construct_maps() -> None:
     assert summary["valid"] is True
     assert len(summary["dataset_families"]) == 7
     assert summary["candidate_models"] == ["M0", "M1", "M2", "M3", "M4", "M5"]
-

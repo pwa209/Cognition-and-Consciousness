@@ -6,6 +6,7 @@
   "ssh_host": "127.0.0.1",
   "ssh_port": 1022,
   "scheduler": "tmux",
+  "deployment_scope": "acquisition_only",
   "cpu_count_observed": 256,
   "memory_observed_gib": 1024,
   "gpu_observed": "NVIDIA H100 80GB HBM3",
@@ -15,7 +16,7 @@
   "restart_root": "/data2/wangpeng/cognition-and-consciousness-work",
   "max_parallel_downloads": 4,
   "max_parallel_high_io_jobs": 2,
+  "nas_reserve_bytes": 536870912000,
   "source_release_policy": "content_addressed_git_commit",
   "data_policy": "raw_to_nas_directly"
 }
-

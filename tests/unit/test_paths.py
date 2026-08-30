@@ -21,4 +21,3 @@ def test_safe_path_and_root_confinement(tmp_path: Path) -> None:
     relative = safe_relative_path("sub-01/func/events.tsv")
     assert relative == Path("sub-01") / "func" / "events.tsv"
     assert ensure_within(tmp_path, tmp_path / relative).is_relative_to(tmp_path.resolve())
-

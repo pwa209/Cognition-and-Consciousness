@@ -62,13 +62,19 @@ def build_parser() -> argparse.ArgumentParser:
     manifest_resolve.add_argument("--out")
     manifest_resolve.add_argument("--family", action="append")
 
-    acquire = subcommands.add_parser("acquire", help="download eligible public data directly to NAS")
+    acquire = subcommands.add_parser(
+        "acquire", help="download eligible public data directly to NAS"
+    )
     acquire.add_argument("--config", default="conf/base.yaml")
     acquire.add_argument("--canonical-root")
     acquire.add_argument("--family", action="append")
     acquire.add_argument("--workers", type=int)
     acquire.add_argument("--no-resolve", action="store_true")
-    acquire.add_argument("--eligible-only", action="store_true", help="documented no-op; restricted access is never bypassed")
+    acquire.add_argument(
+        "--eligible-only",
+        action="store_true",
+        help="documented no-op; restricted access is never bypassed",
+    )
 
     dataset = subcommands.add_parser("dataset", help="validate or harmonize one downloaded family")
     dataset_sub = dataset.add_subparsers(dest="dataset_command", required=True)
@@ -106,7 +112,9 @@ def build_parser() -> argparse.ArgumentParser:
     report.add_argument("--output-directory", required=True)
 
     simulate = subcommands.add_parser("simulate", help="run synthetic architecture recovery")
-    simulate.add_argument("--architecture", choices=["all", "M0", "M1", "M2", "M3", "M4"], default="all")
+    simulate.add_argument(
+        "--architecture", choices=["all", "M0", "M1", "M2", "M3", "M4"], default="all"
+    )
     simulate.add_argument("--seed", type=int, default=260830)
     simulate.add_argument("--out", default="results/synthetic")
 
@@ -133,18 +141,18 @@ def dispatch(args: argparse.Namespace) -> int:
         expected_host = str(project.server["expected_hostname"])
         if args.canonical_root is None and socket.gethostname() != expected_host:
             raise FactorconError(
-                f"Default acquisition root may be used only on {expected_host}; current host is {socket.gethostname()}"
+                f"Default acquisition root may be used only on {expected_host}; "
+                f"current host is {socket.gethostname()}"
             )
-        _print(
-            acquire_families(
-                project,
-                root,
-                families=_families(args.family),
-                workers=args.workers,
-                resolve=not args.no_resolve,
-            )
+        result = acquire_families(
+            project,
+            root,
+            families=_families(args.family),
+            workers=args.workers,
+            resolve=not args.no_resolve,
         )
-        return 0
+        _print(result)
+        return 0 if result["all_public_success"] else 3
     if args.command == "dataset":
         project = load_project(args.config)
         root = Path(args.canonical_root) if args.canonical_root else project.canonical_root
@@ -184,7 +192,9 @@ def dispatch(args: argparse.Namespace) -> int:
         _print(build_paper_tables(args.score, args.synthesis, args.output_directory))
         return 0
     if args.command == "simulate":
-        architectures = ["M0", "M1", "M2", "M3", "M4"] if args.architecture == "all" else [args.architecture]
+        architectures = (
+            ["M0", "M1", "M2", "M3", "M4"] if args.architecture == "all" else [args.architecture]
+        )
         _print(run_recovery_suite(architectures, seed=args.seed, output=args.out))
         return 0
     if args.command == "status":

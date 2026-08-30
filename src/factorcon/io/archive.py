@@ -70,7 +70,9 @@ def _extract_tar(archive: Path, root: Path, max_bytes: int) -> ExtractionSummary
                 directories += 1
                 continue
             if not item.isfile():
-                raise IntegrityError(f"Non-regular TAR member rejected: {item.name} type={item.type!r}")
+                raise IntegrityError(
+                    f"Non-regular TAR member rejected: {item.name} type={item.type!r}"
+                )
             if target.exists():
                 raise IntegrityError(f"Extraction target already exists: {target}")
             source = handle.extractfile(item)
@@ -101,4 +103,3 @@ def extract_archive_safe(
     if tarfile.is_tarfile(source):
         return _extract_tar(source, root, max_uncompressed_bytes)
     raise IntegrityError(f"Unsupported or corrupt archive: {source}")
-

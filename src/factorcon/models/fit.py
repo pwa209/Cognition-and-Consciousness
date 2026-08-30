@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from math import log, pi
-from collections.abc import Mapping, Sequence
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -65,14 +65,18 @@ def _component_matrix(
     names = list(components)
     columns = [vectorize_rdm(design_rdm(vector)) for vector in components.values()]
     if not columns:
-        return names, np.empty((len(next(iter(design.values()))) * (len(next(iter(design.values()))) - 1) // 2, 0))
+        return names, np.empty(
+            (len(next(iter(design.values()))) * (len(next(iter(design.values()))) - 1) // 2, 0)
+        )
     matrix = np.column_stack(columns)
     scale = np.linalg.norm(matrix, axis=0)
     scale = np.where(scale > np.finfo(float).eps, scale, 1.0)
     return names, matrix / scale
 
 
-def _score_prediction(observations: NDArray[np.float64], prediction: NDArray[np.float64], variance: float) -> float:
+def _score_prediction(
+    observations: NDArray[np.float64], prediction: NDArray[np.float64], variance: float
+) -> float:
     residual = observations - prediction[None, :]
     return float(-0.5 * np.mean(np.square(residual) / variance + log(2 * pi * variance)))
 
@@ -89,7 +93,9 @@ def _select_alpha(
         fold_losses = []
         for held_out in range(len(train)):
             fit_rows = np.delete(train, held_out, axis=0)
-            intercept, weights = nonnegative_ridge(matrix, fit_rows.mean(axis=0), alpha=float(alpha))
+            intercept, weights = nonnegative_ridge(
+                matrix, fit_rows.mean(axis=0), alpha=float(alpha)
+            )
             prediction = intercept + matrix @ weights
             fold_losses.append(float(np.mean(np.square(train[held_out] - prediction))))
         losses.append(float(np.mean(fold_losses)))
@@ -131,7 +137,9 @@ def evaluate_architecture(
         active = weights > 1e-10
         if np.any(active):
             gram = matrix[:, active].T @ matrix[:, active]
-            effective_df = 1.0 + float(np.trace(gram @ np.linalg.pinv(gram + alpha * np.eye(len(gram)))))
+            effective_df = 1.0 + float(
+                np.trace(gram @ np.linalg.pinv(gram + alpha * np.eye(len(gram))))
+            )
         else:
             effective_df = 1.0
     train_residual = train - prediction[None, :]
@@ -164,4 +172,3 @@ def component_removal_scores(
         name: float(np.mean(np.square(observed - np.asarray(prediction, dtype=float))) - full_error)
         for name, prediction in reduced_predictions.items()
     }
-

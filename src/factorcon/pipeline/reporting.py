@@ -40,19 +40,29 @@ def build_paper_tables(
             )
     table_path = output / "model_scores.tsv"
     with table_path.open("w", encoding="utf-8", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=list(rows[0]) if rows else ["dataset_family"], delimiter="\t")
+        writer = csv.DictWriter(
+            handle, fieldnames=list(rows[0]) if rows else ["dataset_family"], delimiter="\t"
+        )
         writer.writeheader()
         writer.writerows(rows)
     synthesis = Path(synthesis_path)
     sources[str(synthesis)] = {"sha256": hash_file(synthesis), "family": "cross_family"}
     manifest = {
         "created_utc": utc_now(),
-        "tables": {"model_scores": {"path": str(table_path), "sha256": hash_file(table_path), "rows": len(rows)}},
+        "tables": {
+            "model_scores": {
+                "path": str(table_path),
+                "sha256": hash_file(table_path),
+                "rows": len(rows),
+            }
+        },
         "sources": sources,
         "synthesis": {"path": str(synthesis), "sha256": hash_file(synthesis)},
         "claims": [],
-        "note": "Claims are added only after results exist; journal positioning is not an execution gate.",
+        "note": (
+            "Claims are added only after results exist; journal positioning is not an "
+            "execution gate."
+        ),
     }
     atomic_write_json(output / "results_manifest.json", manifest)
     return manifest
-

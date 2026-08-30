@@ -19,4 +19,3 @@ def test_logistic_calibrator_separates_simple_data() -> None:
     model = LogisticCalibrator(alpha=0.1).fit(x, y)
     prediction = model.predict_probability(x)
     assert prediction[:3].max() < prediction[3:].min()
-

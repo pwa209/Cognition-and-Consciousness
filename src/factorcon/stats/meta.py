@@ -55,4 +55,3 @@ def random_effects_normal(effects: ArrayLike, standard_errors: ArrayLike) -> Ran
         prediction_high=mean + z * prediction_se,
         family_count=len(y),
     )
-

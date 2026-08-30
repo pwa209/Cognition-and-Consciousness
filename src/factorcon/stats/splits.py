@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import hashlib
 from collections import defaultdict
+from collections.abc import Hashable, Sequence
 from dataclasses import dataclass
-from typing import Hashable, Sequence
 
 import numpy as np
 
@@ -116,4 +116,3 @@ def deterministic_partition(
     small = np.flatnonzero(np.fromiter((item in small_groups for item in array), dtype=bool))
     large = np.flatnonzero(np.fromiter((item not in small_groups for item in array), dtype=bool))
     return small, large
-

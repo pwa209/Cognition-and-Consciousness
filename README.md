@@ -35,7 +35,11 @@ factorcon simulate --architecture all --out results/synthetic
 pytest -q
 ```
 
-On the university server, use `scripts/server/bootstrap.sh`, then queue phases with `scripts/server/queue_phase.sh`. Do not place passwords, API keys, cookies, or account credentials in this repository or in command history.
+Current server authorization is acquisition-only. Use the sparse acquisition release described in
+[`docs/SERVER_RUNBOOK.md`](docs/SERVER_RUNBOOK.md), resolve manifests, and then queue raw-data
+downloads. Do not deploy or queue P03-P10 unless the owner explicitly expands the scope. Do not
+place passwords, API keys, cookies, or account credentials in this repository or in command
+history.
 
 ## Reproducible command surface
 
@@ -58,4 +62,3 @@ Large jobs must be launched through the phase runner. Direct foreground download
 Tracked: source code, configuration, human-reviewed construct maps, source manifests, checksums/inventories, environment definitions, run summaries, deviations, roadmap, manuscript code, and small figure-source tables.
 
 Not tracked: participant-level raw data, large derivatives, caches, temporary work, credentials, cookies, or protected metadata. Dataset licenses and terms remain authoritative.
-

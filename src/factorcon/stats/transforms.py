@@ -22,7 +22,7 @@ class FoldStandardizer:
     mean_: NDArray[np.float64] | None = None
     scale_: NDArray[np.float64] | None = None
 
-    def fit(self, x: ArrayLike) -> "FoldStandardizer":
+    def fit(self, x: ArrayLike) -> FoldStandardizer:
         data = _matrix(x, "x")
         self.mean_ = data.mean(axis=0)
         scale = data.std(axis=0, ddof=0)
@@ -46,7 +46,7 @@ class NuisanceResidualizer:
     alpha: float = 1e-6
     coefficients_: NDArray[np.float64] | None = None
 
-    def fit(self, nuisance: ArrayLike, targets: ArrayLike) -> "NuisanceResidualizer":
+    def fit(self, nuisance: ArrayLike, targets: ArrayLike) -> NuisanceResidualizer:
         z = _matrix(nuisance, "nuisance")
         y = _matrix(targets, "targets")
         if len(z) != len(y):
@@ -73,7 +73,7 @@ class RidgeRegressor:
     alpha: float = 1.0
     coefficients_: NDArray[np.float64] | None = None
 
-    def fit(self, x: ArrayLike, y: ArrayLike) -> "RidgeRegressor":
+    def fit(self, x: ArrayLike, y: ArrayLike) -> RidgeRegressor:
         features = _matrix(x, "x")
         targets = _matrix(y, "y")
         if len(features) != len(targets):
@@ -91,9 +91,7 @@ class RidgeRegressor:
         return np.column_stack([np.ones(len(features)), features]) @ self.coefficients_
 
 
-def haufe_patterns(
-    x: ArrayLike, predictions: ArrayLike, weights: ArrayLike
-) -> NDArray[np.float64]:
+def haufe_patterns(x: ArrayLike, predictions: ArrayLike, weights: ArrayLike) -> NDArray[np.float64]:
     """Transform linear encoding/decoding weights into activation patterns."""
 
     features = _matrix(x, "x")
@@ -103,4 +101,3 @@ def haufe_patterns(
     covariance_s = np.cov(scores, rowvar=False)
     covariance_s = np.atleast_2d(covariance_s)
     return covariance_x @ weight_matrix @ np.linalg.pinv(covariance_s)
-

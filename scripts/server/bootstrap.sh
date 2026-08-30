@@ -6,6 +6,9 @@ repo_root="$(factorcon_repo_root)"
 config_path="$repo_root/conf/base.yaml"
 
 [[ "${1:-}" == "--confirm-roots" ]] || factorcon_die "explicit --confirm-roots is required"
+deployment_scope="$(factorcon_config_value "$config_path" server deployment_scope)"
+[[ "$deployment_scope" == "full" ]] || \
+  factorcon_die "full bootstrap is disabled while deployment_scope=$deployment_scope"
 roots_status="$(factorcon_config_value "$config_path" server roots_status)"
 [[ "$roots_status" == "owner_confirmed" ]] || factorcon_die "conf/server_h100.yaml does not record owner_confirmed roots"
 
@@ -36,4 +39,3 @@ mkdir -p -- \
   "$restart_root/environments"
 
 "$repo_root/scripts/server/preflight.sh" "$config_path"
-

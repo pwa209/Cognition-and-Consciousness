@@ -28,6 +28,8 @@ def state_transition_complexity(
     active = np.abs(response) > threshold_sd * scale[:, None]
     temporal = np.count_nonzero(np.diff(active.astype(np.int8), axis=1))
     spatial = np.count_nonzero(np.diff(active.astype(np.int8), axis=0))
-    maximum = active.shape[0] * max(active.shape[1] - 1, 1) + max(active.shape[0] - 1, 1) * active.shape[1]
+    maximum = (
+        active.shape[0] * max(active.shape[1] - 1, 1)
+        + max(active.shape[0] - 1, 1) * active.shape[1]
+    )
     return float((temporal + spatial) / maximum)
-

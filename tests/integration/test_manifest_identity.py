@@ -25,4 +25,3 @@ def test_access_control_is_not_misrepresented_as_public() -> None:
     cogitate = next(item for item in project.datasets if item.family == "cogitate")
     assert cogitate.access == "account_and_terms_required"
     assert cogitate.values["requires_owner_action"] is True
-

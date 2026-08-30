@@ -22,3 +22,10 @@ This ledger is part of the transparent non-preregistered record. Add entries chr
 - **Reason:** COGITATE requires a user-created account and acceptance of terms; DREAM combines open and restricted packages.
 - **Consequence:** public-family acquisition proceeds; unavailable families remain explicit and may enter later without replacing or suppressing earlier results.
 
+## 2026-08-30 — Acquisition-only server deployment
+
+- **Owner instruction:** after scripts are written, do not deploy anything except data acquisition.
+- **Change:** use a commit-pinned sparse release containing only acquisition modules, configuration,
+  and P01/P02 runners. Keep P03-P10 source in GitHub/local storage only.
+- **Consequence:** the full roadmap and analysis implementation remain reproducible but are neither
+  deployed nor queued until the owner explicitly expands server authorization.

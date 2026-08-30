@@ -14,8 +14,12 @@
   "access": "public",
   "expected_participants": 26,
   "modalities": ["fmri", "behavior", "force", "physiology"],
-  "estimated_bytes": 34147542464,
+  "snapshot_reported_bytes": 34147542464,
+  "expected_manifest_files": 119120,
+  "expected_manifest_bytes": 1578461354264,
+  "estimated_bytes": 1578461354264,
+  "include_official_derivatives": true,
+  "max_parallel_downloads": 8,
   "construct_map": "conf/construct_maps/propofol_volition_fmri.yaml",
   "split_units": ["subject", "run", "state_period"]
 }
-

@@ -39,8 +39,7 @@ class FileRecord:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, value: dict[str, Any]) -> "FileRecord":
+    def from_dict(cls, value: dict[str, Any]) -> FileRecord:
         """Construct and validate a record loaded from JSON Lines."""
 
         return cls(**value)
-

@@ -8,6 +8,9 @@ There are no scientific gates: null, heterogeneous, unfavorable, or low-ceiling 
 
 ## Safety and data rules
 
+- Current server authorization is acquisition-only. Deploy only the sparse acquisition release
+  and queue only source resolution/downloads; do not deploy or queue P03-P10 unless the owner
+  later gives an explicit instruction.
 - Never commit raw participant data, large derivatives, credentials, cookies, access tokens, `.netrc`, or machine-local secrets.
 - Never echo credentials. Account secrets are entered only through interactive prompts or owner-managed secret stores outside the repository.
 - Download data directly to the university NAS canonical root. Use `/data1` for active fast work and `/data2` for restartable intermediates.
@@ -40,4 +43,3 @@ There are no scientific gates: null, heterogeneous, unfavorable, or low-ceiling 
 ## Completion criteria
 
 A phase is operational only when its command, configuration validation, dry run, failure marker, success marker, provenance sidecar, and restart behavior have been tested. Scientific findings never determine operational completion.
-

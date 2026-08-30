@@ -7,6 +7,10 @@ config_path="$repo_root/conf/base.yaml"
 phase="${1:-}"
 family="${2:-}"
 [[ "$phase" =~ ^P(0[0-9]|10)$ ]] || factorcon_die "phase must be P00 through P10"
+deployment_scope="$(factorcon_config_value "$config_path" server deployment_scope)"
+if [[ "$deployment_scope" == "acquisition_only" && "$phase" != "P01" && "$phase" != "P02" ]]; then
+  factorcon_die "phase $phase is not authorized while deployment_scope=acquisition_only"
+fi
 
 expected_host="$(factorcon_config_value "$config_path" server expected_hostname)"
 expected_user="$(factorcon_config_value "$config_path" server expected_user)"

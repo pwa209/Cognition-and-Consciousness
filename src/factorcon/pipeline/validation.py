@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import json
 import tarfile
 import zipfile
 from pathlib import Path
@@ -12,7 +11,14 @@ from factorcon.acquire.records import FileRecord
 from factorcon.config import DatasetConfig, ProjectConfig
 from factorcon.errors import ConfigError, IntegrityError
 from factorcon.io.bids import inventory_bids
-from factorcon.util import atomic_write_json, hash_file, read_jsonl, safe_relative_path, slug, utc_now
+from factorcon.util import (
+    atomic_write_json,
+    hash_file,
+    read_jsonl,
+    safe_relative_path,
+    slug,
+    utc_now,
+)
 
 
 def _dataset(project: ProjectConfig, family: str) -> DatasetConfig:
@@ -93,14 +99,23 @@ def validate_family(
         report["bytes"] += size
         if record.size is not None and size != record.size:
             report["errors"].append(
-                {"path": record.relative_path, "issue": "size_mismatch", "expected": record.size, "observed": size}
+                {
+                    "path": record.relative_path,
+                    "issue": "size_mismatch",
+                    "expected": record.size,
+                    "observed": size,
+                }
             )
             continue
         if deep_hash and record.checksum:
             observed = hash_file(path, record.checksum_algorithm or "sha256")
             if observed.lower() != record.checksum.lower():
                 report["errors"].append(
-                    {"path": record.relative_path, "issue": "checksum_mismatch", "observed": observed}
+                    {
+                        "path": record.relative_path,
+                        "issue": "checksum_mismatch",
+                        "observed": observed,
+                    }
                 )
         if path.name.lower().endswith((".zip", ".tar", ".tar.gz", ".tgz")):
             try:
@@ -126,9 +141,12 @@ def validate_family(
             expected = dataset.values.get("expected_participants")
             if isinstance(expected, int) and len(bids.participants) != expected:
                 report["warnings"].append(
-                    {"issue": "participant_count", "expected": expected, "observed": len(bids.participants)}
+                    {
+                        "issue": "participant_count",
+                        "expected": expected,
+                        "observed": len(bids.participants),
+                    }
                 )
     report["status"] = "valid" if not report["errors"] else "invalid"
     atomic_write_json(output, report)
     return report
-

@@ -19,6 +19,9 @@ class IntegrityError(FactorconError):
     """Raised when bytes, metadata, or paths fail integrity checks."""
 
 
+class CapacityError(FactorconError):
+    """Raised before an acquisition would consume the protected storage reserve."""
+
+
 class SourceError(FactorconError):
     """Raised when an upstream source cannot be resolved safely."""
-

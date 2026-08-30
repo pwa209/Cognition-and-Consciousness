@@ -9,4 +9,3 @@ def test_equal_family_meta_analysis() -> None:
     assert result.ci_low < result.mean < result.ci_high
     assert result.prediction_low <= result.ci_low
     assert result.prediction_high >= result.ci_high
-

@@ -106,4 +106,3 @@ def resolve_osf(config: DatasetConfig) -> list[FileRecord]:
             page_url = _next_url(document) or ""
     records.sort(key=lambda item: item.relative_path)
     return records
-

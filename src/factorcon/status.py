@@ -22,4 +22,3 @@ def collect_status(root: str | Path) -> dict[str, Any]:
                 continue
             records.append({"path": str(path.relative_to(canonical)), "record": value})
     return {"canonical_root": str(canonical), "exists": canonical.exists(), "records": records}
-

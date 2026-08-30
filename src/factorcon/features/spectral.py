@@ -51,7 +51,9 @@ def relative_bandpower(
     if power.shape[axis] != len(frequencies):
         raise ValueError("PSD frequency axis does not match frequencies")
     positive = frequencies > 0
-    total = np.trapezoid(np.take(power, np.flatnonzero(positive), axis=axis), frequencies[positive], axis=axis)
+    total = np.trapezoid(
+        np.take(power, np.flatnonzero(positive), axis=axis), frequencies[positive], axis=axis
+    )
     total = np.maximum(total, np.finfo(float).tiny)
     result: dict[str, NDArray[np.float64]] = {}
     for name, (low, high) in bands_hz.items():
@@ -60,7 +62,9 @@ def relative_bandpower(
         mask = (frequencies >= low) & (frequencies < high)
         if mask.sum() < 2:
             raise ValueError(f"Band {name} has fewer than two frequency bins")
-        band = np.trapezoid(np.take(power, np.flatnonzero(mask), axis=axis), frequencies[mask], axis=axis)
+        band = np.trapezoid(
+            np.take(power, np.flatnonzero(mask), axis=axis), frequencies[mask], axis=axis
+        )
         result[name] = band / total
     return result
 
@@ -93,6 +97,7 @@ def spectral_entropy(psd: ArrayLike, *, axis: int = -1) -> NDArray[np.float64]:
 
     power = np.asarray(psd, dtype=float)
     probabilities = power / np.maximum(power.sum(axis=axis, keepdims=True), np.finfo(float).tiny)
-    entropy = -np.sum(probabilities * np.log(np.maximum(probabilities, np.finfo(float).tiny)), axis=axis)
+    entropy = -np.sum(
+        probabilities * np.log(np.maximum(probabilities, np.finfo(float).tiny)), axis=axis
+    )
     return entropy / np.log(power.shape[axis])
-

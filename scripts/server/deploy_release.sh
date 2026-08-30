@@ -6,6 +6,9 @@ repo_root="$(factorcon_repo_root)"
 config_path="$repo_root/conf/base.yaml"
 commit="${1:-}"
 [[ "$commit" =~ ^[0-9a-f]{40}$ ]] || factorcon_die "usage: deploy_release.sh <40-character-git-commit>"
+deployment_scope="$(factorcon_config_value "$config_path" server deployment_scope)"
+[[ "$deployment_scope" == "full" ]] || \
+  factorcon_die "full release deployment is disabled while deployment_scope=$deployment_scope"
 
 expected_host="$(factorcon_config_value "$config_path" server expected_hostname)"
 expected_user="$(factorcon_config_value "$config_path" server expected_user)"
@@ -34,4 +37,3 @@ mkdir -p -- "$(dirname -- "$destination")"
 mv -- "$temporary" "$destination"
 chmod -R u=rwX,g=rX,o= -- "$destination"
 printf '%s\n' "$destination"
-

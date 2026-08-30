@@ -25,4 +25,3 @@ def test_zip_traversal_is_rejected(tmp_path: Path) -> None:
     with pytest.raises(IntegrityError):
         extract_archive_safe(archive, tmp_path / "out")
     assert not (tmp_path / "escape.txt").exists()
-

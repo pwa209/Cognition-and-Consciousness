@@ -10,4 +10,3 @@ def test_state_transition_complexity_is_bounded() -> None:
     evoked = np.tile([0.0, 1.0] * 10, (4, 1))
     value = state_transition_complexity(evoked, baseline)
     assert 0 <= value <= 1
-

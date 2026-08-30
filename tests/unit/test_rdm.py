@@ -24,4 +24,3 @@ def test_crossnobis_recovers_separated_conditions() -> None:
 def test_vectorizer_retains_negative_values() -> None:
     matrix = np.array([[0.0, -0.25], [-0.25, 0.0]])
     assert vectorize_rdm(matrix).tolist() == [-0.25]
-

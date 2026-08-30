@@ -31,7 +31,9 @@ def robustness_canonical_rdm(
     specifications: list[dict[str, Any]] = []
     for branch, alphas in branches.items():
         scores = {
-            model: evaluate_architecture(model, design, arrays["train"], arrays["test"], alphas=alphas).log_score
+            model: evaluate_architecture(
+                model, design, arrays["train"], arrays["test"], alphas=alphas
+            ).log_score
             for model in ARCHITECTURES
         }
         alternative = max(("M0", "M1", "M2", "M3"), key=scores.__getitem__)
@@ -53,12 +55,20 @@ def robustness_canonical_rdm(
             }
             alternative = max(("M0", "M1", "M2", "M3"), key=scores.__getitem__)
             influence.append(
-                {"omitted_test_replicate": omitted, "best_nonfactorized": alternative, "delta_M4": scores["M4"] - scores[alternative]}
+                {
+                    "omitted_test_replicate": omitted,
+                    "best_nonfactorized": alternative,
+                    "delta_M4": scores["M4"] - scores[alternative],
+                }
             )
     rng = np.random.default_rng(seed)
-    permuted_design = {name: values[rng.permutation(len(values))] for name, values in design.items()}
+    permuted_design = {
+        name: values[rng.permutation(len(values))] for name, values in design.items()
+    }
     negative = {
-        model: evaluate_architecture(model, permuted_design, arrays["train"], arrays["test"]).log_score
+        model: evaluate_architecture(
+            model, permuted_design, arrays["train"], arrays["test"]
+        ).log_score
         for model in ("M0", "M1", "M2", "M3", "M4")
     }
     report = {
@@ -73,4 +83,3 @@ def robustness_canonical_rdm(
     }
     atomic_write_json(output, report)
     return report
-

@@ -19,4 +19,3 @@ def test_unitary_data_do_not_favor_factorized_model() -> None:
 def test_factorized_data_recover_incremental_prediction() -> None:
     result = recover_architecture("M4", seed=505)
     assert result.scores["M4"] > max(result.scores[model] for model in ("M0", "M1", "M2", "M3"))
-

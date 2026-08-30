@@ -64,7 +64,9 @@ def component_design(
     if architecture == "M5":
         return {}
     if architecture == "M0":
-        global_columns = [columns[name] for name in CONSTRUCT_ORDER if name in columns and name != "S"]
+        global_columns = [
+            columns[name] for name in CONSTRUCT_ORDER if name in columns and name != "S"
+        ]
         if not global_columns:
             raise ValueError("M0 requires at least one E/K/A/R construct")
         result = {"G": _standardize(np.mean(global_columns, axis=0))}
@@ -75,7 +77,10 @@ def component_design(
         if e is None or not ks:
             raise ValueError("M1 requires E and at least one K component")
         gate = 1.0 / (1.0 + np.exp(-e))
-        result = {"E": e, **{f"gate({name})": _standardize(gate * value) for name, value in ks.items()}}
+        result = {
+            "E": e,
+            **{f"gate({name})": _standardize(gate * value) for name, value in ks.items()},
+        }
         if a is not None:
             result["A"] = a
         if r is not None:
@@ -121,4 +126,3 @@ def component_design(
         if left in columns and right in columns:
             result[f"{left}:{right}"] = _interaction(columns[left], columns[right])
     return result
-

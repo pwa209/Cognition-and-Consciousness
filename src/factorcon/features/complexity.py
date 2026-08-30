@@ -14,7 +14,7 @@ def lempel_ziv_binary(sequence: ArrayLike) -> float:
     values = np.asarray(sequence)
     if values.ndim != 1 or len(values) < 4:
         raise ValueError("sequence must be one-dimensional with at least four values")
-    if not set(np.unique(values)).issubset({0, 1, False, True}):
+    if not set(np.unique(values)).issubset({0, 1}):
         raise ValueError("sequence must be binary")
     text = "".join("1" if bool(value) else "0" for value in values)
     dictionary: set[str] = set()
@@ -56,4 +56,3 @@ def permutation_entropy(signal: ArrayLike, *, order: int = 3, delay: int = 1) ->
     probabilities = np.asarray(list(patterns.values()), dtype=float) / count
     entropy = -float(np.sum(probabilities * np.log(probabilities)))
     return entropy / np.log(factorial(order))
-

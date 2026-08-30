@@ -33,4 +33,3 @@ def empirical_ordered_thresholds(ratings: ArrayLike) -> NDArray[np.float64]:
     cumulative = np.cumsum(counts)[:-1] / counts.sum()
     cumulative = np.clip(cumulative, 1e-6, 1 - 1e-6)
     return np.log(cumulative / (1 - cumulative))
-

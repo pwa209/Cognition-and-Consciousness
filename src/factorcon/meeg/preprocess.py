@@ -27,8 +27,9 @@ def preprocess_raw(
     path = Path(bids_path)
     entities = BIDSPath(root=path.parent, basename=path.name)
     raw = read_raw_bids(entities, verbose="ERROR")
-    harmonics = [line_frequency_hz * factor for factor in range(1, int(lowpass_hz // line_frequency_hz) + 1)]
+    harmonics = [
+        line_frequency_hz * factor for factor in range(1, int(lowpass_hz // line_frequency_hz) + 1)
+    ]
     raw.load_data().notch_filter(harmonics).filter(highpass_hz, lowpass_hz)
     raw.resample(resample_hz)
     return raw
-

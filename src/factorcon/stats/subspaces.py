@@ -29,4 +29,3 @@ def principal_angles(left: ArrayLike, right: ArrayLike) -> NDArray[np.float64]:
     singular = np.linalg.svd(a.T @ b, compute_uv=False)
     singular = np.clip(singular, 0.0, 1.0)
     return np.degrees(np.arccos(singular))
-

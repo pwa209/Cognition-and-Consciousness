@@ -38,7 +38,9 @@ _URL_RE = re.compile(r"https?://[^\s,;]+")
 _DIRECT_SUFFIXES = (".zip", ".tar", ".tar.gz", ".tgz", ".7z", ".edf", ".bdf")
 
 
-def parse_dream_registry(path: str | Path, config: DatasetConfig) -> tuple[list[FileRecord], list[dict[str, str]]]:
+def parse_dream_registry(
+    path: str | Path, config: DatasetConfig
+) -> tuple[list[FileRecord], list[dict[str, str]]]:
     """Resolve directly downloadable open constituent URLs and retain unresolved rows."""
 
     direct: list[FileRecord] = []
@@ -46,7 +48,9 @@ def parse_dream_registry(path: str | Path, config: DatasetConfig) -> tuple[list[
     with Path(path).open(encoding="utf-8-sig", newline="") as handle:
         reader = csv.DictReader(handle)
         for row in reader:
-            normalized = {str(key).strip().casefold(): str(value or "").strip() for key, value in row.items()}
+            normalized = {
+                str(key).strip().casefold(): str(value or "").strip() for key, value in row.items()
+            }
             access = normalized.get("accessibility", "").casefold()
             revoked = normalized.get("revoked", "").casefold()
             name = normalized.get("common name") or f"set-{normalized.get('set id', 'unknown')}"
@@ -61,7 +65,12 @@ def parse_dream_registry(path: str | Path, config: DatasetConfig) -> tuple[list[
                 pathname = urlparse(clean_url).path.casefold()
                 if not pathname.endswith(_DIRECT_SUFFIXES):
                     unresolved.append(
-                        {"dataset": name, "accessibility": access, "status": "manual_url_resolution", "url": clean_url}
+                        {
+                            "dataset": name,
+                            "accessibility": access,
+                            "status": "manual_url_resolution",
+                            "url": clean_url,
+                        }
                     )
                     continue
                 basename = Path(urlparse(clean_url).path).name or f"download-{index}"
@@ -75,4 +84,3 @@ def parse_dream_registry(path: str | Path, config: DatasetConfig) -> tuple[list[
                     )
                 )
     return direct, unresolved
-
