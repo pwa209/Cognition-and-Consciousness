@@ -18,6 +18,9 @@ The journal ambition is Nature or Science, with Nature Human Behaviour as a real
 - University server: H100 host verified; no Slurm; persistent jobs use `tmux` plus logs and status markers.
 - Public source audit: OpenNeuro, OSF, and BMVP are directly retrievable. COGITATE requires a user-created account and acceptance of terms. DREAM is a registry with dataset-specific access states.
 - Data policy: raw data and heavy derivatives live only on the university NAS/work volumes and are excluded from Git.
+- Analysis status: architecture, leakage, feature, model, simulation, and reporting cores are tested;
+  dataset-specific P06 producers that depend on downloaded schemas are deliberately explicit
+  contracts rather than unvalidated guesses.
 
 See [docs/ROADMAP.md](docs/ROADMAP.md) for the phase map and [docs/SERVER_RUNBOOK.md](docs/SERVER_RUNBOOK.md) for operations.
 
