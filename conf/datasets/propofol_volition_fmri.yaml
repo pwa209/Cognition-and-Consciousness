@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "family": "propofol_volition_fmri",
+  "title": "An open fMRI resource for studying human brain function and covert consciousness under anesthesia",
+  "role": "A_K_volition_R_anchor",
+  "source_type": "openneuro",
+  "source_id": "ds006623",
+  "source_url": "https://openneuro.org/datasets/ds006623/versions/1.0.0",
+  "snapshot": "1.0.0",
+  "git_sha": "9c36d2c59d58fbbced4af6d0413d22a6ea5c4880",
+  "doi": "10.18112/openneuro.ds006623.v1.0.0",
+  "article_doi": "10.1038/s41597-025-06442-2",
+  "license": "CC0-1.0",
+  "access": "public",
+  "expected_participants": 26,
+  "modalities": ["fmri", "behavior", "force", "physiology"],
+  "estimated_bytes": 34147542464,
+  "construct_map": "conf/construct_maps/propofol_volition_fmri.yaml",
+  "split_units": ["subject", "run", "state_period"]
+}
+

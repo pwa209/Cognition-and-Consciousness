@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "family": "dream",
+  "status": "specified_before_outcome_analysis",
+  "measurement_unit": "awakening",
+  "mappings": [
+    {
+      "observed": "standardized_dream_report_classification",
+      "construct": "E",
+      "direction": "experience_higher_than_no_experience",
+      "scale": "dataset_specific_binary_link_with_interval_censoring",
+      "uncertainty": "experience_without_recall_is_ambiguous_not_midpoint",
+      "held_constant": ["sleep_stage", "contributing_dataset", "time_of_night", "prior_awakenings"],
+      "alternative": "recall_and_report_failure",
+      "enters": ["DREAM-1", "DREAM-2", "DREAM-3", "DREAM-4"]
+    },
+    {
+      "observed": "sleep_stage_and_continuous_spectral_state",
+      "construct": "A",
+      "direction": "state_specific_not_a_definition_of_E",
+      "scale": "categorical_and_continuous",
+      "uncertainty": "stage_confidence_and_objective_subjective_discrepancy",
+      "held_constant": ["contributing_dataset"],
+      "alternative": "recording_or_montage_difference",
+      "enters": ["DREAM-1", "DREAM-2", "DREAM-3"]
+    },
+    {
+      "observed": "awakening_report",
+      "construct": "R",
+      "direction": "delayed_verbal_report_availability",
+      "scale": "protocol_specific",
+      "uncertainty": "recall_delay_and_informativeness",
+      "held_constant": ["awakening_method"],
+      "alternative": "amnesia",
+      "enters": ["all"]
+    }
+  ],
+  "contrasts": {
+    "DREAM-1": "experience versus no experience within dataset and sleep stage",
+    "DREAM-2": "E after continuous arousal and awakening covariates",
+    "DREAM-3": "shared E component across NREM and REM versus E-by-stage",
+    "DREAM-4": "interval-censored experience-without-recall sensitivity"
+  }
+}
+

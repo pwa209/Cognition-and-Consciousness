@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "family": "masked_content_fmri",
+  "title": "Informative neural representations of unseen contents during higher-order processing in human brains and deep artificial networks",
+  "role": "E_K_content_anchor",
+  "source_type": "openneuro",
+  "source_id": "ds003927",
+  "source_url": "https://openneuro.org/datasets/ds003927/versions/1.0.3",
+  "snapshot": "1.0.3",
+  "git_sha": "1f62eb63f0e55023609add6dd6148545b762b804",
+  "doi": "10.18112/openneuro.ds003927.v1.0.3",
+  "article_doi": "10.1038/s41562-021-01274-7",
+  "license": "CC0-1.0",
+  "access": "public",
+  "expected_participants": 7,
+  "modalities": ["fmri", "behavior"],
+  "estimated_bytes": 153344263696,
+  "construct_map": "conf/construct_maps/masked_content_fmri.yaml",
+  "split_units": ["subject", "run"]
+}
+

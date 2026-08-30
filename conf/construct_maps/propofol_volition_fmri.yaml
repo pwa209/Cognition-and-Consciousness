@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "family": "propofol_volition_fmri",
+  "status": "specified_before_outcome_analysis",
+  "measurement_unit": "instruction_block_and_state_window",
+  "mappings": [
+    {
+      "observed": "propofol_effect_site_concentration_and_transition_period",
+      "construct": "A",
+      "direction": "higher_concentration_and_loss_transition_lower_arousal",
+      "scale": "continuous_primary_categorical_secondary",
+      "uncertainty": "dose_model_and_hysteresis",
+      "held_constant": ["instruction", "run"],
+      "alternative": "time_and_order",
+      "enters": ["PROP-1", "PROP-2", "PROP-3"]
+    },
+    {
+      "observed": "awake_localizer_trained_imagery_template_expression",
+      "construct": "K_volition",
+      "direction": "instruction_specific_expression_supports_volitional_operation",
+      "scale": "crossvalidated_continuous_score",
+      "uncertainty": "participant_localizer_reliability",
+      "held_constant": ["auditory_instruction", "A", "force"],
+      "alternative": "generic_auditory_response_or_spontaneous_imagery",
+      "enters": ["PROP-1", "PROP-2"]
+    },
+    {
+      "observed": "squeeze_force",
+      "construct": "R",
+      "direction": "force_above_calibrated_baseline_supports_execution",
+      "scale": "continuous_and_event",
+      "uncertainty": "sensor_noise_and_threshold",
+      "held_constant": ["instruction", "A"],
+      "alternative": "involuntary_movement",
+      "enters": ["PROP-1", "PROP-2"]
+    },
+    {
+      "observed": "instruction_identity_and_sound",
+      "construct": "S",
+      "direction": "sensory_cue",
+      "scale": "categorical",
+      "uncertainty": "observed",
+      "held_constant": [],
+      "alternative": "none",
+      "enters": ["all"]
+    }
+  ],
+  "contrasts": {
+    "PROP-1": "imagery-template expression when force-defined R is absent",
+    "PROP-2": "unique A, K_volition, and R predictive components",
+    "PROP-3": "loss versus recovery at matched dose"
+  }
+}
+

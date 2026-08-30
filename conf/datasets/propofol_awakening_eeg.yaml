@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "family": "propofol_awakening_eeg",
+  "title": "A repeated awakening study exploring the capacity of complexity measures to capture dreaming during propofol sedation",
+  "role": "within_sedation_E_A_support",
+  "source_type": "openneuro",
+  "source_id": "ds005620",
+  "source_url": "https://openneuro.org/datasets/ds005620/versions/1.0.0",
+  "snapshot": "1.0.0",
+  "git_sha": "a7ee50741b5625ee54478be73201ecfd4fd904dd",
+  "doi": "10.18112/openneuro.ds005620.v1.0.0",
+  "article_doi": "10.1038/s41598-025-12695-z",
+  "license": "CC0-1.0",
+  "access": "public",
+  "expected_participants": 20,
+  "expected_attempted_awakenings": 52,
+  "modalities": ["eeg", "tms_eeg", "reports"],
+  "estimated_bytes": 83002662733,
+  "construct_map": "conf/construct_maps/propofol_awakening_eeg.yaml",
+  "split_units": ["subject", "awakening"]
+}
+

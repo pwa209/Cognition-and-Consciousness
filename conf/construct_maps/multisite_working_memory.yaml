@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "family": "multisite_working_memory",
+  "status": "specified_before_outcome_analysis",
+  "measurement_unit": "trial",
+  "mappings": [
+    {
+      "observed": "perceptual_awareness_scale",
+      "construct": "E",
+      "direction": "higher_rating_higher_experience_evidence",
+      "scale": "ordinal_participant_thresholds",
+      "uncertainty": "hierarchical_ordered_logit_posterior_draws",
+      "held_constant": ["cue_presence", "stimulus_contrast", "laboratory", "session"],
+      "alternative": "scale_use_and_sensory_evidence",
+      "enters": ["WM-1", "WM-2", "WM-3"]
+    },
+    {
+      "observed": "delayed_orientation_discrimination",
+      "construct": "K_memory",
+      "direction": "correct_discrimination_supports_maintenance",
+      "scale": "trial_binary_with_signal_detection_link",
+      "uncertainty": "participant_and_laboratory_partial_pooling",
+      "held_constant": ["response_side", "contrast", "cue_presence", "trial_index"],
+      "alternative": "residual_sensory_strength_or_response_bias",
+      "enters": ["WM-1", "WM-2", "WM-3"]
+    },
+    {
+      "observed": "stimulus_contrast_and_cue_presence",
+      "construct": "S",
+      "direction": "physical_evidence",
+      "scale": "dataset_native",
+      "uncertainty": "observed",
+      "held_constant": [],
+      "alternative": "none",
+      "enters": ["all"]
+    },
+    {
+      "observed": "button_response",
+      "construct": "R",
+      "direction": "executed_choice",
+      "scale": "categorical_and_reaction_time",
+      "uncertainty": "missing_failed_and_no_response_distinguished",
+      "held_constant": ["response_mapping"],
+      "alternative": "motor_preparation",
+      "enters": ["all"]
+    }
+  ],
+  "contrasts": {
+    "WM-1": "K_memory slope across posterior E",
+    "WM-2": "performance at the fifth percentile of participant-calibrated E",
+    "WM-3": "one shared factor versus E plus K_memory components with leave-one-laboratory-out prediction"
+  }
+}
+

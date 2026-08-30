@@ -1,0 +1,75 @@
+[build-system]
+requires = ["setuptools>=75", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "factorcon"
+version = "0.1.0"
+description = "Reproducible cross-dataset tests of factorized consciousness and cognition architectures"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+authors = [{name = "Peng Wang"}]
+dependencies = [
+  "numpy>=2.0,<3",
+]
+
+[project.optional-dependencies]
+workflow = [
+  "snakemake>=9,<10",
+  "pyyaml>=6,<7",
+  "pydantic>=2.8,<3",
+]
+analysis = [
+  "scipy>=1.14,<2",
+  "pandas>=2.2,<3",
+  "pyarrow>=17,<30",
+  "xarray>=2024.7",
+  "scikit-learn>=1.5,<2",
+  "statsmodels>=0.14,<1",
+  "pymc>=5.16,<6",
+  "arviz>=0.19,<1",
+]
+neuro = [
+  "nibabel>=5.3,<6",
+  "nilearn>=0.11,<1",
+  "pybids>=0.17,<1",
+  "mne>=1.8,<2",
+  "mne-bids>=0.15,<1",
+]
+test = [
+  "pytest>=8.3,<9",
+  "pytest-cov>=5,<7",
+]
+dev = [
+  "factorcon[workflow,analysis,neuro,test]",
+  "mypy>=1.11,<2",
+  "ruff>=0.6,<1",
+]
+
+[project.scripts]
+factorcon = "factorcon.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+addopts = "-ra --strict-markers"
+testpaths = ["tests"]
+markers = [
+  "network: requires public network access",
+  "slow: computationally intensive",
+  "neuro: requires optional neuroimaging dependencies",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+packages = ["factorcon"]
+

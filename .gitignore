@@ -1,0 +1,53 @@
+# Credentials and machine-local configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.netrc
+secrets/
+conf/local/
+
+# Raw or derived research data never enter Git
+data/
+raw/
+derivatives/
+scratch/
+work/
+results/artifacts/
+results/intermediates/
+*.nii
+*.nii.gz
+*.edf
+*.bdf
+*.fif
+*.set
+*.vhdr
+*.vmrk
+*.eeg
+*.mat
+*.zarr/
+
+# Generated run state (small curated summaries may be committed deliberately)
+logs/
+run_state/
+reports/generated/
+manifests/generated/
+
+# Python and workflow caches
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.snakemake/
+.venv/
+venv/
+
+# Local document-review and operating-system files
+.tmp/
+~$*.docx
+.DS_Store
+Thumbs.db
+

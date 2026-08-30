@@ -1,0 +1,9 @@
+family	source_type	source_id	version_or_snapshot	doi	license	access	expected_bytes	checked_utc
+multisite_working_memory	osf	xzv9t	live_snapshot_2026-08-30		not_declared_in_osf_node_metadata	public	542530371	2026-08-30T00:00:00Z
+masked_content_fmri	openneuro	ds003927	1.0.3	10.18112/openneuro.ds003927.v1.0.3	CC0-1.0	public	153344263696	2026-08-30T00:00:00Z
+bmvp	bmvp_nitrc	bmvp_release	website_inventory_2026-08-30	10.1038/s41467-022-35117-4	CC-BY-4.0	public	1616284874752	2026-08-30T00:00:00Z
+cogitate	cogitate_account	cogitate_v1_3_documentation	v1.3	10.17617/1.K278-N152	CC-BY-4.0_subject_to_terms	account_and_terms_required		2026-08-30T00:00:00Z
+propofol_volition_fmri	openneuro	ds006623	1.0.0	10.18112/openneuro.ds006623.v1.0.0	CC0-1.0	public	34147542464	2026-08-30T00:00:00Z
+dream	dream_registry	22133105	v6	10.26180/22133105.v6	per_constituent_dataset	mixed_registry_open_and_restricted		2026-08-30T00:00:00Z
+propofol_awakening_eeg	openneuro	ds005620	1.0.0	10.18112/openneuro.ds005620.v1.0.0	CC0-1.0	public	83002662733	2026-08-30T00:00:00Z
+

@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "family": "multisite_working_memory",
+  "title": "Replicating the unconscious working memory effect: A multisite Registered Report",
+  "role": "behavioral_E_K_memory_anchor",
+  "source_type": "osf",
+  "source_id": "xzv9t",
+  "source_url": "https://osf.io/xzv9t/",
+  "api_url": "https://api.osf.io/v2/nodes/xzv9t/files/",
+  "snapshot_label": "live_snapshot_2026-08-30",
+  "source_modified_utc": "2026-01-02T16:57:01.580299Z",
+  "license": "not_declared_in_osf_node_metadata",
+  "access": "public",
+  "expected_participants": 531,
+  "expected_sites": 19,
+  "modalities": ["behavior"],
+  "estimated_bytes": 542530371,
+  "construct_map": "conf/construct_maps/multisite_working_memory.yaml",
+  "split_units": ["laboratory", "subject"],
+  "download_all_files": true,
+  "execute_downloaded_binaries": false
+}
+

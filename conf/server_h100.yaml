@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "host_alias": "university-h100",
+  "expected_hostname": "kemove-Rack-Server",
+  "expected_user": "wangpeng",
+  "ssh_host": "127.0.0.1",
+  "ssh_port": 1022,
+  "scheduler": "tmux",
+  "cpu_count_observed": 256,
+  "memory_observed_gib": 1024,
+  "gpu_observed": "NVIDIA H100 80GB HBM3",
+  "roots_status": "proposed_pending_owner_confirmation",
+  "canonical_root": "/private_nas/wangpeng/cognition-and-consciousness",
+  "fast_root": "/data1/wangpeng/cognition-and-consciousness-work",
+  "restart_root": "/data2/wangpeng/cognition-and-consciousness-work",
+  "max_parallel_downloads": 4,
+  "max_parallel_high_io_jobs": 2,
+  "source_release_policy": "content_addressed_git_commit",
+  "data_policy": "raw_to_nas_directly"
+}
+

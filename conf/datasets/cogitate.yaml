@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "family": "cogitate",
+  "title": "COGITATE multimodal conscious visual perception release",
+  "role": "K_task_R_cross_modal_anchor",
+  "source_type": "cogitate_account",
+  "source_id": "cogitate_v1_3_documentation",
+  "source_url": "https://www.arc-cogitate.com/data-release",
+  "documentation_url": "https://cogitate-consortium.github.io/cogitate-data/",
+  "xnat_url": "https://cogitate-data.ae.mpg.de/",
+  "snapshot_label": "release_document_v1.3_checked_2026-08-30",
+  "dataset_doi": "10.17617/1.K278-N152",
+  "license": "CC-BY-4.0_subject_to_terms",
+  "access": "account_and_terms_required",
+  "requires_owner_action": true,
+  "expected_participants": {"fmri": 118, "meeg": 100, "ieeg": 38},
+  "modalities": ["fmri", "meg", "eeg", "ieeg", "behavior", "eye_tracking"],
+  "construct_map": "conf/construct_maps/cogitate.yaml",
+  "split_units": ["subject", "site", "run"],
+  "credentials_policy": "owner_managed_outside_repository"
+}
+

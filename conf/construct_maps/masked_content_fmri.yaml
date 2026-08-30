@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "family": "masked_content_fmri",
+  "status": "specified_before_outcome_analysis",
+  "measurement_unit": "trial_and_runwise_condition",
+  "mappings": [
+    {
+      "observed": "trialwise_visibility_rating",
+      "construct": "E",
+      "direction": "higher_visibility_higher_experience_evidence",
+      "scale": "ordinal_participant_thresholds",
+      "uncertainty": "posterior_draws",
+      "held_constant": ["stimulus_identity", "image_features", "accuracy", "motor_response"],
+      "alternative": "decision_confidence_or_scale_use",
+      "enters": ["MC-1", "MC-2", "MC-3"]
+    },
+    {
+      "observed": "living_nonliving_category_information",
+      "construct": "K_content",
+      "direction": "positive_crossvalidated_category_information",
+      "scale": "crossnobis_and_held_out_log_score",
+      "uncertainty": "runwise_crossvalidation_and_subject_replication",
+      "held_constant": ["stimulus_identity", "low_level_image_features", "visibility", "response"],
+      "alternative": "physical_image_difference",
+      "enters": ["MC-1", "MC-2", "MC-3"]
+    },
+    {
+      "observed": "stimulus_identity_and_low_level_image_features",
+      "construct": "S",
+      "direction": "physical_input",
+      "scale": "categorical_and_continuous",
+      "uncertainty": "observed",
+      "held_constant": [],
+      "alternative": "none",
+      "enters": ["all"]
+    },
+    {
+      "observed": "choice_and_button",
+      "construct": "R",
+      "direction": "report_and_motor_execution",
+      "scale": "categorical",
+      "uncertainty": "observed",
+      "held_constant": ["response_mapping"],
+      "alternative": "decision_evidence",
+      "enters": ["all"]
+    }
+  ],
+  "contrasts": {
+    "MC-1": "category information over the low-E posterior region",
+    "MC-2": "category and E effects constrained to one direction versus separate components",
+    "MC-3": "high-E category decoder transfer to low-E and visibility decoder transfer across categories"
+  }
+}
+

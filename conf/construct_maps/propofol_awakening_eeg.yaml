@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "family": "propofol_awakening_eeg",
+  "status": "specified_before_outcome_analysis",
+  "measurement_unit": "awakening",
+  "mappings": [
+    {
+      "observed": "immediate_experience_questions",
+      "construct": "E",
+      "direction": "reported_experience_higher_than_no_experience",
+      "scale": "binary_measurement_link",
+      "uncertainty": "participant_bias_and_rare_no_experience_partial_pooling",
+      "held_constant": ["deep_sedation", "maintenance_dose", "recording_order"],
+      "alternative": "recall_or_failed_awakening",
+      "enters": ["PAW-1", "PAW-2", "PAW-3"]
+    },
+    {
+      "observed": "dose_RASS_and_wake_sedation_state",
+      "construct": "A",
+      "direction": "higher_sedation_lower_arousal",
+      "scale": "continuous_and_categorical",
+      "uncertainty": "protocol_and_physiology",
+      "held_constant": ["recording_order"],
+      "alternative": "time_since_induction",
+      "enters": ["PAW-1", "PAW-2", "PAW-3"]
+    },
+    {
+      "observed": "response_to_awakening_questions",
+      "construct": "R",
+      "direction": "report_available",
+      "scale": "categorical",
+      "uncertainty": "no_information_is_missing_not_no_experience",
+      "held_constant": ["awakening_attempt"],
+      "alternative": "motor_or_language_failure",
+      "enters": ["all"]
+    }
+  ],
+  "contrasts": {
+    "PAW-1": "spontaneous EEG experience versus no experience within deep sedation",
+    "PAW-2": "wake-sedation A variance versus within-sedation E variance",
+    "PAW-3": "TMS-evoked complexity association with A, E, or both"
+  }
+}
+

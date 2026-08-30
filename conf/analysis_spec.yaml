@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "study_status": "transparent_non_preregistered_secondary_analysis",
+  "registration": null,
+  "scientific_gates": false,
+  "result_dependent_stopping": false,
+  "report_all_candidate_models": true,
+  "report_all_completed_families": true,
+  "technical_integrity_checks": true,
+  "target_positioning": ["Nature", "Science", "Nature Human Behaviour"],
+  "primary_question": "Which candidate architecture best predicts held-out behavior and neural geometry after E, K, A, R, S and measurement uncertainty are distinguished?",
+  "constructs": ["E", "A", "R", "K_content", "K_memory", "K_task", "K_volition", "S"],
+  "architectures": {
+    "M0": "unitary_global_state",
+    "M1": "experience_gating",
+    "M2": "cognitive_access",
+    "M3": "report_bottleneck",
+    "M4": "factorized_interactive",
+    "M5": "saturated_predictable_ceiling"
+  },
+  "primary_scores": ["held_out_log_predictive_density", "leave_one_family_out_score"],
+  "secondary_scores": ["within_minus_cross_transfer", "principal_angles", "unique_variance", "temporal_generalization"],
+  "interactions": ["E:A", "E:K_content", "E:K_memory", "A:K_volition", "K_task:R"],
+  "policy": {
+    "negative_results_continue": true,
+    "low_ceiling_results_continue": true,
+    "heterogeneous_results_continue": true,
+    "access_restrictions_are_reported": true,
+    "corrupt_inputs_stop_affected_job": true,
+    "leakage_detection_stops_affected_analysis": true
+  }
+}
+

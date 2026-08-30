@@ -1,0 +1,164 @@
+"""Phase-mapped FactorCon workflow.
+
+P01/P02 acquisition is launched through the server runner because downloads are long,
+resumable external transfers. This workflow covers P03-P10 and consumes only verified
+manifests/raw inputs or canonical RDM contracts.
+"""
+
+import json
+import os
+from pathlib import Path
+
+REPO = Path(workflow.basedir).parent.resolve()
+SERVER = json.loads((REPO / config["server"]).read_text(encoding="utf-8"))
+CANONICAL = Path(os.environ.get("FACTORCON_CANONICAL_ROOT", SERVER["canonical_root"]))
+RESTART = Path(os.environ.get("FACTORCON_RESTART_ROOT", SERVER["restart_root"]))
+CONFIG_PATH = REPO / "conf" / "base.yaml"
+FAMILIES = [Path(value).stem for value in config["datasets"]]
+
+VALIDATION = [str(CANONICAL / "reports" / "generated" / "data_validation" / f"{family}.json") for family in FAMILIES]
+COMMON = [str(RESTART / "derivatives" / family / "common" / "events.jsonl") for family in FAMILIES]
+HARMONIZE_REPORTS = [str(CANONICAL / "reports" / "generated" / "harmonization" / f"{family}.json") for family in FAMILIES]
+CANONICAL_RDMS = [str(RESTART / "derivatives" / family / "canonical" / "rdms.npz") for family in FAMILIES]
+MODEL_SCORES = [str(CANONICAL / "results" / "intermediates" / "model_scores" / f"{family}.json") for family in FAMILIES]
+ROBUSTNESS = [str(CANONICAL / "results" / "intermediates" / "robustness" / f"{family}.json") for family in FAMILIES]
+SYNTHESIS = str(CANONICAL / "results" / "intermediates" / "synthesis" / "equal_family.json")
+PAPER_MANIFEST = str(CANONICAL / "results" / "paper" / "results_manifest.json")
+
+shell.executable("/bin/bash")
+
+
+rule validate_data:
+    input:
+        VALIDATION
+
+
+rule validate_family:
+    output:
+        str(CANONICAL / "reports" / "generated" / "data_validation" / "{family}.json")
+    params:
+        family=lambda wildcards: wildcards.family
+    threads: 2
+    shell:
+        "PYTHONPATH='{REPO}/src' python3 -m factorcon dataset validate "
+        "--config '{CONFIG_PATH}' --canonical-root '{CANONICAL}' "
+        "--family '{params.family}' --output '{output}'"
+
+
+rule harmonize:
+    input:
+        COMMON,
+        HARMONIZE_REPORTS
+
+
+rule harmonize_family:
+    input:
+        validation=str(CANONICAL / "reports" / "generated" / "data_validation" / "{family}.json")
+    output:
+        events=str(RESTART / "derivatives" / "{family}" / "common" / "events.jsonl"),
+        report=str(CANONICAL / "reports" / "generated" / "harmonization" / "{family}.json")
+    params:
+        family=lambda wildcards: wildcards.family
+    threads: 2
+    shell:
+        "mkdir -p '{RESTART}/derivatives/{params.family}/common' "
+        "'{CANONICAL}/reports/generated/harmonization' && "
+        "PYTHONPATH='{REPO}/src' python3 -m factorcon dataset harmonize "
+        "--config '{CONFIG_PATH}' --canonical-root '{CANONICAL}' "
+        "--family '{params.family}' --output '{output.events}' --report '{output.report}'"
+
+
+rule pilot:
+    input:
+        COMMON,
+        HARMONIZE_REPORTS
+    output:
+        str(CANONICAL / "reports" / "generated" / "pilot" / "architecture_recovery.json")
+    threads: 8
+    shell:
+        "mkdir -p '{CANONICAL}/reports/generated/pilot' && "
+        "PYTHONPATH='{REPO}/src' python3 -m factorcon simulate --architecture all "
+        "--seed {config[random_seed]} --out '{CANONICAL}/reports/generated/pilot'"
+
+
+rule features:
+    input:
+        CANONICAL_RDMS
+
+
+# Canonical RDM files are a deliberate contract boundary. Modality adapters must create
+# them from verified family-specific features. There is no generic rule that could silently
+# mis-map E/K/A/R/S; a missing file is a visible implementation/access state.
+
+
+rule models:
+    input:
+        MODEL_SCORES
+
+
+rule score_family:
+    input:
+        rdm=str(RESTART / "derivatives" / "{family}" / "canonical" / "rdms.npz")
+    output:
+        str(CANONICAL / "results" / "intermediates" / "model_scores" / "{family}.json")
+    params:
+        family=lambda wildcards: wildcards.family
+    threads: 8
+    shell:
+        "mkdir -p '{CANONICAL}/results/intermediates/model_scores' && "
+        "PYTHONPATH='{REPO}/src' python3 -m factorcon model score "
+        "--family '{params.family}' --input '{input.rdm}' --output '{output}'"
+
+
+rule synthesis:
+    input:
+        MODEL_SCORES
+    output:
+        SYNTHESIS
+    threads: 2
+    run:
+        from factorcon.pipeline.canonical import synthesize_scores
+        synthesize_scores(list(input), output[0])
+
+
+rule robustness:
+    input:
+        ROBUSTNESS
+
+
+rule robustness_family:
+    input:
+        rdm=str(RESTART / "derivatives" / "{family}" / "canonical" / "rdms.npz"),
+        scores=str(CANONICAL / "results" / "intermediates" / "model_scores" / "{family}.json")
+    output:
+        str(CANONICAL / "results" / "intermediates" / "robustness" / "{family}.json")
+    params:
+        family=lambda wildcards: wildcards.family
+    threads: 8
+    shell:
+        "mkdir -p '{CANONICAL}/results/intermediates/robustness' && "
+        "PYTHONPATH='{REPO}/src' python3 -m factorcon model robustness "
+        "--family '{params.family}' --input '{input.rdm}' --output '{output}' --seed {config[random_seed]}"
+
+
+rule figures:
+    input:
+        scores=MODEL_SCORES,
+        synthesis=SYNTHESIS
+    output:
+        PAPER_MANIFEST
+    run:
+        from factorcon.pipeline.reporting import build_paper_tables
+        build_paper_tables(list(input.scores), input.synthesis, Path(output[0]).parent)
+
+
+rule reproduce:
+    input:
+        PAPER_MANIFEST,
+        ROBUSTNESS
+
+
+rule all_analysis:
+    input:
+        PAPER_MANIFEST,
+        ROBUSTNESS

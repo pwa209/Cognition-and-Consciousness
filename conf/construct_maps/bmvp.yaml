@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "family": "bmvp",
+  "status": "specified_before_outcome_analysis",
+  "measurement_unit": "trial",
+  "mappings": [
+    {
+      "observed": "subjective_perception_report_in_report_blocks",
+      "construct": "E",
+      "direction": "reported_perceived_higher_experience_evidence",
+      "scale": "binary_measurement_link",
+      "uncertainty": "response_bias_and_crossfitted_calibration",
+      "held_constant": ["stimulus_presence", "contrast", "run", "ocular_features"],
+      "alternative": "decision_and_report_process",
+      "enters": ["BMVP-1", "BMVP-2", "BMVP-3"]
+    },
+    {
+      "observed": "crossfitted_eye_and_pupil_probability_in_no_report_blocks",
+      "construct": "E",
+      "direction": "higher_calibrated_probability_higher_experience_evidence",
+      "scale": "probability_not_hard_label",
+      "uncertainty": "calibration_sensitivity_specificity_propagated",
+      "held_constant": ["eye_position", "microsaccades", "blinks", "pupil_baseline"],
+      "alternative": "orienting_without_experience",
+      "enters": ["BMVP-1", "BMVP-3"]
+    },
+    {
+      "observed": "report_context_and_response_events",
+      "construct": "R",
+      "direction": "report_availability_preparation_and_execution",
+      "scale": "factorial",
+      "uncertainty": "observed_context_with_trial_response",
+      "held_constant": ["stimulus_evidence", "E_probability"],
+      "alternative": "block_context",
+      "enters": ["BMVP-1", "BMVP-2", "BMVP-3"]
+    },
+    {
+      "observed": "stimulus_presence_and_threshold_contrast",
+      "construct": "S",
+      "direction": "physical_input",
+      "scale": "categorical_and_continuous",
+      "uncertainty": "observed",
+      "held_constant": [],
+      "alternative": "none",
+      "enters": ["all"]
+    }
+  ],
+  "contrasts": {
+    "BMVP-1": "E component common to report and no-report contexts",
+    "BMVP-2": "report component after E and ocular structure",
+    "BMVP-3": "incremental E-by-report interaction"
+  }
+}
+

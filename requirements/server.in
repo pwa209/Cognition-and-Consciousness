@@ -1,0 +1,21 @@
+# Resolve this file once per deployed Git commit and retain `pip freeze --all` under
+# canonical_root/manifests/generated/environments/<commit>.txt.
+numpy>=2.0,<3
+scipy>=1.14,<2
+pandas>=2.2,<3
+pyarrow>=17,<30
+xarray>=2024.7
+scikit-learn>=1.5,<2
+statsmodels>=0.14,<1
+pymc>=5.16,<6
+arviz>=0.19,<1
+pyyaml>=6,<7
+pydantic>=2.8,<3
+snakemake>=9,<10
+nibabel>=5.3,<6
+nilearn>=0.11,<1
+pybids>=0.17,<1
+mne>=1.8,<2
+mne-bids>=0.15,<1
+pytest>=8.3,<9
+

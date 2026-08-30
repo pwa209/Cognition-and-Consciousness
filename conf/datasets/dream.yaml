@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "family": "dream",
+  "title": "The Dream EEG and Mentation database",
+  "role": "within_stage_E_A_anchor",
+  "source_type": "dream_registry",
+  "source_id": "22133105",
+  "source_url": "https://bridges.monash.edu/articles/dataset/The_DREAM_database/22133105",
+  "registry_file_id": 49774971,
+  "registry_version": 6,
+  "registry_doi": "10.26180/22133105.v6",
+  "article_doi": "10.1038/s41467-025-61945-1",
+  "snapshot_label": "registry_v6_2025-06-08",
+  "license": "per_constituent_dataset",
+  "access": "mixed_registry_open_and_restricted",
+  "initial_release_counts": {"datasets": 20, "participants": 505, "awakenings": 2643},
+  "modalities": ["eeg", "meg", "reports"],
+  "construct_map": "conf/construct_maps/dream.yaml",
+  "split_units": ["contributing_dataset", "subject", "sleep_stage"],
+  "open_only": true
+}
+

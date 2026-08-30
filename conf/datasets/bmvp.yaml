@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "family": "bmvp",
+  "title": "Human visual consciousness involves large scale cortical and subcortical networks independent of task report and eye movement activity",
+  "role": "E_R_report_no_report_anchor",
+  "source_type": "bmvp_nitrc",
+  "source_id": "bmvp_release",
+  "source_url": "https://bmvp.projects.nitrc.org/",
+  "index_url": "https://bmvp.projects.nitrc.org/download_all.html",
+  "article_doi": "10.1038/s41467-022-35117-4",
+  "snapshot_label": "website_inventory_2026-08-30",
+  "license": "CC-BY-4.0",
+  "access": "public",
+  "expected_subjects_website": 133,
+  "expected_archive_urls": 168,
+  "modalities": ["behavior", "eye_tracking", "eeg", "fmri", "depth_eeg"],
+  "estimated_bytes": 1616284874752,
+  "construct_map": "conf/construct_maps/bmvp.yaml",
+  "split_units": ["subject", "run"],
+  "max_parallel_downloads": 2
+}
+

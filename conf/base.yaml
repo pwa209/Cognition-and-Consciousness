@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "project": "cognition-and-consciousness",
+  "analysis_spec": "conf/analysis_spec.yaml",
+  "server": "conf/server_h100.yaml",
+  "datasets": [
+    "conf/datasets/multisite_working_memory.yaml",
+    "conf/datasets/masked_content_fmri.yaml",
+    "conf/datasets/bmvp.yaml",
+    "conf/datasets/cogitate.yaml",
+    "conf/datasets/propofol_volition_fmri.yaml",
+    "conf/datasets/dream.yaml",
+    "conf/datasets/propofol_awakening_eeg.yaml"
+  ],
+  "construct_maps": [
+    "conf/construct_maps/multisite_working_memory.yaml",
+    "conf/construct_maps/masked_content_fmri.yaml",
+    "conf/construct_maps/bmvp.yaml",
+    "conf/construct_maps/cogitate.yaml",
+    "conf/construct_maps/propofol_volition_fmri.yaml",
+    "conf/construct_maps/dream.yaml",
+    "conf/construct_maps/propofol_awakening_eeg.yaml"
+  ],
+  "random_seed": 260830,
+  "outer_folds": 5,
+  "outer_repeats": 5,
+  "inner_folds": 4,
+  "measurement_draws": 50,
+  "candidate_models": ["M0", "M1", "M2", "M3", "M4", "M5"]
+}
+

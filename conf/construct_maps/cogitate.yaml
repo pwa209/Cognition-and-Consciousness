@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "family": "cogitate",
+  "status": "specified_before_outcome_analysis",
+  "measurement_unit": "event_and_runwise_condition",
+  "scope_note": "E is approximately high and constant; COGITATE anchors K_task, R, S and their dynamics rather than identifying E.",
+  "mappings": [
+    {
+      "observed": "task_relevant_nontarget_vs_task_irrelevant_same_stimulus",
+      "construct": "K_task",
+      "direction": "task_relevance_higher_selection",
+      "scale": "counterbalanced_factorial",
+      "uncertainty": "participant_run_and_site",
+      "held_constant": ["stimulus_id", "category", "orientation", "duration", "response_required"],
+      "alternative": "block_instruction_or_expectation",
+      "enters": ["COG-1", "COG-2", "COG-3", "COG-4"]
+    },
+    {
+      "observed": "target_vs_matched_nontarget_and_motor_localizer",
+      "construct": "R",
+      "direction": "target_response_higher_preparation_and_execution",
+      "scale": "event_factorial",
+      "uncertainty": "participant_run_and_site",
+      "held_constant": ["stimulus_id", "category", "orientation", "duration", "rarity"],
+      "alternative": "target_detection_or_oddball",
+      "enters": ["COG-1", "COG-4"]
+    },
+    {
+      "observed": "category_orientation_duration_identity",
+      "construct": "S",
+      "direction": "physical_and_content_structure",
+      "scale": "factorial",
+      "uncertainty": "observed",
+      "held_constant": [],
+      "alternative": "none",
+      "enters": ["all"]
+    }
+  ],
+  "contrasts": {
+    "COG-1": "separate K_task and R components",
+    "COG-2": "K_task representational-geometry convergence across fMRI, M-EEG, and iEEG",
+    "COG-3": "category-by-task interaction",
+    "COG-4": "temporal divergence of category, K_task, and R"
+  }
+}
+
