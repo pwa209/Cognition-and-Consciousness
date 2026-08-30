@@ -7,7 +7,7 @@ Last updated: 2026-08-30
 | Proposal review | complete | 43 pages rendered and visually reviewed; methods extracted into config contracts |
 | Study designation | complete | transparent non-preregistered secondary analysis; no scientific gates |
 | Local repository | implemented | full P00-P10 code and acquisition-only runner; 51 tests and Ruff checks pass |
-| GitHub | active | initial implementation pushed; acquisition hardening is the next tracked release |
+| GitHub | current | acquisition-hardened release `e49bb2b` pushed to `main` |
 | Server connection | verified | expected hostname/user, H100, CPU, RAM, storage, outbound sources |
 | Server roots | awaiting owner confirmation | proposed paths are in `conf/server_h100.yaml`; no remote project writes yet |
 | Server deployment scope | acquisition only | owner instructed that P03-P10 must not be deployed or queued |
