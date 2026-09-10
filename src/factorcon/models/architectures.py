@@ -31,11 +31,33 @@ def _standardize(value: ArrayLike) -> NDArray[np.float64]:
 def _validated_design(design: Mapping[str, ArrayLike]) -> dict[str, NDArray[np.float64]]:
     if not design:
         raise ValueError("design cannot be empty")
+    unknown = set(design) - set(CONSTRUCT_ORDER)
+    if unknown:
+        raise ValueError(f"Unknown construct columns: {sorted(unknown)}")
     result = {name: _standardize(value) for name, value in design.items()}
     lengths = {len(value) for value in result.values()}
     if len(lengths) != 1 or next(iter(lengths)) < 3:
         raise ValueError("all design columns must have equal length >= 3")
     return result
+
+
+def unavailable_reason(architecture: str, design: Mapping[str, ArrayLike]) -> str | None:
+    """Return structural missing-construct status without inspecting neural outcomes.
+
+    Design columns are condition-long, unitless operational constructs. An unavailable
+    candidate is retained in reports; absence is not replaced with a zero-valued label.
+    """
+    if architecture not in ARCHITECTURES:
+        raise ValueError(f"Unknown architecture: {architecture}")
+    if architecture == "M0" and not (set(design) & (set(CONSTRUCT_ORDER) - {"S"})):
+        return "M0 requires an observed E/K/A/R construct"
+    if architecture == "M1" and ("E" not in design or not set(design) & set(K_NAMES)):
+        return "M1 requires E and at least one K component"
+    if architecture == "M2" and not set(design) & set(K_NAMES):
+        return "M2 requires at least one K component"
+    if architecture == "M3" and "R" not in design:
+        return "M3 requires R"
+    return None
 
 
 def _interaction(left: NDArray[np.float64], right: NDArray[np.float64]) -> NDArray[np.float64]:

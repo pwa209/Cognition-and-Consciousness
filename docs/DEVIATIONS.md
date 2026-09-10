@@ -29,3 +29,22 @@ This ledger is part of the transparent non-preregistered record. Add entries chr
   and P01/P02 runners. Keep P03-P10 source in GitHub/local storage only.
 - **Consequence:** the full roadmap and analysis implementation remain reproducible but are neither
   deployed nor queued until the owner explicitly expands server authorization.
+
+## 2026-09-10 — Scientific review corrections (non-preregistered)
+
+- **Basis:** owner requested scientific-nature review and script revisions; no participant
+  outcomes analyzed. Full assessment: `docs/SCIENTIFIC_REVIEW_2026-09-10.md`.
+- **Changes:** replace test-selected comparator with configured paired contrasts; use
+  actual equal-family weighting; require independent train/test identities in canonical
+  v2; aggregate by group; calibrate scoring variance on held-out training groups; keep
+  unavailable models explicit; fix constant-column/intercept handling; use joint
+  condition shuffling and group-level influence; report design aliases.
+- **Scope correction:** mark the existing architectures as operational prototypes,
+  the score as marginal Gaussian nats/pair rather than joint ELPD, and LOFO as not
+  implemented. M5 is not a guaranteed ceiling. Unknown uncertainty is never fabricated.
+- **Affected outputs:** canonical score, synthesis, robustness and paper-source tables.
+  v1 canonical files need real source identities and rescoring, not guessed IDs.
+  Prior outputs remain historical and must not be mixed with v2/specification hashes.
+- **Preserved:** E/A/R and four separate K constructs, negative crossnobis values,
+  all candidate IDs, no scientific gates, non-preregistered status, acquisition-only
+  server authorization. Nothing was deployed by this review.

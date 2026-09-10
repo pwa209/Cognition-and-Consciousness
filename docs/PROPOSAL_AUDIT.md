@@ -1,5 +1,11 @@
 # Proposal-to-implementation audit
 
+> **2026-09-10 correction:** the original implementation description below overstates
+> several completed methods. The canonical scorer is an operational component-RDM
+> prototype, not the full latent/PCM/LOFO implementation. See
+> [the scientific review](SCIENTIFIC_REVIEW_2026-09-10.md) and
+> [v2 input contract](CANONICAL_RDM_V2.md) for the current evidence-backed scope.
+
 ## Accepted scientific core
 
 The proposal's strongest contribution is a connected construct-bridge design across seven families. It distinguishes experiential status (`E`), cognitive-operation components (`K_content`, `K_memory`, `K_task`, `K_volition`), arousal/global state (`A`), report/action (`R`), and physical/sensory structure (`S`). It compares six architectures from a unitary rank-one account through a saturated predictive ceiling, emphasizing held-out prediction, representational geometry, unique variance, temporal generalization, and leave-one-family-out transfer.
@@ -40,4 +46,3 @@ The proposal anticipated a Slurm cluster and 5 TB fast scratch. The verified hos
 ## Claims discipline
 
 The target is the minimum predictive architecture supported at the available measurement resolution. Factorization does not imply ontological independence. Decoding does not establish use by a participant. Unresponsiveness is not unconsciousness. Sleep stage and anesthesia dose are not definitions of experience. Temporal precedence constrains but does not establish causality.
-

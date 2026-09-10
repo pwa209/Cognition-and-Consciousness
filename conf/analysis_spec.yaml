@@ -19,8 +19,32 @@
     "M5": "saturated_predictable_ceiling"
   },
   "primary_scores": ["held_out_log_predictive_density", "leave_one_family_out_score"],
+  "primary_scores_status": "planned_not_implemented_end_to_end",
   "secondary_scores": ["within_minus_cross_transfer", "principal_angles", "unique_variance", "temporal_generalization"],
   "interactions": ["E:A", "E:K_content", "E:K_memory", "A:K_volition", "K_task:R"],
+  "rdm_evaluation": {
+    "implementation": "operational_component_rdm_prototypes_v2_not_full_latent_architectures",
+    "score_kind": "mean_gaussian_marginal_log_score_nats_per_pair",
+    "joint_predictive_density_implemented": false,
+    "leave_one_family_out_implemented": false,
+    "alphas": [0.0, 0.0001, 0.001, 0.01, 0.1, 1.0, 10.0],
+    "paired_contrasts": [["M4", "M0"], ["M4", "M1"], ["M4", "M2"], ["M4", "M3"], ["M4", "M5"]],
+    "family_weighting": "equal_finite_available_families",
+    "uncertainty": "test_groups_conditional_on_training_fixed_conditions",
+    "model_scope": {
+      "M0": "fixed_equal_loading_rank_one_proxy_not_learned_loading_unitary_model",
+      "M1": "fixed_standardized_logistic_gate_not_fitted_strict_or_partial_gate",
+      "M2": "fixed_equal_K_access_proxy_not_fitted_latent_access",
+      "M3": "R_and_interactions_not_region_specific_shrinkage_report_model",
+      "M4": "additive_nonnegative_component_RDMs_not_general_correlated_latent_model",
+      "M5": "training_group_mean_RDM_benchmark_not_guaranteed_noise_ceiling"
+    },
+    "robustness_alphas": {
+      "weak_regularization": [0.0, 0.00001, 0.0001, 0.001],
+      "default": [0.0, 0.0001, 0.001, 0.01, 0.1, 1.0, 10.0],
+      "strong_regularization": [0.01, 0.1, 1.0, 10.0, 100.0]
+    }
+  },
   "policy": {
     "negative_results_continue": true,
     "low_ceiling_results_continue": true,
@@ -30,4 +54,3 @@
     "leakage_detection_stops_affected_analysis": true
   }
 }
-

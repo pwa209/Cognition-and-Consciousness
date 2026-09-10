@@ -11,10 +11,16 @@ from pathlib import Path
 from typing import Any
 
 from factorcon.acquire import acquire_families, resolve_manifests
-from factorcon.config import load_project, validate_project
+from factorcon.config import load_analysis_spec, load_project, validate_project
 from factorcon.errors import FactorconError
+from factorcon.models.architectures import ARCHITECTURES, unavailable_reason
 from factorcon.pipeline import harmonize_family, validate_family
-from factorcon.pipeline.canonical import score_canonical_rdm, synthesize_scores
+from factorcon.pipeline.canonical import (
+    DEFAULT_SPEC,
+    load_canonical_rdm,
+    score_canonical_rdm,
+    synthesize_scores,
+)
 from factorcon.pipeline.reporting import build_paper_tables
 from factorcon.pipeline.robustness import robustness_canonical_rdm
 from factorcon.simulation import run_recovery_suite
@@ -105,6 +111,10 @@ def build_parser() -> argparse.ArgumentParser:
     model_robustness.add_argument("--input", required=True)
     model_robustness.add_argument("--output", required=True)
     model_robustness.add_argument("--seed", type=int, default=260830)
+    for model_parser in (model_score, model_synthesize, model_robustness):
+        model_parser.add_argument("--analysis-spec", default=str(DEFAULT_SPEC))
+    for model_parser in (model_score, model_robustness):
+        model_parser.add_argument("--dry-run", action="store_true", help="validate without writing")
 
     report = subcommands.add_parser("report", help="build auditable paper-source tables")
     report.add_argument("--score", action="append", required=True)
@@ -175,16 +185,36 @@ def dispatch(args: argparse.Namespace) -> int:
         _print(result)
         return 0
     if args.command == "model":
+        if getattr(args, "dry_run", False):
+            spec = load_analysis_spec(args.analysis_spec)
+            arrays, design = load_canonical_rdm(args.input)
+            _print(
+                {
+                    "dry_run": True,
+                    "writes": False,
+                    "family": args.family,
+                    "train_groups": len(set(arrays["train_group_ids"])),
+                    "test_groups": len(set(arrays["test_group_ids"])),
+                    "implementation": spec["rdm_evaluation"]["implementation"],
+                    "unavailable_reasons": {
+                        m: unavailable_reason(m, design) for m in ARCHITECTURES
+                    },
+                }
+            )
+            return 0
         if args.model_command == "score":
-            result = score_canonical_rdm(args.input, args.output, family=args.family)
+            result = score_canonical_rdm(
+                args.input, args.output, family=args.family, analysis_spec=args.analysis_spec
+            )
         elif args.model_command == "synthesize":
-            result = synthesize_scores(args.input, args.output)
+            result = synthesize_scores(args.input, args.output, analysis_spec=args.analysis_spec)
         else:
             result = robustness_canonical_rdm(
                 args.input,
                 args.output,
                 family=args.family,
                 seed=args.seed,
+                analysis_spec=args.analysis_spec,
             )
         _print(result)
         return 0

@@ -1,6 +1,23 @@
 # Project status
 
-Last updated: 2026-08-30
+Last updated: 2026-09-10
+
+## Current scientific implementation
+
+Scientific review and local revisions are documented in
+`SCIENTIFIC_REVIEW_2026-09-10.md`, with executed checks in
+`SCIENTIFIC_REVIEW_VALIDATION.md`. The canonical component-RDM prototype now uses
+independent-group identities, fixed pairwise comparisons and genuinely equal-family
+summaries. Full latent measurement/architectures, P06 producers and P08 LOFO transfer
+remain unfinished. No analysis was deployed or queued by this revision.
+
+The read-only server check earlier on September 10 found working memory and propofol
+awakening EEG download records complete; masked fMRI, BMVP and propofol-volition
+acquisition remained partial, DREAM had only its registry, and COGITATE was waiting
+for access. The historical "not started" entries below are not the current acquisition
+status. Local root-confirmation configuration was not changed by this review.
+
+## Historical record — 2026-08-30
 
 | Area | State | Evidence / next action |
 |---|---|---|

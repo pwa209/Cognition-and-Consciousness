@@ -1,5 +1,11 @@
 # Phase-mapped implementation roadmap
 
+> **Implementation audit, 2026-09-10:** phase entries describe intended deliverables,
+> not completed capabilities. P06 producers, full latent architectures/measurement
+> inference and actual P08 held-out-family transfer remain unfinished. Revised local
+> scoring uses identity-checked component-RDM prototypes and marginal scores, not
+> joint PCM ELPD. See `SCIENTIFIC_REVIEW_2026-09-10.md` for phase-mapped priorities.
+
 This roadmap is operational, not a scientific stop/go tree. Every phase proceeds when its inputs are technically available; unfavorable or null results never block later work. Access-controlled families can remain `WAITING_ACCESS` while public families continue.
 
 ## Current server authorization

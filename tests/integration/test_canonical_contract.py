@@ -19,6 +19,10 @@ def _write(path: Path, truth: str, seed: int) -> None:
         path,
         train_rdms=train,
         test_rdms=test,
+        train_group_ids=np.asarray([f"train-{i}" for i in range(len(train))]),
+        test_group_ids=np.asarray([f"test-{i}" for i in range(len(test))]),
+        independent_unit=np.asarray("synthetic_participant"),
+        design_origin=np.asarray("fixed_by_design"),
         design_names=names,
         design_values=values,
         condition_labels=np.asarray(

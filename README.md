@@ -14,6 +14,12 @@ The journal ambition is Nature or Science, with Nature Human Behaviour as a real
 
 ## Current state
 
+**Scientific review, 2026-09-10:** the local scorer is a tested component-RDM prototype,
+not the proposal's complete latent/PCM/leave-one-family-out analysis. It now enforces
+independent-group identities, fixed paired comparisons and equal-family weighting.
+See the [review and phase priorities](docs/SCIENTIFIC_REVIEW_2026-09-10.md) and
+[canonical v2 contract](docs/CANONICAL_RDM_V2.md). Analysis code remains undeployed.
+
 - Proposal: audited, extracted, and translated into implementation contracts.
 - University server: H100 host verified; no Slurm; persistent jobs use `tmux` plus logs and status markers.
 - Public source audit: OpenNeuro, OSF, and BMVP are directly retrievable. COGITATE requires a user-created account and acceptance of terms. DREAM is a registry with dataset-specific access states.

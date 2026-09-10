@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from math import isfinite
 from pathlib import Path
 from typing import Any
 
@@ -79,6 +80,53 @@ def _require(mapping: dict[str, Any], keys: set[str], label: str) -> None:
         raise ConfigError(f"{label} is missing required fields: {', '.join(missing)}")
 
 
+def load_analysis_spec(path: str | Path) -> dict[str, Any]:
+    """Validate result-independent scoring settings; no participant data are read.
+
+    Alpha grids are finite nonnegative penalties. Contrasts are fixed model-ID pairs;
+    these settings describe marginal-score prototypes, not a registration or gate.
+    """
+    spec = load_structured(path)
+    if spec.get("registration") is not None or spec.get("scientific_gates") is not False:
+        raise ConfigError("Analysis requires registration=null and scientific_gates=false")
+    settings = spec.get("rdm_evaluation")
+    if not isinstance(settings, dict):
+        raise ConfigError("rdm_evaluation settings are required")
+    _require(
+        settings,
+        {
+            "alphas",
+            "paired_contrasts",
+            "implementation",
+            "model_scope",
+            "robustness_alphas",
+            "score_kind",
+        },
+        str(path),
+    )
+    if settings["score_kind"] != "mean_gaussian_marginal_log_score_nats_per_pair":
+        raise ConfigError("Unsupported score_kind for the component-RDM implementation")
+    branches = settings["robustness_alphas"]
+    if not isinstance(branches, dict) or not branches:
+        raise ConfigError("robustness_alphas must contain named grids")
+    for grid in [settings["alphas"], *branches.values()]:
+        if (
+            not isinstance(grid, list)
+            or not grid
+            or any(
+                isinstance(a, bool) or not isinstance(a, (int, float)) or not isfinite(a) or a < 0
+                for a in grid
+            )
+        ):
+            raise ConfigError("alpha grids must be non-empty finite nonnegative numbers")
+    required = [["M4", f"M{i}"] for i in (0, 1, 2, 3, 5)]
+    if settings["paired_contrasts"] != required:
+        raise ConfigError("Retain the five fixed M4 comparisons in their declared order")
+    if set(settings["model_scope"]) != {f"M{i}" for i in range(6)}:
+        raise ConfigError("model_scope must describe all six candidates")
+    return spec
+
+
 def load_project(path: str | Path) -> ProjectConfig:
     """Load and cross-validate the project configuration graph."""
 
@@ -93,7 +141,7 @@ def load_project(path: str | Path) -> ProjectConfig:
     server_path = _resolve(root, str(values["server"]))
     analysis_path = _resolve(root, str(values["analysis_spec"]))
     server = load_structured(server_path)
-    analysis = load_structured(analysis_path)
+    analysis = load_analysis_spec(analysis_path)
     _require(
         server,
         {
