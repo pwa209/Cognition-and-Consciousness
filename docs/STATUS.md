@@ -14,6 +14,12 @@ prototype remains separate. Full raw-to-feature integration, within-neural-subje
 measurement cross-fitting, simultaneous inference calibration, shared empirical
 anchors and production readiness are not complete. No analysis was deployed or queued.
 
+**Later source-staging authorization, 2026-09-10:** the owner approved an inactive
+versioned copy of analysis commit `c1a6e6479c7ace967bfcf070cf2e27ef382b1c18` on the
+server. It is staged, not activated; no analysis environment or jobs were created.
+See `SERVER_STAGING_c1a6e64.md` for the exact path and integrity checks. The existing
+acquisition source and download sessions were left unchanged.
+
 The read-only server check earlier on September 10 found working memory and propofol
 awakening EEG download records complete; masked fMRI, BMVP and propofol-volition
 acquisition remained partial, DREAM had only its registry, and COGITATE was waiting

@@ -8,9 +8,11 @@ There are no scientific gates: null, heterogeneous, unfavorable, or low-ceiling 
 
 ## Safety and data rules
 
-- Current server authorization is acquisition-only. Deploy only the sparse acquisition release
-  and queue only source resolution/downloads; do not deploy or queue P03-P10 unless the owner
-  later gives an explicit instruction.
+- Current server execution authorization is acquisition-only. The owner additionally
+  authorized an inactive, versioned analysis-source snapshot on 2026-09-10. Source staging
+  does not authorize activation, analysis-environment installation, or P03-P10 jobs.
+  Keep the active acquisition release unchanged; queue only source resolution/downloads
+  unless the owner later gives a separate explicit instruction.
 - Never commit raw participant data, large derivatives, credentials, cookies, access tokens, `.netrc`, or machine-local secrets.
 - Never echo credentials. Account secrets are entered only through interactive prompts or owner-managed secret stores outside the repository.
 - Download data directly to the university NAS canonical root. Use `/data1` for active fast work and `/data2` for restartable intermediates.

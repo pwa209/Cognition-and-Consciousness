@@ -13,9 +13,15 @@ The root paths above remain proposals until the owner confirms them. Do not crea
 
 ## Authorized deployment scope
 
-The current owner instruction authorizes **data acquisition only**. Deploy the sparse acquisition
-release and queue P01/P02 only. Do not deploy a full source release, create a scientific Python
-environment, or queue P03-P10 unless the owner later gives an explicit instruction.
+The current owner instruction authorizes **data acquisition only for execution**. Deploy the
+sparse acquisition release and queue P01/P02 only. On 2026-09-10 the owner additionally
+authorized **inactive source staging only**. Do not activate the staged analysis source,
+create a scientific Python environment, or queue P03-P10 without separate explicit permission.
+
+The verified inactive snapshot and unchanged active-source checks are recorded in
+[`SERVER_STAGING_c1a6e64.md`](SERVER_STAGING_c1a6e64.md). That operation used the existing
+fast-work source parent; it did not confirm all proposed storage roots or create `/data2`
+work directories. The configuration's `deployment_scope=acquisition_only` remains unchanged.
 
 ## First acquisition deployment
 
