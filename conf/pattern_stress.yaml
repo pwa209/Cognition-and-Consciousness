@@ -1,0 +1,11 @@
+{
+  "suite": "patterns",
+  "replicates": 200,
+  "groups": 6,
+  "conditions": 8,
+  "features": 6,
+  "draws": 1000,
+  "warmup": 1000,
+  "chains": 4,
+  "scenarios": ["unitary", "factorized", "aliased", "heavy_tail"]
+}

@@ -4,12 +4,15 @@ Last updated: 2026-09-10
 
 ## Current scientific implementation
 
-Scientific review and local revisions are documented in
-`SCIENTIFIC_REVIEW_2026-09-10.md`, with executed checks in
-`SCIENTIFIC_REVIEW_VALIDATION.md`. The canonical component-RDM prototype now uses
-independent-group identities, fixed pairwise comparisons and genuinely equal-family
-summaries. Full latent measurement/architectures, P06 producers and P08 LOFO transfer
-remain unfinished. No analysis was deployed or queued by this revision.
+The follow-up now provides a separate fitted generative-pattern engine, modular
+ordinal report measurement, true source-only LOFO, nested subject-bootstrap refits,
+independent stress generators and additional adapter/statistical checks. See
+`IMPLEMENTATION_FOLLOWUP_2026-09-10.md` for the phase-by-phase implemented/open ledger,
+`PATTERN_AND_MEASUREMENT_COMMANDS.md` for command contracts and
+`SCIENTIFIC_REVIEW_VALIDATION.md` for executed tests. The historical component-RDM
+prototype remains separate. Full raw-to-feature integration, within-neural-subject
+measurement cross-fitting, simultaneous inference calibration, shared empirical
+anchors and production readiness are not complete. No analysis was deployed or queued.
 
 The read-only server check earlier on September 10 found working memory and propofol
 awakening EEG download records complete; masked fMRI, BMVP and propofol-volition

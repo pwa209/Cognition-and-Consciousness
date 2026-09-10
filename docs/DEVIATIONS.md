@@ -48,3 +48,27 @@ This ledger is part of the transparent non-preregistered record. Add entries chr
 - **Preserved:** E/A/R and four separate K constructs, negative crossnobis values,
   all candidate IDs, no scientific gates, non-preregistered status, acquisition-only
   server authorization. Nothing was deployed by this review.
+
+## 2026-09-10 — Follow-up fitted models and measurement implementation
+
+- **Owner instruction:** fix the remaining identified scientific/implementation gaps.
+- **Changes:** add a separate versioned generative-pattern likelihood and learned
+  M0–M5 parameters; nested source-only LOFO; hierarchical ordinal-probit external
+  report calibration; common/context-specific threshold checks and MNAR sensitivity;
+  full nested subject-bootstrap refitting; independent stress generators; explicit
+  multiplicity/equivalence utilities; verified masked-event adapter; BIDS timing and
+  one-sided PSD corrections.
+- **Rationale:** replace fixed-proxy and missing-method gaps with explicit executable
+  models while preserving a truthful distinction between code tests and scientific
+  validation. Operational E is report-liability probability, not a universal measure
+  or ground truth. M5 remains an empirical within-family benchmark, not a ceiling.
+- **Affected outputs:** new `measurement`, `patterns`, `stress` artifacts; new
+  harmonized masked events; any newly regenerated spectral features. Previous RDM
+  scores and historical outputs remain distinct and unchanged.
+- **Calibration restriction:** new pattern v1 accepts independent external calibration
+  only. It refuses all-subject empirical designs; within-neural-subject cross-fitting
+  and a fully joint behavioral/neural measurement model are not silently claimed.
+- **Remaining limits:** detailed in `docs/IMPLEMENTATION_FOLLOWUP_2026-09-10.md`.
+  Raw-to-feature validation, shared anchors, complete simulation/inference calibration
+  and production restart/concurrency remain outstanding. Unfavorable results continue.
+- **Server:** read-only schema checks only; no analysis deployment or queue changes.

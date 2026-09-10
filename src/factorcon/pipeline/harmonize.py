@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import csv
+import math
 import re
-from dataclasses import asdict
+from dataclasses import asdict, replace
 from pathlib import Path
 from typing import Any
 
@@ -36,7 +37,8 @@ def _float(value: str | None) -> float | None:
     if value is None:
         return None
     try:
-        return float(value)
+        number = float(value)
+        return number if math.isfinite(number) else None
     except ValueError:
         return None
 
@@ -59,8 +61,14 @@ def harmonize_bids_events(
     """Normalize all event files while preserving every source column in metadata."""
 
     records: list[TrialRecord] = []
-    files = sorted(data_root.rglob("*_events.tsv"))
+    files = sorted(
+        p
+        for p in data_root.rglob("*_events.tsv")
+        if "derivatives" not in p.relative_to(data_root).parts
+    )
     for event_file in files:
+        if not event_file.resolve().is_relative_to(data_root.resolve()):
+            raise IntegrityError("event file resolves outside the dataset root")
         entities = _entities(event_file)
         rows = read_events(event_file)
         for index, row in enumerate(rows):
@@ -73,7 +81,7 @@ def harmonize_bids_events(
                 row,
                 ("sleep_stage", "state", "sedation_state", "rass", "propofol_concentration"),
             )
-            report_availability = "available" if awareness is not None else "not_requested"
+            report_availability = "available" if awareness is not None else "unknown"
             record = TrialRecord(
                 dataset_family=dataset.family,
                 modality=_modality(event_file),
@@ -114,8 +122,62 @@ def harmonize_bids_events(
                 },
             )
             record.validate()
+            if dataset.family == "masked_content_fmri":
+                required = {
+                    "visibility",
+                    "targets",
+                    "labels",
+                    "paths",
+                    "response",
+                    "correct",
+                    "RT_response",
+                    "options",
+                }
+                if missing := required - row.keys():
+                    raise IntegrityError(f"ds003927 event columns missing: {sorted(missing)}")
+                visibility = _first(row, ("visibility",))
+                if visibility not in {None, "unconscious", "glimpse", "conscious"}:
+                    raise IntegrityError(f"Unrecognized ds003927 visibility: {visibility}")
+                category = _first(row, ("targets",))
+                if category not in {None, "Living_Things", "Nonliving_Things"}:
+                    raise IntegrityError(f"Unrecognized ds003927 target category: {category}")
+                record = replace(
+                    record,
+                    condition=category or "unspecified",
+                    stimulus_id=_first(row, ("paths", "labels")),
+                    stimulus_features={
+                        **record.stimulus_features,
+                        "category": category,
+                        "object_label": _first(row, ("labels",)),
+                        "response_mapping": _first(row, ("options",)),
+                    },
+                    # RT units are not established by the inspected header: preserve raw only.
+                    response_time=None,
+                    metadata={
+                        **record.metadata,
+                        "adapter": "ds003927_1.0.3_verified_columns_v1",
+                        "visibility_ordinal_code": {
+                            "unconscious": 0,
+                            "glimpse": 1,
+                            "conscious": 2,
+                        }.get(visibility),
+                        "ordinal_code_is_E_probability": False,
+                        "RT_response_raw": _first(row, ("RT_response",)),
+                        "RT_response_unit_status": "requires_source_verification",
+                    },
+                )
+                record.validate()
             records.append(record)
-    return records, {"event_files": len(files), "records": len(records)}
+    participants = {r.subject for r in records}
+    if dataset.family == "masked_content_fmri":
+        expected = dataset.values.get("expected_participants")
+        if isinstance(expected, int) and len(participants) != expected:
+            raise IntegrityError(f"ds003927 participant count {len(participants)} != {expected}")
+    return records, {
+        "event_files": len(files),
+        "records": len(records),
+        "participants": len(participants),
+    }
 
 
 def harmonize_multisite_working_memory(
@@ -189,7 +251,7 @@ def harmonize_multisite_working_memory(
                 arousal_state=None,
                 report_availability="available"
                 if _float(row.get("PASresp")) is not None
-                else "not_requested",
+                else "unknown",
                 qc_status="pending",
                 metadata={
                     "source_file": "Data/uWM_012_Clean_Data.csv",

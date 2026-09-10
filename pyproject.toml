@@ -39,6 +39,7 @@ neuro = [
 test = [
   "pytest>=8.3,<9",
   "pytest-cov>=5,<7",
+  "scipy>=1.14,<2",
 ]
 dev = [
   "factorcon[workflow,analysis,neuro,test]",
@@ -72,4 +73,3 @@ select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
 python_version = "3.12"
 strict = true
 packages = ["factorcon"]
-

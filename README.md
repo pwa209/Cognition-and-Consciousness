@@ -14,11 +14,16 @@ The journal ambition is Nature or Science, with Nature Human Behaviour as a real
 
 ## Current state
 
-**Scientific review, 2026-09-10:** the local scorer is a tested component-RDM prototype,
-not the proposal's complete latent/PCM/leave-one-family-out analysis. It now enforces
-independent-group identities, fixed paired comparisons and equal-family weighting.
-See the [review and phase priorities](docs/SCIENTIFIC_REVIEW_2026-09-10.md) and
-[canonical v2 contract](docs/CANONICAL_RDM_V2.md). Analysis code remains undeployed.
+**Scientific follow-up, 2026-09-10:** a separate local generative-pattern engine now
+fits M0–M5, integrates external report-measurement draws, and implements nested
+within-family and source-only LOFO prediction. Report measurement, independent stress
+generators and training-refit subject bootstrap are included. This is not yet the
+complete raw-data-to-manuscript implementation. See the
+[implemented fixes and remaining boundaries](docs/IMPLEMENTATION_FOLLOWUP_2026-09-10.md)
+and [local command contracts](docs/PATTERN_AND_MEASUREMENT_COMMANDS.md).
+The historical [canonical RDM v2 scorer](docs/CANONICAL_RDM_V2.md) remains a distinct
+prototype; its scores must not be mixed with pattern likelihoods. Analysis code
+remains undeployed.
 
 - Proposal: audited, extracted, and translated into implementation contracts.
 - University server: H100 host verified; no Slurm; persistent jobs use `tmux` plus logs and status markers.

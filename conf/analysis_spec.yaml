@@ -19,9 +19,34 @@
     "M5": "saturated_predictable_ceiling"
   },
   "primary_scores": ["held_out_log_predictive_density", "leave_one_family_out_score"],
-  "primary_scores_status": "planned_not_implemented_end_to_end",
+  "primary_scores_status": "pattern_engine_implemented_raw_dataset_integration_incomplete",
   "secondary_scores": ["within_minus_cross_transfer", "principal_angles", "unique_variance", "temporal_generalization"],
   "interactions": ["E:A", "E:K_content", "E:K_memory", "A:K_volition", "K_task:R"],
+  "pattern_evaluation": {
+    "implementation": "generative_pattern_v1",
+    "calibration": "external_disjoint_subjects_only",
+    "penalties": [0.001, 0.01, 0.1],
+    "unitary_rank": 1,
+    "gate_floor": 0.0,
+    "report_leak": 0.1,
+    "optimizer_starts": 4,
+    "max_iter": 500,
+    "all_candidates": ["M0", "M1", "M2", "M3", "M4", "M5"],
+    "uncertainty": "external_design_draws_conditional_on_fitted_parameters",
+    "lofo": "source_only_common_external_anchors_required",
+    "deployment": "not_authorized"
+  },
+  "report_measurement": {
+    "implementation": "hierarchical_ordinal_probit_v1",
+    "draws": 1000,
+    "warmup": 1000,
+    "chains": 4,
+    "context_specific_thresholds": false,
+    "anchor": "first_report_liability_threshold_zero_residual_sd_one",
+    "prior_version": "beta_normal_sd2.5_variance_invgamma2_1_threshold_normal_index_sd2",
+    "missingness_log_odds_shifts": [-2.0, -1.0, 0.0, 1.0, 2.0],
+    "universal_E_scale_validated": false
+  },
   "rdm_evaluation": {
     "implementation": "operational_component_rdm_prototypes_v2_not_full_latent_architectures",
     "score_kind": "mean_gaussian_marginal_log_score_nats_per_pair",

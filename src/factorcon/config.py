@@ -124,6 +124,67 @@ def load_analysis_spec(path: str | Path) -> dict[str, Any]:
         raise ConfigError("Retain the five fixed M4 comparisons in their declared order")
     if set(settings["model_scope"]) != {f"M{i}" for i in range(6)}:
         raise ConfigError("model_scope must describe all six candidates")
+    patterns = spec.get("pattern_evaluation")
+    if patterns is not None:
+        _require(
+            patterns,
+            {
+                "implementation",
+                "calibration",
+                "penalties",
+                "unitary_rank",
+                "gate_floor",
+                "report_leak",
+                "optimizer_starts",
+                "max_iter",
+                "all_candidates",
+                "uncertainty",
+                "lofo",
+                "deployment",
+            },
+            "pattern_evaluation",
+        )
+        if patterns["calibration"] != "external_disjoint_subjects_only":
+            raise ConfigError("pattern v1 only supports disjoint external calibration")
+        grid = patterns["penalties"]
+        if (
+            not isinstance(grid, list)
+            or not grid
+            or any(
+                isinstance(p, bool) or not isinstance(p, (int, float)) or not isfinite(p) or p < 0
+                for p in grid
+            )
+            or len(set(grid)) != len(grid)
+        ):
+            raise ConfigError("unique finite nonnegative pattern penalty grid required")
+        if patterns["all_candidates"] != [f"M{i}" for i in range(6)]:
+            raise ConfigError("pattern evaluation must retain all six candidates")
+        for name in ("optimizer_starts", "max_iter"):
+            if type(patterns[name]) is not int or patterns[name] < 1:
+                raise ConfigError(f"positive integer {name} required")
+        if patterns["unitary_rank"] not in (1, 2):
+            raise ConfigError("unitary_rank must be 1 or 2")
+        for name in ("gate_floor", "report_leak"):
+            if (
+                type(patterns[name]) not in (int, float)
+                or not isfinite(patterns[name])
+                or not 0 <= patterns[name] <= 1
+            ):
+                raise ConfigError(f"invalid {name}")
+        if patterns["gate_floor"] == 1:
+            raise ConfigError("gate_floor=1 removes the gating hypothesis")
+    reports = spec.get("report_measurement")
+    if reports is not None:
+        for key, minimum in (("draws", 8), ("warmup", 0), ("chains", 2)):
+            if type(reports.get(key)) is not int or reports[key] < minimum:
+                raise ConfigError(f"report measurement {key} must be integer >= {minimum}")
+        if type(reports.get("context_specific_thresholds")) is not bool:
+            raise ConfigError("boolean context_specific_thresholds required")
+        if (
+            reports.get("prior_version")
+            != "beta_normal_sd2.5_variance_invgamma2_1_threshold_normal_index_sd2"
+        ):
+            raise ConfigError("unsupported report prior version")
     return spec
 
 

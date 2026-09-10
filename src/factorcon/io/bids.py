@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import csv
 import json
+import math
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -60,7 +61,11 @@ def inventory_bids(root: str | Path) -> BIDSInventory:
 
 
 def read_events(path: str | Path) -> list[dict[str, str]]:
-    """Read a BIDS events TSV and validate finite, nonnegative onsets/durations."""
+    """Read seconds-valued BIDS events; negative onset and n/a duration are valid.
+
+    Unknown duration is retained as n/a, never silently assigned zero. This parser
+    validates timing but does not infer experience from event markers.
+    """
 
     source = Path(path)
     with source.open(encoding="utf-8-sig", newline="") as handle:
@@ -71,10 +76,14 @@ def read_events(path: str | Path) -> list[dict[str, str]]:
     for index, row in enumerate(rows, start=2):
         try:
             onset = float(row["onset"])
-            duration = float(row["duration"])
+            duration = None if row["duration"] == "n/a" else float(row["duration"])
         except (TypeError, ValueError) as exc:
             raise IntegrityError(f"Invalid event timing at {source}:{index}") from exc
-        if onset < previous or duration < 0:
-            raise IntegrityError(f"Nonmonotonic onset or negative duration at {source}:{index}")
+        if (
+            not math.isfinite(onset)
+            or onset < previous
+            or (duration is not None and (not math.isfinite(duration) or duration < 0))
+        ):
+            raise IntegrityError(f"Invalid/nonmonotonic event timing at {source}:{index}")
         previous = onset
     return rows

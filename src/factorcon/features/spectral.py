@@ -21,7 +21,12 @@ def power_spectral_density(
     """
 
     data = np.asarray(signals, dtype=float)
-    if data.ndim < 1 or data.shape[axis] < 4 or sampling_rate_hz <= 0:
+    if (
+        data.ndim < 1
+        or data.shape[axis] < 4
+        or not np.isfinite(sampling_rate_hz)
+        or sampling_rate_hz <= 0
+    ):
         raise ValueError("signals need at least four samples and positive sampling rate")
     if not np.isfinite(data).all():
         raise ValueError("signals must be finite")
@@ -33,6 +38,10 @@ def power_spectral_density(
     spectrum = np.fft.rfft(centered * window.reshape(shape), axis=axis)
     normalization = sampling_rate_hz * np.sum(window**2)
     power = np.square(np.abs(spectrum)) / normalization
+    # One-sided PSD folds negative-frequency power into interior positive bins.
+    interior = [slice(None)] * data.ndim
+    interior[axis] = slice(1, -1 if sample_count % 2 == 0 else None)
+    power[tuple(interior)] *= 2
     frequencies = np.fft.rfftfreq(sample_count, d=1.0 / sampling_rate_hz)
     return frequencies, power
 

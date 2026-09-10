@@ -121,12 +121,35 @@ def build_parser() -> argparse.ArgumentParser:
     report.add_argument("--synthesis", required=True)
     report.add_argument("--output-directory", required=True)
 
+    patterns = subcommands.add_parser("patterns", help="local generative pattern prediction")
+    patterns.add_argument("--input", action="append", required=True)
+    patterns.add_argument("--output", required=True)
+    patterns.add_argument("--mode", choices=["within", "lofo"], required=True)
+    patterns.add_argument("--analysis-spec", default=str(DEFAULT_SPEC))
+    patterns.add_argument("--seed", type=int, default=260830)
+    patterns.add_argument("--dry-run", action="store_true")
+    patterns.add_argument("--bootstrap-replicates", type=int, default=0)
+
     simulate = subcommands.add_parser("simulate", help="run synthetic architecture recovery")
     simulate.add_argument(
         "--architecture", choices=["all", "M0", "M1", "M2", "M3", "M4"], default="all"
     )
     simulate.add_argument("--seed", type=int, default=260830)
     simulate.add_argument("--out", default="results/synthetic")
+
+    measurement = subcommands.add_parser("measurement", help="local ordinal report calibration")
+    measurement.add_argument("--input", required=True)
+    measurement.add_argument("--output", required=True)
+    measurement.add_argument("--analysis-spec", default=str(DEFAULT_SPEC))
+    measurement.add_argument("--seed", type=int, default=260830)
+    measurement.add_argument("--dry-run", action="store_true")
+
+    stress = subcommands.add_parser("stress", help="local independent report/pattern stress tests")
+    stress.add_argument("--plan", required=True)
+    stress.add_argument("--output", required=True)
+    stress.add_argument("--analysis-spec", default=str(DEFAULT_SPEC))
+    stress.add_argument("--seed", type=int, default=260830)
+    stress.add_argument("--dry-run", action="store_true")
 
     status = subcommands.add_parser("status", help="summarize run-state markers")
     status.add_argument("--config", default="conf/base.yaml")
@@ -221,11 +244,64 @@ def dispatch(args: argparse.Namespace) -> int:
     if args.command == "report":
         _print(build_paper_tables(args.score, args.synthesis, args.output_directory))
         return 0
+    if args.command == "patterns":
+        from factorcon.pipeline.patterns import score_pattern_files, validate_pattern_inputs
+
+        if args.dry_run:
+            datasets, spec = validate_pattern_inputs(args.input, args.analysis_spec, mode=args.mode)
+            _print(
+                {
+                    "dry_run": True,
+                    "writes": False,
+                    "families": [d.family for d in datasets],
+                    "implementation": spec["pattern_evaluation"]["implementation"],
+                }
+            )
+        else:
+            _print(
+                score_pattern_files(
+                    args.input,
+                    args.output,
+                    mode=args.mode,
+                    analysis_spec=args.analysis_spec,
+                    seed=args.seed,
+                    bootstrap_replicates=args.bootstrap_replicates,
+                )
+            )
+        return 0
     if args.command == "simulate":
         architectures = (
             ["M0", "M1", "M2", "M3", "M4"] if args.architecture == "all" else [args.architecture]
         )
         _print(run_recovery_suite(architectures, seed=args.seed, output=args.out))
+        return 0
+    if args.command == "measurement":
+        from factorcon.pipeline.measurement import fit_report_file, load_report_calibration
+
+        if args.dry_run:
+            data = load_report_calibration(args.input)
+            load_analysis_spec(args.analysis_spec)
+            _print(
+                {"dry_run": True, "writes": False, "calibration_subjects": len(set(data.subjects))}
+            )
+        else:
+            _print(
+                fit_report_file(
+                    args.input, args.output, analysis_spec=args.analysis_spec, seed=args.seed
+                )
+            )
+        return 0
+    if args.command == "stress":
+        from factorcon.simulation_stress import run_stress_plan, validate_stress_plan
+
+        if args.dry_run:
+            _print({"dry_run": True, "writes": False, "plan": validate_stress_plan(args.plan)})
+        else:
+            _print(
+                run_stress_plan(
+                    args.plan, args.output, analysis_spec=args.analysis_spec, seed=args.seed
+                )
+            )
         return 0
     if args.command == "status":
         project = load_project(args.config)
