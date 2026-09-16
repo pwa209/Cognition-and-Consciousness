@@ -1,5 +1,12 @@
 # Rorqual deployment status
 
+**Later acquisition update — 2026-09-16 17:34 UTC:** the isolated repair release
+resolved Volition's complete expected inventory, 19 public DREAM sets and five
+authorized COGITATE bundles. All three transfers started on personal scratch.
+Private DREAM set 8 and the mislabeled raw-MEEG bundle remain held. See the
+[repair evidence and commands](ACQUISITION_REPAIRS_20260916.md).
+The timestamped records below are historical snapshots, not current counters.
+
 Observed **2026-09-16 10:21:55 UTC**. This is a dated operational record, not a live
 dashboard, preregistration or scientific result. No raw participant data are in Git.
 

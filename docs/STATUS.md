@@ -4,6 +4,12 @@ Last updated: 2026-09-16
 
 ## Fresh Compute Canada execution
 
+At 2026-09-16 17:34 UTC, the [acquisition repair release](ACQUISITION_REPAIRS_20260916.md)
+is deployed and transferring Volition, 19 public DREAM sets and five authorized
+COGITATE bundles directly to personal scratch. Local full tests: 140 passed;
+Rorqual targeted tests: 30 passed. Private DREAM set 8 and raw-MEEG catalog access
+remain explicit holds; started transfers are not completed datasets.
+
 Rorqual is now deployed on personal 20 TB scratch with separate owner authorization
 for acquisition and ready analysis phases. WM acquisition, integrity validation and
 harmonization completed; EEG acquisition and P05 simulations are underway. See the

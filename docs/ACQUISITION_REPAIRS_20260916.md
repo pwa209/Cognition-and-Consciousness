@@ -48,3 +48,34 @@ No archives are extracted and no downloaded code is executed by this runner.
 
 Deployment and actual progress must be verified separately; source tests alone do
 not establish completion. DREAM set 8 remains private pending owner access.
+
+## Verified deployment and start
+
+Source commit `b2e9e59e8613b7bd4e8f0ba120f49c8678c4564e` was installed as
+a new immutable release on Rorqual: 164 source files verified, source archive SHA-256
+`bd59cd5aae427d3c0324a57ca5ab62e9f505d01a0aa23c254eba925d816fe26f`.
+Local full suite: **140 passed**. Rorqual targeted acquisition/storage/repair suite:
+**30 passed**. All three command/config dry runs passed. Synthetic tests cover
+failure and success status/provenance and reuse of the frozen manifest on restart.
+
+All three live resolvers completed, with the configured Volition totals unchanged:
+
+| Family | Resolved objects | Bytes | Remaining hold |
+|---|---:|---:|---|
+| Volition fMRI | 119,120 | 1,578,461,354,264 | None at resolution |
+| DREAM | 58 across 19 public sets | 150,734,502,767 | Private set 8 |
+| COGITATE Experiment 1 | 5 full bundles | 1,796,597,638,162 | Mislabeled raw-MEEG link |
+
+At **2026-09-16 17:34:46 UTC**, all three repair processes reported DOWNLOADING
+on `rorqual3`: DREAM PID 2716231, COGITATE PID 2716232, Volition PID 2716233.
+Observed partial bytes were respectively 469,762,048; 310,378,496; and 17,131.
+These are transfer observations, **not completed or checksum-verified datasets**.
+Each repair uses one low-priority HTTP worker (three total); the original BMVP
+worker and the existing analysis jobs were neither stopped nor changed.
+
+The private COGITATE catalog is under the fresh run's
+`operations/private-catalogs` directory with owner-only permissions; no credentials
+were copied. XNAT is a separate official account service. Its login page has been
+opened for the owner to investigate raw MEEG through the supported alternative.
+The public landing page lists Experiment 2 sizes/DOIs while the accessed download
+catalog says coming soon; no Experiment 2 retrieval URLs were inferred.
