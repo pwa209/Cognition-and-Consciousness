@@ -99,3 +99,12 @@ This ledger is part of the transparent non-preregistered record. Add entries chr
   Explicitly stop affected preparation on non-null ZIP CRC test results (previously
   recorded without enforcement). No raw archive extraction or downloaded code execution.
   Preserve PAS as observed ordinal evidence and all original grouping identities.
+
+- **2026-09-16 acquisition-source repairs:** add dataset-scoped SHA256E OpenNeuro
+  retrieval without relaxing snapshot/count/byte checks; treat DREAM v6's 22 rows
+  as 20 sets plus amendment history; resolve explicit Figshare versions and the
+  public FreiData v1 record. Add an owner-authorized private COGITATE catalog with
+  modality/format/size/ETag validation. The mislabeled raw-MEEG link and private
+  DREAM set 8 remain explicit access/source holds. No analysis labels change.
+  Isolate repair locks, manifests, ledgers and provenance from the active campaign.
+  See `ACQUISITION_REPAIRS_20260916.md` for commands and identity boundaries.

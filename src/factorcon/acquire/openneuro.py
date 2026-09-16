@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from urllib.parse import urlparse
+import re
+from urllib.parse import parse_qs, unquote, urlparse
 
 from factorcon.acquire.net import request_json
 from factorcon.acquire.records import FileRecord
@@ -10,6 +11,44 @@ from factorcon.config import DatasetConfig
 from factorcon.errors import IntegrityError, SourceError
 
 GRAPHQL_URL = "https://openneuro.org/crn/graphql"
+
+
+def select_object_url(
+    urls: list[str], dataset_id: str, size: int | None
+) -> tuple[str, str | None, str | None]:
+    """Select pinned HTTPS retrieval; content keys bind exact bytes and SHA-256.
+
+    Only API-supplied URLs for the pinned snapshot are considered. This does not
+    alter scientific labels. Sizes are bytes; unknown or mismatched identities fail.
+    """
+    candidates = []
+    for url in urls:
+        parsed = urlparse(url)
+        if (
+            parsed.scheme != "https"
+            or parsed.username
+            or parsed.password
+            or parsed.port not in {None, 443}
+            or parsed.fragment
+        ):
+            continue
+        if parsed.hostname in {"s3.amazonaws.com", "openneuro.s3.amazonaws.com"}:
+            versions = parse_qs(parsed.query).get("versionId", [])
+            if len(versions) == 1 and versions[0] and versions[0] != "null":
+                candidates.append((0, url, None, None))
+        elif parsed.hostname == "openneuro.org":
+            prefix = f"/crn/datasets/{dataset_id}/objects/"
+            if not parsed.path.startswith(prefix):
+                continue
+            key = unquote(parsed.path[len(prefix) :])
+            match = re.fullmatch(r"SHA256E-s(\d+)--([0-9a-f]{64})(?:\.[A-Za-z0-9._-]+)?", key)
+            if match is None or size is None or int(match[1]) != size:
+                continue
+            candidates.append((1, url, "sha256", match[2]))
+    if not candidates:
+        raise IntegrityError("URL is not object-version pinned and has no verified SHA256E key")
+    _, url, algorithm, digest = min(candidates, key=lambda value: value[0])
+    return url, algorithm, digest
 
 
 def resolve_openneuro(config: DatasetConfig) -> list[FileRecord]:
@@ -84,16 +123,9 @@ def resolve_openneuro(config: DatasetConfig) -> list[FileRecord]:
         urls = item.get("urls") or []
         if not urls:
             raise SourceError(f"OpenNeuro file has no retrieval URL: {relative}")
-        url = str(urls[0])
-        parsed = urlparse(url)
-        if parsed.scheme != "https" or parsed.hostname not in {
-            "s3.amazonaws.com",
-            "openneuro.s3.amazonaws.com",
-        }:
-            raise IntegrityError(f"Unexpected OpenNeuro object host for {relative}: {url}")
-        if "versionId=" not in parsed.query:
-            raise IntegrityError(f"OpenNeuro URL is not object-version pinned: {relative}")
         size_value = item.get("size")
+        size = int(size_value) if size_value is not None else None
+        url, algorithm, digest = select_object_url([str(u) for u in urls], dataset_id, size)
         records.append(
             FileRecord(
                 family=config.family,
@@ -101,6 +133,8 @@ def resolve_openneuro(config: DatasetConfig) -> list[FileRecord]:
                 relative_path=relative,
                 url=url,
                 size=int(size_value) if size_value is not None else None,
+                checksum_algorithm=algorithm,
+                checksum=digest,
                 source_id=str(item.get("id") or ""),
                 annexed=bool(item.get("annexed")),
                 metadata={

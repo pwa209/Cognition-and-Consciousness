@@ -1,0 +1,4 @@
+Key ID,Set ID,Amendment,Date approved,Common name,Accessibility,Revoked,Data URL
+1,4,0,100,Example,Unknown,FALSE,#N/A
+2,4,1,101,Example,Open,FALSE,https://doi.org/10.6084/m9.figshare.123.v1
+3,8,0,102,Private fixture,Private,FALSE,#N/A

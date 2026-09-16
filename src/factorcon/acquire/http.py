@@ -97,6 +97,9 @@ def download_one(
     for attempt in range(1, attempts + 1):
         offset = partial.stat().st_size if partial.exists() else 0
         headers = {"User-Agent": USER_AGENT, "Accept": "*/*", "Accept-Encoding": "identity"}
+        pinned_etag = (record.metadata or {}).get("http_etag")
+        if pinned_etag:
+            headers["If-Match"] = str(pinned_etag)
         if offset:
             headers["Range"] = f"bytes={offset}-"
         request = urllib.request.Request(record.url, headers=headers, method="GET")
@@ -108,6 +111,8 @@ def download_one(
                     offset = 0
                     raise SourceError("Server ignored Range; partial reset for clean retry")
                 response_headers = getattr(response, "headers", {})
+                if pinned_etag and response_headers.get("ETag") != pinned_etag:
+                    raise IntegrityError("HTTP object ETag changed or is missing")
                 length_header = response_headers.get("Content-Length")
                 expected_response_bytes = (
                     int(length_header.strip())
@@ -192,6 +197,7 @@ def download_one(
                     complete_size = int(match.group(1))
             if (
                 exc.code == 416
+                and (not pinned_etag or exc.headers.get("ETag") == pinned_etag)
                 and complete_size is not None
                 and partial.exists()
                 and partial.stat().st_size == complete_size
