@@ -11,6 +11,7 @@ import shutil
 import time
 import urllib.error
 import urllib.request
+from collections.abc import Callable
 from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -56,8 +57,13 @@ def download_one(
     chunk_size: int = 8 << 20,
     reserve_bytes: int = 0,
     space_check_interval: int = 1 << 30,
+    storage_guard: Callable[[int], None] | None = None,
 ) -> DownloadResult:
-    """Download one file with resume, path confinement, size/hash checks, and atomic promotion."""
+    """Download an upstream object with resume, confinement and atomic promotion.
+
+    ``storage_guard`` receives imminent write sizes in bytes (zero before transfer),
+    and may raise CapacityError before writing. No scientific labels are inspected.
+    """
 
     root = Path(destination_root)
     relative = safe_relative_path(record.relative_path)
@@ -66,6 +72,8 @@ def download_one(
     final.parent.mkdir(parents=True, exist_ok=True)
     if reserve_bytes < 0:
         raise ValueError("reserve_bytes must be nonnegative")
+    if storage_guard is not None:
+        storage_guard(0)
 
     valid, sha256 = _verify_existing(final, record)
     if valid and sha256 is not None:
@@ -126,6 +134,8 @@ def download_one(
                     bytes_since_space_check = 0
                     response_bytes = 0
                     while chunk := response.read(chunk_size):
+                        if storage_guard is not None:
+                            storage_guard(len(chunk))
                         response_bytes += len(chunk)
                         bytes_since_space_check += len(chunk)
                         if reserve_bytes and bytes_since_space_check >= space_check_interval:
@@ -297,6 +307,7 @@ def download_many(
     workers: int = 4,
     reserve_bytes: int = 0,
     source_manifest_sha256: str | None = None,
+    storage_guard: Callable[[int], None] | None = None,
 ) -> dict[str, Any]:
     """Download records with bounded concurrency and durable per-file provenance.
 
@@ -381,12 +392,14 @@ def download_many(
                     record = next(iterator)
                 except StopIteration:
                     return False
+                guarded = {"storage_guard": storage_guard} if storage_guard is not None else {}
                 pending[
                     pool.submit(
                         download_one,
                         record,
                         destination_root,
                         reserve_bytes=reserve_bytes,
+                        **guarded,
                     )
                 ] = record
                 return True

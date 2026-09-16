@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "cluster": "rorqual",
+  "ssh_host": "rorqual.alliancecan.ca",
+  "ssh_user": "pwa209",
+  "candidate_fresh_root": "/scratch/pwa209/cognition-and-consciousness/fresh-20260916",
+  "root_status": "requires_live_quota_and_identity_check",
+  "fresh_publisher_downloads": true,
+  "reuse_other_project_data_or_environments": false,
+  "downloads_to_shared_project_storage": false,
+  "cache_and_temp_to_personal_scratch": true,
+  "personal_quota_reserve_bytes": 500000000000,
+  "personal_quota_reserve_files": 50000,
+  "download_workers": 1,
+  "initial_cpu_job": {"purpose": "isolated_environment_and_synthetic_tests", "cpus": 4, "memory_gib": 16, "minutes": 30, "gpus": 0},
+  "analysis_execution_authorized": true,
+  "analysis_execution_note": "Owner explicitly authorized ready analysis phases on Compute Canada on 2026-09-16. Technical input and environment readiness still required; university-server restrictions remain unchanged.",
+  "scientific_gates": false,
+  "registration": null
+}

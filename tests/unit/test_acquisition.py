@@ -35,6 +35,59 @@ class _Response(BytesIO):
         self.close()
 
 
+def test_personal_guard_preserves_partial_and_allows_resume(monkeypatch, tmp_path):
+    record = FileRecord(
+        family="fixture", snapshot="v1", relative_path="x.dat", url="https://example.test/x", size=6
+    )
+    monkeypatch.setattr(
+        http_module.urllib.request, "urlopen", lambda *_a, **_k: _Response(b"abcdef", 200)
+    )
+    calls = []
+
+    def guard(size):
+        calls.append(size)
+        if len(calls) == 3:
+            raise CapacityError("fixture reserve")
+
+    with pytest.raises(CapacityError):
+        download_one(record, tmp_path, storage_guard=guard, chunk_size=3, attempts=1)
+    assert calls == [0, 3, 3]
+    assert (tmp_path / "x.dat.part").read_bytes() == b"abc"
+    assert not (tmp_path / "x.dat").exists()
+    monkeypatch.setattr(
+        http_module.urllib.request,
+        "urlopen",
+        lambda *_a, **_k: _Response(
+            b"def", 206, {"Content-Range": "bytes 3-5/6", "Content-Length": "3"}
+        ),
+    )
+    result = download_one(record, tmp_path, storage_guard=lambda n: None, attempts=1)
+    assert result.bytes == 6
+    assert (tmp_path / "x.dat").read_bytes() == b"abcdef"
+
+
+def test_personal_guard_refuses_before_network(monkeypatch, tmp_path):
+    record = FileRecord(
+        family="fixture", snapshot="v1", relative_path="x.dat", url="https://example.test/x", size=1
+    )
+
+    def guard(_size):
+        raise CapacityError("fixture reserve")
+
+    def unexpected(*_args, **_kwargs):
+        pytest.fail("network must not be reached")
+
+    monkeypatch.setattr(http_module.urllib.request, "urlopen", unexpected)
+    with pytest.raises(SourceError):
+        download_many([record], tmp_path, tmp_path / "ledger.json", workers=1, storage_guard=guard)
+    import json
+
+    summary = json.loads((tmp_path / "ledger.json").read_text())
+    assert not summary["success"]
+    assert summary["failed"] == 1
+    assert "CapacityError" in summary["failures"]["x.dat"]
+
+
 def test_bmvp_resolver_separates_report_context_from_modality(monkeypatch) -> None:
     html = b"""
     <a href="https://bmvp.projects.nitrc.org/223_RP_EEG.tar">EEG</a>

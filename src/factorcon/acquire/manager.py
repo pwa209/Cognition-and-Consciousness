@@ -216,6 +216,7 @@ def acquire_families(
     families: set[str] | None = None,
     workers: int | None = None,
     resolve: bool = True,
+    storage_guard: Callable[[int], None] | None = None,
 ) -> dict[str, Any]:
     """Download every eligible manifest object directly beneath the canonical root."""
 
@@ -254,6 +255,7 @@ def acquire_families(
                 workers=family_workers,
                 reserve_bytes=int(project.server.get("nas_reserve_bytes", 0)),
                 source_manifest_sha256=manifest_sha256,
+                **({"storage_guard": storage_guard} if storage_guard is not None else {}),
             )
         except Exception as exc:
             status = {
@@ -291,6 +293,7 @@ def acquire_families(
                     workers=family_workers,
                     reserve_bytes=int(project.server.get("nas_reserve_bytes", 0)),
                     source_manifest_sha256=constituent_sha256,
+                    **({"storage_guard": storage_guard} if storage_guard is not None else {}),
                 )
             result["unresolved_constituents"] = len(unresolved)
         status = {

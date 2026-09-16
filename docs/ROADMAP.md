@@ -10,7 +10,12 @@
 
 This roadmap is operational, not a scientific stop/go tree. Every phase proceeds when its inputs are technically available; unfavorable or null results never block later work. Access-controlled families can remain `WAITING_ACCESS` while public families continue.
 
-## Current server authorization
+## Server authorization
+
+**Compute Canada update (2026-09-16):** fresh personal-scratch acquisition,
+environment/test jobs and ready analysis phases are now owner-authorized on Rorqual.
+See [the separate fresh-run roadmap](ALLIANCE_FRESH_RUN.md). The following historical
+university-server workflow and its acquisition-only restriction remain unchanged.
 
 Only acquisition is authorized for deployment. P01 (source resolution) and P02 (direct-to-NAS
 download) may be deployed and queued after the owner confirms the three server roots. P03-P10 are

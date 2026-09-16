@@ -72,3 +72,19 @@ This ledger is part of the transparent non-preregistered record. Add entries chr
   Raw-to-feature validation, shared anchors, complete simulation/inference calibration
   and production restart/concurrency remain outstanding. Unfavorable results continue.
 - **Server:** read-only schema checks only; no analysis deployment or queue changes.
+
+## 2026-09-16 — Fresh Compute Canada execution
+
+- **Owner instruction:** build a fresh Rorqual study using personal 20 TB storage;
+  separately authorized ready analysis phases as well as acquisition/environment tests.
+- **Operational change:** isolated fresh personal-scratch root, native SSH password/MFA,
+  quota-aware single-worker downloads and Slurm CPU jobs. University state unchanged.
+- **P05 scheduling:** split each original 200-replicate plan into independent jobs.
+  Original seed = 260830 + original replicate ID; every scenario retained. Each shard
+  result has local replicate zero, with original identity in wrapper provenance.
+  No estimand, model, penalty, scenario, chain length or success-based selection changes.
+- **Affected artifacts:** separate fresh manifests/ledgers, environments, qualification
+  evidence and P05 shards. A completed shard is not a completed 200-replicate campaign;
+  original-identity aggregation and completeness checks are required before summaries.
+- **Preserved:** non-preregistered status, distinct constructs, no scientific gates,
+  access controls and explicit missing empirical adapters/calibration evidence.
