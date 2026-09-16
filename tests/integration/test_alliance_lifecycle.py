@@ -6,6 +6,7 @@ import importlib.util
 import json
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -97,3 +98,67 @@ def test_transfer_rejects_shared_root_before_git(monkeypatch):
     monkeypatch.setattr(module.subprocess, "check_output", unexpected)
     with pytest.raises(IntegrityError):
         module.build_transfer("HEAD", "/project/def-ptewarie/pwa209/study", Path.cwd())
+
+
+def test_wm_phase_crc_failure_and_versioned_retry(tmp_path, monkeypatch):
+    module = _load("wm_phase")
+    source = tmp_path / "source"
+    for name in (
+        "analysis_spec.yaml",
+        "base.yaml",
+        "datasets/multisite_working_memory.yaml",
+        "construct_maps/multisite_working_memory.yaml",
+    ):
+        atomic_write_json(source / "conf" / name, {})
+    project = SimpleNamespace(root=source)
+    monkeypatch.setattr(module, "ScratchQuotaGuard", lambda _path: lambda n: None)
+    monkeypatch.setattr(module.signal, "signal", lambda *_args: None)
+
+    def validator(_project, _root, _family, output, **_kwargs):
+        result = {"status": "valid", "archives": {"fixture.zip": {"test_result": "bad_crc"}}}
+        atomic_write_json(output, result)
+        return result
+
+    monkeypatch.setattr(module, "validate_family", validator)
+    attempt = tmp_path / "failed"
+    with pytest.raises(ValueError, match="technical validation"):
+        module.run_phase(project, tmp_path, "P03", attempt)
+    assert json.loads((attempt / "status.json").read_text())["status"] == "FAILED"
+    assert (attempt / "report.json").exists()
+
+    def valid(_project, _root, _family, output, **_kwargs):
+        result = {"status": "valid", "archives": {}, "files": 1, "bytes": 10}
+        atomic_write_json(output, result)
+        return result
+
+    monkeypatch.setattr(module, "validate_family", valid)
+    retry = tmp_path / "retry"
+    assert module.run_phase(project, tmp_path, "P03", retry)["files"] == 1
+    assert json.loads((retry / "status.json").read_text())["status"] == "SUCCESS"
+    assert json.loads((retry / "provenance.json").read_text())["outputs"]["report.json"]
+    with pytest.raises(FileExistsError):
+        module.run_phase(project, tmp_path, "P03", retry)
+
+
+def test_wm_harmonization_keeps_private_rows_and_only_returns_counts(tmp_path, monkeypatch):
+    module = _load("wm_phase")
+    source = tmp_path / "source"
+    for name in (
+        "analysis_spec.yaml",
+        "base.yaml",
+        "datasets/multisite_working_memory.yaml",
+        "construct_maps/multisite_working_memory.yaml",
+    ):
+        atomic_write_json(source / "conf" / name, {})
+    monkeypatch.setattr(module, "ScratchQuotaGuard", lambda _path: lambda n: None)
+    monkeypatch.setattr(module.signal, "signal", lambda *_args: None)
+
+    def harmonizer(_project, _root, _family, output, report):
+        atomic_write_json(output, {"observed_experience": None})
+        result = {"status": "harmonized", "records": 1, "participants": 1}
+        atomic_write_json(report, result)
+        return result
+
+    monkeypatch.setattr(module, "harmonize_family", harmonizer)
+    result = module.run_phase(SimpleNamespace(root=source), tmp_path, "P04", tmp_path / "attempt")
+    assert result == {"status": "harmonized", "records": 1, "participants": 1}

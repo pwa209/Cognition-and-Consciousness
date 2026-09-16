@@ -95,3 +95,13 @@ scientific result-dependent change. The failed attempt/environment are preserved
 
 Authorization does not establish empirical readiness. The historical RDM workflow is
 not substituted for the newer pattern engine. See `IMPLEMENTATION_FOLLOWUP_2026-09-10.md`.
+
+### First acquired family: working memory
+
+All 146 publisher files (542,530,371 bytes) completed at 10:11:32 UTC. The study-specific
+`wm_phase.sbatch` / `wm_phase.py` path now runs P03 deep checksum/archive validation,
+then P04 schema normalization only after P03 technical success. It enforces recorded
+ZIP CRC failures, preserves all raw files and writes private per-job artifacts with
+status/provenance. P04 checks the existing 531-participant/19-laboratory schema contract.
+These jobs do not fit behavioral effects or turn PAS values into E probabilities.
+Unfavorable scientific results do not enter their scheduling decisions.

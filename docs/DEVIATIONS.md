@@ -93,3 +93,9 @@ This ledger is part of the transparent non-preregistered record. Add entries chr
   validation on CPU node rc32623. Add observed compute-node naming plus Rorqual
   Slurm identity checks, and immutable per-release manifests for source-only repairs.
   Acquisition continues on its original source; failed qualification records remain.
+
+- **First eligible empirical preparation:** after all 146 WM files completed, add
+  scoped P03/P04 Slurm wrappers around the existing validator and WM harmonizer.
+  Explicitly stop affected preparation on non-null ZIP CRC test results (previously
+  recorded without enforcement). No raw archive extraction or downloaded code execution.
+  Preserve PAS as observed ordinal evidence and all original grouping identities.
