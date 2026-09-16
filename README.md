@@ -14,6 +14,13 @@ The journal ambition is Nature or Science, with Nature Human Behaviour as a real
 
 ## Current state
 
+**Compute Canada, 2026-09-16:** a fresh deployment is running on personal Rorqual
+scratch, with owner authorization for acquisition and ready analysis phases. WM
+download/validation/harmonization completed; further acquisition and independent
+simulations are running. See the [deployment record](docs/ALLIANCE_DEPLOYMENT_STATUS.md)
+and [fresh-run roadmap](docs/ALLIANCE_FRESH_RUN.md). No data or environments were
+imported from earlier studies; the university server remains unchanged.
+
 **Scientific follow-up, 2026-09-10:** a separate local generative-pattern engine now
 fits M0–M5, integrates external report-measurement draws, and implements nested
 within-family and source-only LOFO prediction. Report measurement, independent stress
@@ -22,13 +29,14 @@ complete raw-data-to-manuscript implementation. See the
 [implemented fixes and remaining boundaries](docs/IMPLEMENTATION_FOLLOWUP_2026-09-10.md)
 and [local command contracts](docs/PATTERN_AND_MEASUREMENT_COMMANDS.md).
 The historical [canonical RDM v2 scorer](docs/CANONICAL_RDM_V2.md) remains a distinct
-prototype; its scores must not be mixed with pattern likelihoods. Analysis code
-remains undeployed.
+prototype; its scores must not be mixed with pattern likelihoods. University analysis
+activation remains unauthorized; Rorqual has the separate authorization above.
 
 - Proposal: audited, extracted, and translated into implementation contracts.
 - University server: H100 host verified; no Slurm; persistent jobs use `tmux` plus logs and status markers.
 - Public source audit: OpenNeuro, OSF, and BMVP are directly retrievable. COGITATE requires a user-created account and acceptance of terms. DREAM is a registry with dataset-specific access states.
-- Data policy: raw data and heavy derivatives live only on the university NAS/work volumes and are excluded from Git.
+- Data policy: university-run data stay on its NAS/work volumes; fresh Rorqual data,
+  caches and derivatives stay on personal scratch, not shared `/project`. All are excluded from Git.
 - Analysis status: architecture, leakage, feature, model, simulation, and reporting cores are tested;
   dataset-specific P06 producers that depend on downloaded schemas are deliberately explicit
   contracts rather than unvalidated guesses.
@@ -49,7 +57,7 @@ factorcon simulate --architecture all --out results/synthetic
 pytest -q
 ```
 
-Current server authorization is acquisition-only. Use the sparse acquisition release described in
+University-server authorization is acquisition-only. Use the sparse acquisition release described in
 [`docs/SERVER_RUNBOOK.md`](docs/SERVER_RUNBOOK.md), resolve manifests, and then queue raw-data
 downloads. Do not deploy or queue P03-P10 unless the owner explicitly expands the scope. Do not
 place passwords, API keys, cookies, or account credentials in this repository or in command

@@ -1,8 +1,18 @@
 # Project status
 
-Last updated: 2026-09-10
+Last updated: 2026-09-16
 
-## Current scientific implementation
+## Fresh Compute Canada execution
+
+Rorqual is now deployed on personal 20 TB scratch with separate owner authorization
+for acquisition and ready analysis phases. WM acquisition, integrity validation and
+harmonization completed; EEG acquisition and P05 simulations are underway. See the
+[dated deployment record](ALLIANCE_DEPLOYMENT_STATUS.md) and
+[phase roadmap](ALLIANCE_FRESH_RUN.md). University-server state remains unchanged.
+The scientific implementation limits below remain applicable; its September 10
+deployment statements describe the earlier university-server review, not Rorqual.
+
+## Scientific implementation — September 10 baseline
 
 The follow-up now provides a separate fitted generative-pattern engine, modular
 ordinal report measurement, true source-only LOFO, nested subject-bootstrap refits,
