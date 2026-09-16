@@ -88,3 +88,8 @@ This ledger is part of the transparent non-preregistered record. Add entries chr
   original-identity aggregation and completeness checks are required before summaries.
 - **Preserved:** non-preregistered status, distinct constructs, no scientific gates,
   access controls and explicit missing empirical adapters/calibration evidence.
+
+- **Cluster qualification repair:** job 21169188 exposed login-only hostname
+  validation on CPU node rc32623. Add observed compute-node naming plus Rorqual
+  Slurm identity checks, and immutable per-release manifests for source-only repairs.
+  Acquisition continues on its original source; failed qualification records remain.

@@ -16,7 +16,7 @@ import tarfile
 from pathlib import Path, PurePosixPath
 
 
-def build_transfer(commit: str, root: str, repository: Path) -> str:
+def build_transfer(commit: str, root: str, repository: Path, *, existing_run: bool = False) -> str:
     """Return a fresh-only shell transfer of committed source, with SHA-256 verification.
 
     ``root`` is a single fresh-* run in personal scratch. Source files are byte-for-byte
@@ -50,6 +50,7 @@ def build_transfer(commit: str, root: str, repository: Path) -> str:
         "archive_sha256": hashlib.sha256(archive).hexdigest(),
         "files": files,
         "archive_base64": base64.b64encode(archive).decode(),
+        "existing_run": existing_run,
     }
     # The embedded receiver uses only the verified cluster Python standard library.
     return """#!/usr/bin/env bash
@@ -65,7 +66,11 @@ assert personal.is_dir() and personal.stat().st_uid==os.getuid()
 root=pathlib.Path(payload['root'])
 assert root.parent==personal/'cognition-and-consciousness' and root.name.startswith('fresh-')
 assert root.resolve()==root
-assert not root.exists(), 'Fresh target exists: reconcile it; never overwrite or import prior data'
+if payload['existing_run']:
+    initial=json.loads((root/'FRESH_RUN.json').read_text())
+    assert initial['download_root']==str(root) and initial['reuse_prior_data'] is False
+else:
+    assert not root.exists(), 'Fresh target exists: reconcile; never overwrite or import prior data'
 archive=base64.b64decode(payload['archive_base64'],validate=True)
 assert hashlib.sha256(archive).hexdigest()==payload['archive_sha256']
 with tarfile.open(fileobj=io.BytesIO(archive),mode='r:gz') as tar:
@@ -81,8 +86,10 @@ with tarfile.open(fileobj=io.BytesIO(archive),mode='r:gz') as tar:
             assert digest==payload['files'][member.name]
     assert seen==set(payload['files'])
     root.parent.mkdir(exist_ok=True)
-    root.mkdir(mode=0o700)
+    if not payload['existing_run']:
+        root.mkdir(mode=0o700)
     release=root/'releases'/payload['commit']/'source'
+    assert not release.parent.exists(), 'Version already exists: reconcile, never overwrite'
     release.mkdir(parents=True)
     tar.extractall(release,filter='data')
 for relative,digest in payload['files'].items():
@@ -93,8 +100,9 @@ record={k:v for k,v in payload.items() if k!='archive_base64'}
 record.update(created_utc=datetime.datetime.now(datetime.timezone.utc).isoformat(),
               download_root=str(root),reuse_prior_data=False,release=str(release),
               shared_storage_downloads=False,analysis_execution_authorized=True)
-tmp=root/'FRESH_RUN.json.tmp'
-tmp.write_text(json.dumps(record,indent=2)); tmp.replace(root/'FRESH_RUN.json')
+target=release.parent/'RELEASE.json' if payload['existing_run'] else root/'FRESH_RUN.json'
+tmp=target.with_suffix('.json.tmp')
+tmp.write_text(json.dumps(record,indent=2)); tmp.replace(target)
 print(json.dumps({'status':'SOURCE_INSTALLED','root':str(root),'release':str(release),
                   'files_verified':len(payload['files']),'archive_sha256':payload['archive_sha256']}))
 FACTORCON_RECEIVE
@@ -107,8 +115,11 @@ def main() -> int:
     parser.add_argument("--commit", required=True)
     parser.add_argument("--root", required=True)
     parser.add_argument("--queue-file", type=Path, required=True)
+    parser.add_argument("--existing-run", action="store_true")
     args = parser.parse_args()
-    script = build_transfer(args.commit, args.root, Path(__file__).resolve().parents[2])
+    script = build_transfer(
+        args.commit, args.root, Path(__file__).resolve().parents[2], existing_run=args.existing_run
+    )
     args.queue_file.parent.mkdir(parents=True, exist_ok=True)
     if args.queue_file.exists():
         raise FileExistsError("queue identity already exists; reconcile before retry")

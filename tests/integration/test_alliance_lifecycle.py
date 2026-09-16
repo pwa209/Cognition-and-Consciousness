@@ -22,10 +22,9 @@ def _load(name):
 
 def test_stress_wrapper_dry_run_failure_success_and_retry(tmp_path, monkeypatch):
     module = _load("stress_shard")
-    source = tmp_path / "release"
     root = tmp_path / "fresh-fixture"
+    source = root / "releases" / ("a" * 40) / "source"
     (source / "conf").mkdir(parents=True)
-    root.mkdir()
     plan = {
         "suite": "reports",
         "replicates": 200,
@@ -43,6 +42,8 @@ def test_stress_wrapper_dry_run_failure_success_and_retry(tmp_path, monkeypatch)
         root / "FRESH_RUN.json",
         {
             "release": str(source),
+            "download_root": str(root),
+            "reuse_prior_data": False,
             "analysis_execution_authorized": True,
             "files": {
                 p.relative_to(source).as_posix(): hash_file(p) for p in source.rglob("*.yaml")

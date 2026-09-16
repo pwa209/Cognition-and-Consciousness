@@ -6,6 +6,7 @@ shared project path is accepted as a download/cache target. Scratch is not archi
 
 from __future__ import annotations
 
+import json
 import os
 import re
 import socket
@@ -22,6 +23,18 @@ PERSONAL_ROOT = Path("/scratch/pwa209")
 STUDY_ROOT = PERSONAL_ROOT / "cognition-and-consciousness"
 
 
+def is_rorqual_execution(hostname: str, environment: dict[str, str]) -> bool:
+    """Accept verified login naming or CPU node naming plus a Rorqual Slurm allocation."""
+    short = hostname.split(".")[0]
+    if re.fullmatch(r"rorqual\d+", short):
+        return True
+    return bool(
+        re.fullmatch(r"rc\d+", short)
+        and environment.get("SLURM_CLUSTER_NAME") == "rorqual"
+        and re.fullmatch(r"\d+", environment.get("SLURM_JOB_ID", ""))
+    )
+
+
 def validate_fresh_root(root: str | Path, *, check_host: bool = True) -> Path:
     """Constrain a fresh run to this study's personal scratch tree, rejecting symlinks.
 
@@ -36,8 +49,8 @@ def validate_fresh_root(root: str | Path, *, check_host: bool = True) -> Path:
     if check_host:
         import pwd
 
-        if pwd.getpwuid(os.getuid()).pw_name != "pwa209" or not socket.gethostname().startswith(
-            "rorqual"
+        if pwd.getpwuid(os.getuid()).pw_name != "pwa209" or not is_rorqual_execution(
+            socket.gethostname(), dict(os.environ)
         ):
             raise IntegrityError("Rorqual/pwa209 identity required")
         if not PERSONAL_ROOT.is_dir() or path.resolve() != path:
@@ -45,6 +58,29 @@ def validate_fresh_root(root: str | Path, *, check_host: bool = True) -> Path:
         if PERSONAL_ROOT.stat().st_uid != os.getuid():
             raise IntegrityError("personal scratch root is not owned by current user")
     return path
+
+
+def read_source_record(root: Path, source: Path) -> dict:
+    """Read a same-run immutable source manifest; no data migration or active release switch.
+
+    The initial FRESH_RUN marker remains unchanged when a new source version is added.
+    Per-release records bind subsequent jobs to their own exact source bytes.
+    """
+    initial = json.loads((root / "FRESH_RUN.json").read_text())
+    if initial.get("reuse_prior_data") is not False or initial.get("download_root") != str(root):
+        raise IntegrityError("fresh-run identity mismatch")
+    source = source.resolve()
+    if (
+        source.name != "source"
+        or source.parent.parent != root / "releases"
+        or not re.fullmatch(r"[0-9a-f]{40}", source.parent.name)
+    ):
+        raise IntegrityError("source is not a versioned release inside this fresh run")
+    path = source.parent / "RELEASE.json"
+    record = json.loads(path.read_text()) if path.exists() else initial
+    if record.get("release") != str(source):
+        raise IntegrityError("source release identity mismatch")
+    return record
 
 
 @dataclass(frozen=True)

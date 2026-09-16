@@ -17,7 +17,12 @@ from pathlib import Path
 from typing import Any
 
 from factorcon.acquire import acquire_families, resolve_manifests
-from factorcon.alliance import ScratchQuotaGuard, scratch_environment, validate_fresh_root
+from factorcon.alliance import (
+    ScratchQuotaGuard,
+    read_source_record,
+    scratch_environment,
+    validate_fresh_root,
+)
 from factorcon.config import load_project
 from factorcon.util import atomic_write_json, hash_file, utc_now
 
@@ -31,11 +36,7 @@ def main() -> int:
     args = parser.parse_args()
     root = validate_fresh_root(args.root)
     project = load_project(args.config)
-    marker = json.loads((root / "FRESH_RUN.json").read_text())
-    if marker.get("reuse_prior_data") is not False or marker.get("download_root") != str(root):
-        raise ValueError("fresh-run identity marker mismatch")
-    if marker.get("release") != str(project.root.resolve()):
-        raise ValueError("source release differs from this fresh run's recorded release")
+    marker = read_source_record(root, project.root)
     for path in [args.config, *(d.path for d in project.datasets)]:
         relative = path.resolve().relative_to(project.root.resolve()).as_posix()
         if hash_file(path) != marker["files"][relative]:

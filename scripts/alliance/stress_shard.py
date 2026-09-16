@@ -12,7 +12,7 @@ import os
 import signal
 from pathlib import Path
 
-from factorcon.alliance import ScratchQuotaGuard, validate_fresh_root
+from factorcon.alliance import ScratchQuotaGuard, read_source_record, validate_fresh_root
 from factorcon.simulation_stress import run_stress_plan, validate_stress_plan
 from factorcon.util import atomic_write_json, hash_file, utc_now
 
@@ -27,7 +27,7 @@ def main() -> int:
     args = parser.parse_args()
     root = validate_fresh_root(args.root)
     source = Path(__file__).resolve().parents[2]
-    marker = json.loads((root / "FRESH_RUN.json").read_text())
+    marker = read_source_record(root, source)
     if (
         marker.get("release") != str(source)
         or marker.get("analysis_execution_authorized") is not True

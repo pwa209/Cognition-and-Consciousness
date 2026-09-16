@@ -8,6 +8,18 @@ from factorcon.alliance import parse_personal_quota, scratch_environment, valida
 from factorcon.errors import CapacityError, IntegrityError
 
 
+def test_rorqual_cpu_allocation_not_arbitrary_hostname():
+    from factorcon.alliance import is_rorqual_execution
+
+    assert is_rorqual_execution("rorqual1", {})
+    assert is_rorqual_execution("rc32623", {"SLURM_CLUSTER_NAME": "rorqual", "SLURM_JOB_ID": "42"})
+    assert not is_rorqual_execution("rc32623", {})
+    assert not is_rorqual_execution(
+        "rc32623", {"SLURM_CLUSTER_NAME": "other", "SLURM_JOB_ID": "42"}
+    )
+    assert not is_rorqual_execution("rorqual-attacker", {})
+
+
 def test_personal_quota_not_shared_capacity():
     report = (
         "/scratch (user pwa209) 25KB/ 20TB 1 /1000K\n"

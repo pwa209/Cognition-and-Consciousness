@@ -37,6 +37,9 @@ markers and side effects after disconnection before retrying. No credential is s
    builds a Git-only source transfer with archive and per-file SHA-256 checks.
    The receiver refuses an existing run root. Never delete a partial installation
    automatically: inspect/reconcile it or explicitly document a different fresh root.
+   For a source-only repair in this same fresh run, `--existing-run` adds a new
+   immutable commit directory and per-release `RELEASE.json`. It never overwrites
+   the original `FRESH_RUN.json`, raw data, acquisition process or earlier source.
 3. Set `FACTORCON_ALLIANCE_ROOT` and `FACTORCON_RELEASE` from `FRESH_RUN.json`.
    Submit `qualify.sbatch` with the CPU account, scratch stdout/stderr paths, and
    `FACTORCON_PYTHON_MODULE=python/3.12.4`. It installs a private environment from
@@ -67,6 +70,13 @@ with original replicate/seed, hashes, status and all numerical outcomes. Retry f
 replicates under a new job ID with identical seeds; never choose the best retry.
 P05 retries recompute; they do not resume partial optimizers/chains. SIGKILL can leave
 RUNNING and requires `sacct` reconciliation, not a success claim.
+
+First qualification job `21169188` installed its isolated packages successfully but
+failed the acquisition dry run: the initial guard accepted login names, not Slurm
+compute node `rc32623`. The repair additionally accepts `rc` + digits only with
+`SLURM_CLUSTER_NAME=rorqual` and a numeric Slurm job ID; user and personal-root
+ownership checks remain mandatory. This is a technical deployment repair, not a
+scientific result-dependent change. The failed attempt/environment are preserved.
 
 ## Phase map
 
