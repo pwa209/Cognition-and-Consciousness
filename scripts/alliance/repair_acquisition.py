@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import contextlib
 import fcntl
 import json
 import os
@@ -17,6 +18,7 @@ from factorcon.acquire.dream_constituents import (
     resolve_freidata_row,
 )
 from factorcon.acquire.http import download_many
+from factorcon.acquire.manager import _fingerprint
 from factorcon.acquire.openneuro import resolve_openneuro
 from factorcon.acquire.records import FileRecord
 from factorcon.alliance import (
@@ -45,7 +47,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--root", type=Path, required=True)
     parser.add_argument(
-        "--family", choices=["dream", "cogitate", "propofol_volition_fmri"], required=True
+        "--family", choices=["dream", "cogitate", "propofol_volition_fmri", "bmvp"], required=True
     )
     parser.add_argument("--catalog", type=Path)
     parser.add_argument("--dry-run", action="store_true")
@@ -110,8 +112,14 @@ def main() -> int:
         state("INTERRUPTED", signal=signum)
         raise SystemExit(128 + signum)
 
-    with (run / "campaign.lock").open("a+") as lock:
+    with contextlib.ExitStack() as stack:
+        lock = stack.enter_context((run / "campaign.lock").open("a+"))
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        if args.family == "bmvp":
+            original_lock = stack.enter_context(
+                (root / "operations/acquisition/campaign.lock").open("a+")
+            )
+            fcntl.flock(original_lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         signal.signal(signal.SIGTERM, interrupted)
         signal.signal(signal.SIGINT, interrupted)
         state("RESOLVING")
@@ -154,6 +162,23 @@ def main() -> int:
                                     "reason": f"{type(exc).__name__}: {exc}",
                                 }
                             )
+                elif args.family == "bmvp":
+                    original = root / "manifests/generated/bmvp" / f"{dataset.snapshot_label}.jsonl"
+                    records = [FileRecord.from_dict(r) for r in read_jsonl(original)]
+                    if len(records) != int(dataset.values["expected_archive_urls"]):
+                        raise ValueError("BMVP frozen archive count mismatch")
+                    ledger = (
+                        root / "run_state/P02" / f"bmvp.{dataset.snapshot_label}.downloads.json"
+                    )
+                    previous = json.loads(ledger.read_text())
+                    fingerprint = _fingerprint(records)
+                    if previous["source_manifest_sha256"] != fingerprint:
+                        raise ValueError("BMVP original manifest/ledger identity mismatch")
+                    details = {
+                        "download_manifest_sha256": fingerprint,
+                        "original_manifest_sha256": hash_file(original),
+                        "resume_original_ledger": str(ledger),
+                    }
                 elif args.family == "cogitate":
                     catalog = json.loads(args.catalog.read_text())
                     records = catalog_records(catalog)
@@ -177,12 +202,19 @@ def main() -> int:
                 return 0
             state("DOWNLOADING", files=len(records), manifest_sha256=hash_file(manifest))
             snapshot = "exp1_20231231" if args.family == "cogitate" else dataset.snapshot_label
+            ledger = (
+                root / "run_state/P02" / f"bmvp.{snapshot}.downloads.json"
+                if args.family == "bmvp"
+                else run / "downloads.json"
+            )
             result = download_many(
                 records,
                 root / "data/raw" / args.family / snapshot,
-                run / "downloads.json",
+                ledger,
                 workers=1,
-                source_manifest_sha256=hash_file(manifest),
+                source_manifest_sha256=resolution.get(
+                    "download_manifest_sha256", hash_file(manifest)
+                ),
                 storage_guard=guard,
             )
             state("FINISHED_WITH_HOLDS" if holds else "SUCCESS", downloads=result)

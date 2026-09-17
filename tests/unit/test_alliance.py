@@ -63,3 +63,40 @@ def test_quota_guard_stops_before_byte_reserve(tmp_path, monkeypatch):
     with pytest.raises(CapacityError):
         guard(20_000_000_000_000)
     assert (tmp_path / "quota.json").is_file()
+
+
+def test_quota_timeout_retries_before_writing(monkeypatch):
+    import subprocess
+    from types import SimpleNamespace
+
+    import factorcon.alliance as module
+
+    calls = []
+
+    def run(*args, **kwargs):
+        calls.append(kwargs)
+        if len(calls) < 3:
+            raise subprocess.TimeoutExpired("diskusage_report", 45)
+        return SimpleNamespace(returncode=0, stdout="/scratch (user pwa209) 3TB/20TB 300K/1000K")
+
+    monkeypatch.setattr(module.subprocess, "run", run)
+    sleeps = []
+    monkeypatch.setattr(module.time, "sleep", sleeps.append)
+    assert module.read_personal_quota().limit_bytes == 20_000_000_000_000
+    assert len(calls) == 3 and sleeps == [5, 10]
+
+
+def test_quota_service_exhaustion_fails_closed(monkeypatch, tmp_path):
+    import subprocess
+
+    import factorcon.alliance as module
+
+    def fail(*args, **kwargs):
+        raise subprocess.TimeoutExpired("diskusage_report", 45)
+
+    monkeypatch.setattr(module.subprocess, "run", fail)
+    monkeypatch.setattr(module.time, "sleep", lambda n: None)
+    guard = module.ScratchQuotaGuard(tmp_path / "quota.json")
+    with pytest.raises(CapacityError, match="after 3 attempts"):
+        guard(1024)
+    assert guard.bound == 0 and guard.quota is None

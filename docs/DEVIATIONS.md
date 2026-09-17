@@ -108,3 +108,10 @@ This ledger is part of the transparent non-preregistered record. Add entries chr
   DREAM set 8 remain explicit access/source holds. No analysis labels change.
   Isolate repair locks, manifests, ledgers and provenance from the active campaign.
   See `ACQUISITION_REPAIRS_20260916.md` for commands and identity boundaries.
+
+- **2026-09-17 acquisition recovery:** retry transient personal-quota service
+  failures without writing under unknown quota; exhausted retries stop new transfers
+  as a capacity hold. Resume DREAM/COGITATE with frozen manifests and partials.
+  Add BMVP original-ledger recovery guarded by both campaign locks after verifying
+  the old process is absent. No integrity criteria or scientific rules are weakened.
+  See `ACQUISITION_RECOVERY_20260917.md`.

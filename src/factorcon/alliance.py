@@ -126,13 +126,28 @@ def parse_personal_quota(report: str) -> PersonalQuota:
 
 
 def read_personal_quota() -> PersonalQuota:
-    """Read fresh quota counters without downloading data or changing storage."""
-    command = subprocess.run(["diskusage_report"], capture_output=True, text=True, timeout=45)
-    if command.returncode:
-        raise CapacityError(
-            "diskusage_report failed; download paused rather than assuming free space"
-        )
-    return parse_personal_quota(command.stdout)
+    """Read fresh personal counters with bounded transient-service retries.
+
+    No payload bytes are written while retrying. Exhaustion raises CapacityError,
+    stopping new download submissions while preserving partials. Never substitute
+    stale counters or shared filesystem free space for personal quota evidence.
+    """
+    for attempt in range(3):
+        try:
+            command = subprocess.run(
+                ["diskusage_report"], capture_output=True, text=True, timeout=45
+            )
+        except (subprocess.TimeoutExpired, OSError):
+            command = None
+        if command is not None and command.returncode == 0:
+            # A malformed successful report is an integrity failure, not transient.
+            return parse_personal_quota(command.stdout)
+        if attempt < 2:
+            time.sleep(5 * (attempt + 1))
+    raise CapacityError(
+        "personal quota service unavailable after 3 attempts; partials retained, "
+        "new transfers stopped until fresh quota is available"
+    )
 
 
 class ScratchQuotaGuard:
