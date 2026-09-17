@@ -58,3 +58,18 @@ zero failures in their new attempts and growing partial files:
 Partial growth was checked against the pre-restart sizes; this verifies resumed
 transfer, not complete datasets. Historical failed attempts remain preserved.
 P05 pattern task 21169423_36 remained running; its queued successors were unchanged.
+
+## Evening restart — 2026-09-17
+
+At 18:51 UTC the COGITATE, BMVP and Volition workers were absent on rorqual3
+and their campaign locks were free, despite stale DOWNLOADING markers. Logs did
+not establish the exit cause. DREAM had completed all 58 public files.
+
+At the owner's explicit request, the three incomplete workers were restarted on
+rorqual4 at 18:53 UTC using the same tested `c204375` release, frozen manifests,
+ledgers and personal scratch paths. New PIDs: COGITATE 2291491, BMVP 2291497,
+Volition 2291537. Dry runs and fresh personal quota checks passed. COGITATE reused
+three complete bundles; BMVP reused 121 complete archives. Their partial files
+grew to 170,873,692,160 and 9,768,587,264 bytes respectively at the first check.
+Volition was initially reconciling its saved inventory; process launch alone was
+not counted as resumed byte transfer. DREAM and simulation jobs were untouched.
