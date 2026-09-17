@@ -37,3 +37,24 @@ Original campaign status is historical and is not silently rewritten as current.
 Volition's active process and P05 simulation jobs are intentionally unchanged.
 Previously recorded access holds (private DREAM set 8 and the mislabeled native
 MEEG bundle link) remain; resuming BIDS MEEG does not require that broken link.
+
+## Verified deployment
+
+Release `c2043759ff6aa7b633e1dd90a84c1dce4b491c81` was installed with 165
+verified source files; archive SHA-256
+`3fc3cb01a271e4913185dc0661da3f153a211698541e6089e9855512d4ed3d46`.
+Local full suite: **143 passed**. Rorqual targeted suite: **33 passed**.
+All three dry runs passed before launch.
+
+At **2026-09-17 05:55:39 UTC**, all three workers reported DOWNLOADING, with
+zero failures in their new attempts and growing partial files:
+
+| Family | PID on rorqual3 | Previously completed objects reused | Resumed partial bytes |
+|---|---:|---:|---:|
+| DREAM | 3720696 | 56/58 | 20,929,576,960 |
+| COGITATE | 3720703 | 3/5 | 73,895,247,872 (MEEG BIDS) |
+| BMVP | 3720755 | 114/168 | 1,711,276,032 |
+
+Partial growth was checked against the pre-restart sizes; this verifies resumed
+transfer, not complete datasets. Historical failed attempts remain preserved.
+P05 pattern task 21169423_36 remained running; its queued successors were unchanged.

@@ -1,5 +1,9 @@
 # Rorqual deployment status
 
+**Recovery update — 2026-09-17 05:55 UTC:** DREAM, COGITATE and BMVP were
+resumed with verified partial-byte growth. Quota-service retries retain all storage
+safety checks. See [recovery evidence](ACQUISITION_RECOVERY_20260917.md).
+
 **Later acquisition update — 2026-09-16 17:34 UTC:** the isolated repair release
 resolved Volition's complete expected inventory, 19 public DREAM sets and five
 authorized COGITATE bundles. All three transfers started on personal scratch.
