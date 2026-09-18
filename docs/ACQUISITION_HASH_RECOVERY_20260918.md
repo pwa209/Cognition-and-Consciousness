@@ -29,3 +29,17 @@ The systemd user probe worked, but `Linger=no`; no account-wide linger setting w
 changed and no logout-survival guarantee is claimed. Volition and COGITATE retain
 the same frozen manifests and download ledgers. Other completed datasets and P05
 jobs are untouched. This change affects engineering only, not scientific scope.
+
+## Deployment evidence
+
+Release `49bba58c8abd74f135e73f252f486abd509c2e6b`: 171 source files verified;
+archive SHA-256 `4b90047bfc4dafdd3df9949362ddfdd7233226aeb420e3d4222efcfbb8543b8b`.
+Local full suite: **146 passed**; server targeted suite: **36 passed**. Shell syntax
+and both acquisition dry runs passed.
+
+At **2026-09-18 06:35:20 UTC**, Slurm job **21324125** was RUNNING on rc32304,
+hashing the 752,061,695,148-byte MEEG partial. The publisher HEAD request returned
+HTTP 200, matching pinned size and ETag. Final digest/promotion was still pending.
+COGITATE transfer PID 2162760 (wrapper 2162669) waited on its digest result on
+rorqual3. Volition PID 2162797 (wrapper 2162682) was reconciling its saved inventory.
+No existing data were deleted, and no completion is inferred from process launch.

@@ -1,5 +1,9 @@
 # Rorqual deployment status
 
+**Hashing recovery — 2026-09-18 06:35 UTC:** COGITATE and Volition restarted with
+large-file hashing separated into Slurm job 21324125. The full MEEG partial is
+being hashed rather than re-downloaded. See [deployment evidence and limitations](ACQUISITION_HASH_RECOVERY_20260918.md).
+
 **Recovery update — 2026-09-17 05:55 UTC:** DREAM, COGITATE and BMVP were
 resumed with verified partial-byte growth. Quota-service retries retain all storage
 safety checks. See [recovery evidence](ACQUISITION_RECOVERY_20260917.md).
