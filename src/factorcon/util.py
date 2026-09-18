@@ -101,6 +101,11 @@ def read_jsonl(path: str | Path) -> Iterator[dict[str, Any]]:
 def hash_file(path: str | Path, algorithm: str = "sha256", chunk_size: int = 8 << 20) -> str:
     """Hash a file in bounded memory and return a lowercase hexadecimal digest."""
 
+    queue = os.environ.get("FACTORCON_HASH_QUEUE")
+    if queue and Path(path).stat().st_size >= 256 * 1024 * 1024:
+        from factorcon.hash_queue import queued_hash
+
+        return queued_hash(Path(path), algorithm, Path(queue))
     digest = hashlib.new(algorithm)
     with Path(path).open("rb") as handle:
         while chunk := handle.read(chunk_size):

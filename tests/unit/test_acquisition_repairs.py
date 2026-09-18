@@ -190,3 +190,43 @@ def test_etag_pinned_download_and_reject_changed_object(monkeypatch, tmp_path):
     with pytest.raises(SourceError, match="ETag"):
         http.download_one(record, tmp_path / "bad", attempts=1)
     assert not (tmp_path / "bad/x.bin").exists()
+
+
+def test_complete_partial_uses_head_and_preserves_on_identity_failure(monkeypatch, tmp_path):
+    import json
+    from hashlib import sha256
+    from io import BytesIO
+
+    from factorcon.acquire import http
+    from factorcon.acquire.records import FileRecord
+    from factorcon.errors import SourceError
+
+    class Response(BytesIO):
+        status = 200
+        headers: ClassVar[dict[str, str]] = {"ETag": '"v1"', "Content-Length": "3"}
+
+    methods = []
+
+    def fetch(request, **kwargs):
+        methods.append(request.get_method())
+        return Response(b"")
+
+    monkeypatch.setattr(http.urllib.request, "urlopen", fetch)
+    record = FileRecord(
+        "fixture", "v1", "x.bin", "https://example.test/x", 3, metadata={"http_etag": '"v1"'}
+    )
+    partial = tmp_path / "x.bin.part"
+    partial.write_bytes(b"abc")
+    result = http.download_one(record, tmp_path, attempts=1)
+    assert methods == ["HEAD"] and result.sha256 == sha256(b"abc").hexdigest()
+    assert (tmp_path / "x.bin").read_bytes() == b"abc"
+    assert (
+        json.loads((tmp_path / "x.bin.part.verification.json").read_text())["status"] == "VERIFIED"
+    )
+    bad = tmp_path / "bad"
+    bad.mkdir()
+    (bad / "x.bin.part").write_bytes(b"abc")
+    Response.headers = {"ETag": '"different"', "Content-Length": "3"}
+    with pytest.raises(SourceError, match="identity"):
+        http.download_one(record, bad, attempts=1)
+    assert (bad / "x.bin.part").read_bytes() == b"abc" and not (bad / "x.bin").exists()

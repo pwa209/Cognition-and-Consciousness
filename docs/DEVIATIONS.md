@@ -115,3 +115,11 @@ This ledger is part of the transparent non-preregistered record. Add entries chr
   Add BMVP original-ledger recovery guarded by both campaign locks after verifying
   the old process is absent. No integrity criteria or scientific rules are weakened.
   See `ACQUISITION_RECOVERY_20260917.md`.
+
+- **2026-09-18 transfer/digest separation:** full-sized ETag-pinned partials are
+  source-checked by HEAD before scheduled hashing and atomic promotion. Hashing
+  files >=256 MiB moves to one allocated compute CPU; Internet transfers stay on
+  the network-enabled login surface after a compute-node connectivity probe failed.
+  Preserve file identity, quota controls, all partials and original manifests.
+  Termination causes for previous workers remain unknown; do not label this an
+  established root-cause fix. See `ACQUISITION_HASH_RECOVERY_20260918.md`.

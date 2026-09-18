@@ -104,6 +104,68 @@ def download_one(
             headers["Range"] = f"bytes={offset}-"
         request = urllib.request.Request(record.url, headers=headers, method="GET")
         try:
+            if pinned_etag and record.size is not None and offset == record.size:
+                # A complete partial needs verification, not an unsatisfiable Range GET.
+                head = urllib.request.Request(
+                    record.url,
+                    headers={
+                        "User-Agent": USER_AGENT,
+                        "If-Match": str(pinned_etag),
+                        "Accept-Encoding": "identity",
+                    },
+                    method="HEAD",
+                )
+                with urllib.request.urlopen(head, timeout=timeout) as response:
+                    if (
+                        response.status != 200
+                        or response.headers.get("ETag") != pinned_etag
+                        or response.headers.get("Content-Length") != str(record.size)
+                    ):
+                        raise SourceError("Complete partial identity not confirmed; retained")
+                before = partial.stat()
+                verification = partial.with_name(partial.name + ".verification.json")
+                atomic_write_json(
+                    verification,
+                    {
+                        "status": "HASHING",
+                        "started_utc": utc_now(),
+                        "bytes": offset,
+                        "http_etag": pinned_etag,
+                        "pid": os.getpid(),
+                    },
+                )
+                sha256 = hash_file(partial, "sha256")
+                if record.checksum:
+                    observed = (
+                        sha256
+                        if record.checksum_algorithm == "sha256"
+                        else hash_file(partial, record.checksum_algorithm)
+                    )
+                    if observed.lower() != record.checksum.lower():
+                        raise SourceError("Complete partial checksum mismatch; retained for review")
+                after = partial.stat()
+                if (before.st_size, before.st_mtime_ns) != (after.st_size, after.st_mtime_ns):
+                    raise SourceError("Complete partial changed during verification; retained")
+                os.replace(partial, final)
+                atomic_write_json(
+                    verification,
+                    {
+                        "status": "VERIFIED",
+                        "completed_utc": utc_now(),
+                        "bytes": offset,
+                        "http_etag": pinned_etag,
+                        "sha256": sha256,
+                    },
+                )
+                return DownloadResult(
+                    record.relative_path,
+                    "resumed_verified",
+                    offset,
+                    sha256,
+                    final.stat().st_mtime_ns,
+                    utc_now(),
+                    attempt,
+                )
             with urllib.request.urlopen(request, timeout=timeout) as response:
                 status = int(response.status)
                 if offset and status != 206:
