@@ -102,3 +102,37 @@ not observable in that run. Add ctime/inode to change checks and give this fixtu
 a guaranteed different length. Same-size corruption with restored mtime remains a
 separate SHA-256 test. Initial dependent jobs must be cancelled/replaced explicitly;
 they did not start empirical work. Records of the failed attempt remain intact.
+
+### Replacement campaign
+
+Release `0f4314128bf66a58e98aa8e21f703cb5665edd26` installed with 182 files verified;
+archive SHA-256 `d13ce80009a2f357b27ee335ee9c4c3b50338e98bc99884ab0987da6c5ea6990`.
+After the repair, the local full suite again passed: **178 tests**, 70.60 s.
+Scheduler accounting confirmed all eight old preparation jobs CANCELLED before any
+empirical work; qualification 21409777 remains FAILED in the retained history.
+
+| Replacement job | Purpose |
+|---|---|
+| 21409958 | Qualification |
+| 21409959 | P03 masked fMRI |
+| 21409960 | P04 masked fMRI |
+| 21409961 | P03 awakening EEG |
+| 21409962 | P03 Volition fMRI |
+| 21409963 | P03 COGITATE |
+| 21409964 | P04 COGITATE fMRI |
+| 21409965 | P03 DREAM |
+| 21409966 | P03 BMVP |
+
+Same two-lane technical dependency design; receipts are under the replacement
+release's `operations/empirical-deployment/COMMIT/` directory. No P06–P10 jobs exist
+in this campaign. Follow-up work remains source-specific neural preprocessing and
+measurement/calibration integration, not just waiting for downloads.
+
+Qualification **21409958 completed successfully: 178 remote tests passed** in
+57.52 s. Masked-fMRI and COGITATE P03 started on compute nodes. Awakening P03
+21409961 stopped at the raw participant-count assertion before hashing: the release
+contains 21 subject roots and its participant table contains 21 rows, comprising
+20 upstream included and one upstream excluded flag. The earlier configured 20
+was not the raw inventory count. Add `expected_raw_participants=21`, retain 20 as
+the separately recorded analysis-cohort expectation, and keep all raw subjects.
+No scientific subject exclusion is introduced by this repair.

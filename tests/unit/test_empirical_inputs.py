@@ -29,8 +29,9 @@ def fixture(tmp_path, family="masked_content_fmri", *, repaired=False, archive=F
     snapshot = "exp1_20231231" if family == "cogitate" else "1.0.0"
     data = tmp_path / "data/raw" / family / snapshot
     data.mkdir(parents=True)
-    name = "fixture.zip" if archive else "sub-fixture_events.tsv"
+    name = "fixture.zip" if archive else "sub-fixture/sub-fixture_events.tsv"
     path = data / name
+    path.parent.mkdir(parents=True, exist_ok=True)
     if archive:
         with zipfile.ZipFile(path, "w") as z:
             z.writestr("sub-fixture/func/sub-fixture_events.tsv", "onset\tduration\n0\t1\n")
@@ -106,6 +107,17 @@ def test_manifest_count_and_ledger_identity(tmp_path):
     atomic_write_json(ledger, value)
     with pytest.raises(IntegrityError, match="same-manifest"):
         resolve_acquired_input(tmp_path, dataset)
+
+
+def test_raw_count_separate_from_analysis_count(tmp_path):
+    dataset, _, _ = fixture(tmp_path)
+    raw = DatasetConfig(
+        dataset.path, {**dataset.values, "expected_participants": 0, "expected_raw_participants": 1}
+    )
+    assert len(resolve_acquired_input(tmp_path, raw).records) == 1
+    bad = DatasetConfig(dataset.path, {**raw.values, "expected_raw_participants": 2})
+    with pytest.raises(IntegrityError, match="raw participant count"):
+        resolve_acquired_input(tmp_path, bad)
 
 
 def test_same_size_corruption_rejected_even_when_timestamp_preserved(tmp_path):

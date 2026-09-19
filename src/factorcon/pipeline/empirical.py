@@ -89,12 +89,15 @@ def resolve_acquired_input(root: Path, dataset: DatasetConfig) -> AcquiredInput:
         expected = dataset.values.get("expected_archive_urls")
     if expected is not None and len(records) != expected:
         raise IntegrityError("expected acquisition file count mismatch")
-    expected_subjects = dataset.values.get("expected_participants")
+    expected_subjects = dataset.values.get(
+        "expected_raw_participants", dataset.values.get("expected_participants")
+    )
     if isinstance(expected_subjects, int):
         subjects = {
             safe_relative_path(r.relative_path).parts[0]
             for r in records
-            if safe_relative_path(r.relative_path).parts[0].startswith("sub-")
+            if len(safe_relative_path(r.relative_path).parts) > 1
+            and re.fullmatch(r"sub-[A-Za-z0-9]+", safe_relative_path(r.relative_path).parts[0])
         }
         if len(subjects) != expected_subjects:
             raise IntegrityError("expected raw participant count mismatch")

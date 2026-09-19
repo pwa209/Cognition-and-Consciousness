@@ -1,8 +1,10 @@
 # Rorqual deployment status
 
-**Empirical preparation — 2026-09-19:** release `34fce07` installed and nine jobs
-accepted: qualification 21409777, six P03 integrity/schema jobs, and two dependent
-P04 harmonizers (masked fMRI and COGITATE fMRI). See the [implementation, phase map
+**Empirical preparation — 2026-09-19:** replacement release `0f43141` installed and
+nine jobs accepted: qualification 21409958, six P03 integrity/schema jobs, and two
+dependent P04 harmonizers (masked fMRI and COGITATE fMRI). Initial qualification
+21409777 failed a filesystem-sensitive fixture; its downstream jobs are CANCELLED
+and the complete attempt history is retained. See the [implementation, phase map
 and job receipts](EMPIRICAL_IMPLEMENTATION_20260919.md). P06–P10 are not submitted.
 Available COGITATE bundles and Volition downloads completed before this deployment;
 historical acquisition counters below are not current status.

@@ -148,3 +148,9 @@ This ledger is part of the transparent non-preregistered record. Add entries chr
   same-size corruption with restored mtime still verifies SHA-256 rejection. This
   is not a guarantee against a writer mutating bytes after verification; production
   raw inputs must remain quiescent. Preserve failed qualification and job receipts.
+  P03 awakening job 21409961 then exposed a raw-versus-analysis cohort-count
+  distinction: the pinned 1.0.0 manifest has 21 subject roots and participants.tsv
+  has 21 rows (20 upstream excluded=False, one excluded=True). Add an explicit
+  expected_raw_participants=21 while preserving expected_participants=20. Validate
+  all 21 raw subjects; do not discard the upstream flagged subject or infer its
+  eligibility from a count. The failed count-check attempt remains preserved.

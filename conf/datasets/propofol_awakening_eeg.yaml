@@ -13,6 +13,8 @@
   "license": "CC0-1.0",
   "access": "public",
   "expected_participants": 20,
+  "expected_raw_participants": 21,
+  "raw_participant_count_evidence": "ds005620 1.0.0: 21 manifest subject roots and 21 participants.tsv rows; upstream excluded flags False=20, True=1, inspected 2026-09-19. Retain all raw participants; analysis eligibility is not assigned here.",
   "expected_attempted_awakenings": 52,
   "modalities": ["eeg", "tms_eeg", "reports"],
   "snapshot_reported_bytes": 83002662733,
