@@ -180,3 +180,20 @@ This ledger is part of the transparent non-preregistered record. Add entries chr
   family acquisition configuration, same family/manifest identity and all P03 output
   hashes. Default remains same-release. Record both producer and consumer releases;
   do not falsify the old marker or rehash 159 GB solely because an event parser changed.
+
+- **2026-09-19 masked MRI implementation:** add real raw-MRI fMRIPrep and disjoint
+  ordinal-report calibration jobs. Reserve two of seven participants by a fixed
+  seed/ID SHA-256 rule, before fitting reports or neural outcomes; all sessions stay
+  together. Remaining five participants are evaluation-only. This is an explicit
+  non-preregistered design revision, not a lockbox. Collapse volume-repeated event
+  metadata into trials, retaining shortened runs (12,087 represented trials total),
+  missing reports, and missing probe durations. Upstream code identifies probe=99
+  as parse failure; use a fixed zero placeholder plus missingness indicator, never
+  99 frames as dose. Current predictors do not identify E separately from S.
+  Upstream event generation subtracts ten TRs; raw timing alignment remains unverified
+  and blocks only task-feature construction, not raw preprocessing. Installed module
+  label 25.1.1 actually reports fMRIPrep 25.1.3; pin/check the actual version. Use all
+  seven subjects for raw preprocessing, technical pilot then remaining-subject array;
+  no scientific outcome controls dependencies. See MASKED_NEURAL_EXECUTION_20260919.md.
+  This does not complete neural residual/feature calibration, dataset-general raw
+  integration, common anchors, or empirical P06–P10 input bundles.

@@ -1,0 +1,5 @@
+trials	visibility	probe_frame	targets	paths	response	correct	RT_response
+0.0	n/a	n/a	n/a	n/a	n/a	n/a	n/a
+1.0	unconscious	3.0	Living_Things	fixture-image-A.png	1.0	1.0	0.7
+1.0	unconscious	3.0	Living_Things	fixture-image-A.png	1.0	1.0	0.7
+2.0	missing data	99.0	Nonliving_Things	fixture-image-B.png	99.0	0.0	0.0
