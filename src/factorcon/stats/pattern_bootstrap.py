@@ -44,13 +44,16 @@ def paired_pattern_summary(
                     ):
                         if group in mapping:
                             raise ValueError("duplicate test group/model prediction")
-                        mapping[group] = (score / row["scored_dimensions_per_group"], weight)
+                        dimensions = row["scored_dimensions_per_group"]
+                        if dimensions <= 0 or not np.isfinite(score):
+                            raise ValueError("finite score and positive scored dimension required")
+                        mapping[group] = (score / dimensions, weight, dimensions)
                 by_model[model] = mapping
             if len(by_model) != 2:
                 break
             left, right = by_model["M4"], by_model[comparator]
-            if left.keys() != right.keys() or any(left[g][1] != right[g][1] for g in left):
-                raise ValueError("unpaired independent groups/weights in contrast")
+            if left.keys() != right.keys() or any(left[g][1:] != right[g][1:] for g in left):
+                raise ValueError("unpaired independent groups/weights/dimensions in contrast")
             family_deltas.append(
                 float(
                     np.average(

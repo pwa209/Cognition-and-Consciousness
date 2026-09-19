@@ -154,3 +154,17 @@ This ledger is part of the transparent non-preregistered record. Add entries chr
   expected_raw_participants=21 while preserving expected_participants=20. Validate
   all 21 raw subjects; do not discard the upstream flagged subject or infer its
   eligibility from a count. The failed count-check attempt remains preserved.
+
+- **2026-09-19 downstream execution layer:** add personal-scratch P06 prepared-pattern
+  assembly with fixed 0.1 independent-residual covariance ridge, P07/P08 generative
+  wrappers, 1,000 P09 within-family subject-bootstrap shards (concurrency two), and
+  P10 lossless candidate tables/coverage. Replicate RNG is SeedSequence([260830,index])
+  rather than the historical monolithic bootstrap stream, ensuring array-order
+  independence. No empirical model results were inspected in choosing these settings.
+  This does not complete raw preprocessing, calibration resampling, dataset-specific
+  robustness, simultaneous inference or equivalence testing. Require hash-bound
+  empirical bundles before dispatch, and do not queue mock empirical jobs if absent.
+  Preserve all unavailable/numerically failed candidate rows and all missing bootstrap
+  replicates. Also repair paired_pattern_summary to require identical scored dimensions,
+  as well as subjects and weights, before model comparison. Earlier paired artifacts
+  were not rewritten. See DOWNSTREAM_EXECUTION_20260919.md for exact scope/contracts.

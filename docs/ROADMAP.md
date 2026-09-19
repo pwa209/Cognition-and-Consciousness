@@ -4,7 +4,10 @@
 > deployed for six families; masked-fMRI and COGITATE-fMRI P04 harmonizers are queued
 > behind their own technical predecessors. The latest qualification passed 179 tests.
 > See [commands, job IDs, restart behavior and remaining dependencies](EMPIRICAL_IMPLEMENTATION_20260919.md).
-> P06–P10 remain incomplete and unsubmitted; code presence is not empirical execution.
+> P06–P10 now have a separate tested generative execution/dispatch layer; actual
+> empirical execution remains blocked by raw preprocessing and independent calibration.
+> The P06 builder starts from prepared neural summaries, not recordings; P09 covers
+> subject bootstrap only. See [downstream contracts and remaining work](DOWNSTREAM_EXECUTION_20260919.md).
 
 > **Follow-up, 2026-09-10:** phase entries describe intended deliverables, not universal
 > operational completion. A separate generative-pattern/measurement engine now provides

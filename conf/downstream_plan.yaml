@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "study_status": "transparent_non_preregistered_secondary_analysis",
+  "scientific_gates": false,
+  "feature_input": "independently_calibrated_pattern_bundle_v1",
+  "raw_preprocessing_included": false,
+  "ridge_fraction": 0.1,
+  "bootstrap_replicates": 1000,
+  "bootstrap_array_concurrency": 2,
+  "seed": 260830,
+  "P06": "assemble_and_whiten_precomputed_neural_patterns",
+  "P07": "nested_within_family_generative_M0_M5",
+  "P08": "source_only_leave_family_out_generative_M0_M5",
+  "P09": "full_nested_refit_subject_bootstrap_within_family",
+  "P10": "complete_case_paired_tables_and_failure_coverage",
+  "inference_scope": "fixed_conditions_fixed_families_external_calibration_fixed",
+  "equivalence_testing": "not_implemented_no_justified_margin",
+  "multiplicity_adjusted": false
+}
