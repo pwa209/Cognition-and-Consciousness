@@ -34,7 +34,7 @@
     "all_candidates": ["M0", "M1", "M2", "M3", "M4", "M5"],
     "uncertainty": "external_design_draws_conditional_on_fitted_parameters",
     "lofo": "source_only_common_external_anchors_required",
-    "deployment": "not_authorized"
+    "deployment": "compute_canada_ready_phases_authorized_university_inactive_source_only"
   },
   "report_measurement": {
     "implementation": "hierarchical_ordinal_probit_v1",

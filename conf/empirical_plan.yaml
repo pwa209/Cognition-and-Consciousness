@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "study_status": "transparent_non_preregistered_secondary_analysis",
+  "scientific_gates": false,
+  "families": ["masked_content_fmri", "propofol_awakening_eeg", "propofol_volition_fmri", "cogitate", "dream", "bmvp"],
+  "integrity": {
+    "mode": "sha256_against_acquisition_ledger",
+    "archive_check": "central_directory_paths_types_and_duplicates",
+    "full_archive_decompression_crc": false,
+    "max_metadata_bytes": 2000000
+  },
+  "harmonization_ready": ["masked_content_fmri", "cogitate"],
+  "scope": "P03 byte integrity and source-schema census; P04 verified masked-event adapter. No invented report linkage or empirical E labels.",
+  "downstream": {
+    "P06": "requires_source_specific_preprocessing_and_independent_noise_calibration",
+    "P07": "existing_engine_requires_validated_empirical_pattern_files",
+    "P08": "requires_common_anchors_and_source_support",
+    "P09": "requires_dataset_specific_exchangeability_and_equivalence_margins",
+    "P10": "requires_empirical_results_not_simulation_substitutes"
+  }
+}

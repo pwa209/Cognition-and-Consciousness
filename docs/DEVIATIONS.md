@@ -123,3 +123,21 @@ This ledger is part of the transparent non-preregistered record. Add entries chr
   Preserve file identity, quota controls, all partials and original manifests.
   Termination causes for previous workers remain unknown; do not label this an
   established root-cause fix. See `ACQUISITION_HASH_RECOVERY_20260918.md`.
+
+- **2026-09-19 empirical preparation:** owner instructed implementation and submission
+  of technically ready empirical phases. Add a six-family P03 runner binding each
+  source to the completed original or repaired acquisition manifest and per-file
+  SHA-256 receipts, plus an immutable-attempt P04 wrapper for the existing masked
+  fMRI adapter. All data remain in personal scratch. ZIP central-directory safety
+  and bounded metadata inspection are distinct from full decompression/CRC and
+  scientific preprocessing validation. No source label becomes a ground-truth E
+  value; no favorable result is needed to continue. Reconcile the stale global
+  `pattern_evaluation.deployment` string with the already authorized Compute Canada
+  scope; university restrictions remain unchanged. Affected outputs: new P03/P04
+  artifacts only, not existing simulations or acquired bytes.
+  Source inspection also verified COGITATE Exp1 BIDS fMRI's seven-column event schema,
+  944 event tables and 118 participants. Add its observed-event adapter, preserving
+  all stimulus/nonstimulus rows without assigning E or button timestamps. Record
+  MEEG (501 event files/100 participants) and iEEG (38/38) inventory counts only;
+  their distinct trigger streams are not parsed by the fMRI adapter. Add safe TAR
+  metadata census for BMVP; RAR remains explicitly unparsed.

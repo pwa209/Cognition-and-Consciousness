@@ -14,9 +14,9 @@
   "access": "account_and_terms_required",
   "requires_owner_action": true,
   "expected_participants": {"fmri": 118, "meeg": 100, "ieeg": 38},
+  "exp1_bids_event_files": {"fmri": 944, "meeg": 501, "ieeg": 38},
   "modalities": ["fmri", "meg", "eeg", "ieeg", "behavior", "eye_tracking"],
   "construct_map": "conf/construct_maps/cogitate.yaml",
   "split_units": ["subject", "site", "run"],
   "credentials_policy": "owner_managed_outside_repository"
 }
-
