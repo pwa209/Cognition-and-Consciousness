@@ -208,3 +208,16 @@ This ledger is part of the transparent non-preregistered record. Add entries chr
   diagnostics even if warnings remain; longer sampling is not guaranteed to resolve
   convergence or identifiability. The derived full analysis configuration is private,
   hashed and tied to the tracked extension plan. No original posterior is replaced.
+
+- **2026-09-19 same-model sampler repair:** the longer Gibbs run 21417467 remained
+  unconverged. ArviZ independently confirmed worst R-hat 1.2876434610 and minimum
+  bulk ESS 11.45541, isolating the upper report threshold as the principal problem.
+  Add PyMC NUTS using the exact marginalized three-category ordered-probit
+  likelihood and prior-equivalent noncentered effects. Preserve priors, anchor,
+  fixed predictors, missingness, two/five calibration/evaluation allocation and
+  every historical posterior. Fix four chains with 4,000 warmup/4,000 retained
+  draws, seed 260830, target_accept 0.95 before the new fit. Record parameter-wise
+  diagnostics, divergences, tail ESS and BFMI; no scientific result controls
+  execution. Synthetic density/gradient and quadrature tests qualify computation,
+  not the study's hypothesis. See REPORT_SAMPLER_REPAIR_20260919.md. Numerical
+  convergence alone does not resolve calibration sample size or construct validity.
