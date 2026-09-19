@@ -31,6 +31,12 @@ Qualification **21417466** and extended calibration **21417467** were accepted.
 Only sampling counts increase; the first posterior remains intact. This does not
 replace or resubmit MRI jobs, and convergence is still unverified for the extension.
 
+**Latest receipt, 15:43:46 UTC:** qualification 21417466 SUCCESS, **208 tests passed
+remotely**. Extended calibration 21417467 RUNNING; MRI pilot 21417199 RUNNING;
+remaining six-subject array 21417200 dependency-pending. MRI startup progressed
+through real preprocessing nodes; the 15:42 log census found zero ERROR-level lines.
+Neither ongoing job is yet a completed scientific result.
+
 The 14:52 UTC audit found all available acquisition manifests complete and successful
 P03 checks for all seven families. Private DREAM set 8 and the mislinked raw-MEEG
 catalog item remain access/source holds, not missing authorized manifest bytes.
