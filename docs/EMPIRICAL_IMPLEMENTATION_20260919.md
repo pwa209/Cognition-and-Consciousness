@@ -136,3 +136,29 @@ contains 21 subject roots and its participant table contains 21 rows, comprising
 was not the raw inventory count. Add `expected_raw_participants=21`, retain 20 as
 the separately recorded analysis-cohort expectation, and keep all raw subjects.
 No scientific subject exclusion is introduced by this repair.
+
+### Final verification at 08:55 UTC
+
+EEG-only repair release `abcc10c7d01a4aa1a078e3e6198624b5213c564d` installed with
+182 files verified; archive SHA-256
+`b2b253850d706f3c7ec99007fab29b03a4adf859a0164848fbbaf9e6ebf3b930`.
+Local suite: **179 passed** (59.42 s). New remote qualification **21410131 SUCCESS,
+179 passed** (56.11 s). EEG retry **21410132** is queued after qualification and the
+existing BMVP lane predecessor 21409966, preserving at most two simultaneous P03
+I/O jobs. Unaffected jobs remain on qualified release `0f43141`; they were not
+cancelled or resubmitted for an EEG-only configuration correction.
+
+At this snapshot, masked P03 **21409959 RUNNING**, 866/1,314 files and
+100,593,730,638 bytes rehashed; COGITATE P03 **21409963 RUNNING**, hashing its first
+large archive. P04 masked **21409960**, P04 COGITATE **21409964**, P03 Volition
+**21409962**, DREAM **21409965**, BMVP **21409966**, and EEG **21410132** are queued.
+These are empirical preparation jobs, **not fitted empirical M0–M5 results**.
+
+The awakening source table uses `sub-SD_` IDs while recordings use `sub-`; replacing
+that verified prefix gives a one-to-one mapping of all 21 subjects. The table sums
+to 52 awakenings. This identity audit does not establish the missing trialwise
+experience-report linkage or automatically import the publisher's exclusions.
+
+All code and curated operational records are pushed to branch
+`codex/alliance-fresh-20260916`. Raw data, schemas containing participant records,
+trial JSONL, full inventories, credentials and machine-local catalogs stay out of Git.

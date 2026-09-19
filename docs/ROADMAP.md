@@ -1,5 +1,11 @@
 # Phase-mapped implementation roadmap
 
+> **Compute Canada update, 2026-09-19:** empirical P03 integrity/schema checks are
+> deployed for six families; masked-fMRI and COGITATE-fMRI P04 harmonizers are queued
+> behind their own technical predecessors. The latest qualification passed 179 tests.
+> See [commands, job IDs, restart behavior and remaining dependencies](EMPIRICAL_IMPLEMENTATION_20260919.md).
+> P06–P10 remain incomplete and unsubmitted; code presence is not empirical execution.
+
 > **Follow-up, 2026-09-10:** phase entries describe intended deliverables, not universal
 > operational completion. A separate generative-pattern/measurement engine now provides
 > source-only LOFO and refitted subject bootstrap. Raw-to-feature integration, shared

@@ -8,6 +8,10 @@ and the complete attempt history is retained. See the [implementation, phase map
 and job receipts](EMPIRICAL_IMPLEMENTATION_20260919.md). P06–P10 are not submitted.
 Available COGITATE bundles and Volition downloads completed before this deployment;
 historical acquisition counters below are not current status.
+Qualification 21409958 passed 178 tests; the EEG raw-cohort correction release
+`abcc10c` passed 179 tests remotely in qualification 21410131. EEG-only retry
+21410132 is queued; masked P03 21409959 and COGITATE P03 21409963 were RUNNING
+at 08:55 UTC. Other preparation jobs retain their existing qualified source.
 
 **Hashing recovery — 2026-09-18 06:35 UTC:** COGITATE and Volition restarted with
 large-file hashing separated into Slurm job 21324125. The full MEEG partial is
