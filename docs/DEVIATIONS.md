@@ -230,4 +230,8 @@ This ledger is part of the transparent non-preregistered record. Add entries chr
   parameterizations. Require clean synthetic numerical diagnostics before the new
   empirical attempt, retaining failed qualification artifacts. The synthetic
   threshold interval's failure to cover truth is reported and is not a gate or
-  basis for revision; one fixture is not a coverage study.
+  basis for revision; one fixture is not a coverage study. Centered release `8e8f837`
+  passed 219 server tests and clean synthetic diagnostics (qualification 21421581).
+  Empirical job 21421582 then completed with maximum R-hat 1.000616, minimum
+  bulk/tail ESS 12374.73/8186.17 and zero divergences; all numerical flags clear.
+  This resolves the observed sampling problem, not broader scientific limitations.

@@ -94,5 +94,45 @@ remained running; array 21417200 remained pending the MRI pilot. Neither was cha
 All posterior draws remain private on personal scratch; Git contains code and
 aggregate operational receipts only.
 
+The centered revision `8e8f83701e9aa4d89958e5d1ef42e832e48cc75f` was installed with
+216 source hashes verified and submitted at 17:44:13 UTC. Qualification **21421581**
+completed in 3m59s: **219 tests passed**, scalar quadrature agreed, and the hierarchical
+synthetic fixture had zero divergences, maximum R-hat 1.00160, minimum bulk ESS
+6032.35 and minimum tail ESS 4288.30. All numerical flags were false. Its slope
+interval covered truth, while its upper-threshold interval did not (retained;
+single-fixture recovery is not calibrated coverage). Empirical calibration
+**21421582** started at 17:48:15 UTC and completed successfully in 2m49s (Slurm exit
+0:0). All empirical numerical flags were false:
+
+| Diagnostic | Extended Gibbs 21417467 | Centered marginal NUTS 21421582 |
+|---|---:|---:|
+| Maximum rank/folded split R-hat | 1.287643 | 1.000616 |
+| Minimum bulk ESS (ArviZ) | 11.455 | 12,374.727 |
+| Minimum tail ESS (ArviZ) | 34.429 | 8,186.170 |
+| Divergences | Not an applicable Gibbs diagnostic | 0 |
+| Maximum-tree-depth events | Not applicable | 0 |
+
+The formerly problematic upper threshold has R-hat 0.999989, bulk ESS 22,087.40,
+tail ESS 12,066.31 and mean Monte Carlo SE 0.0001866 probit units. ESS estimates can
+exceed the retained draw count with negative autocorrelation; they are not extra
+observations. Per-chain BFMI ranges 0.938–1.008. Maximum attained tree depth is five.
+These diagnostics resolve the observed numerical warnings, not model adequacy,
+scientific identification, population generalizability, or calibration-cohort size.
+Full parameter traces/diagnostics, package versions, unchanged input hash and
+all historical posteriors remain private under personal scratch. No effect values
+were used to choose the model, participants, priors or sampling revision.
+
+At 17:53 UTC a separate read-only audit verified all nine final output hashes,
+qualification hashes, matching status/provenance, unchanged calibration input,
+disjoint calibration/evaluation IDs, four-by-4,000 posterior dimensions, threshold
+anchors and NPZ/JSON trace identity. The completed marker is dated 17:51:03 UTC.
+MRI pilot 21417199 was still RUNNING (2h21m46s), and remaining array 21417200 was
+still PENDING its MRI pilot. Neither job was modified by the sampler work.
+
+Artifact SHA-256:
+
+- `diagnostics.json`: `3d76b71f447770aa6f60e36db8a079a823e35f66b65343fca6e9d3f94374b533`
+- `posterior.json`: `4328af1d6210824a3feae1b637dd5ad9bc3b50575c01df0aecde28b01b15e63a`
+
 Implementation references: [PyMC OrderedProbit](https://www.pymc.io/projects/docs/en/v5.24.0/api/distributions/generated/pymc.OrderedProbit.html)
 and [ArviZ diagnostics](https://python.arviz.org/en/v0.22.0/api/generated/arviz.summary.html).
