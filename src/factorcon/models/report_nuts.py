@@ -107,8 +107,10 @@ def reference_log_joint(
     )
 
 
-def build_model(data: OrdinalCalibration) -> tuple[Any, dict[str, Any]]:
-    """Build an exact marginal likelihood and noncentered but prior-equivalent hierarchy.
+def build_model(
+    data: OrdinalCalibration, *, parameterization: str = "noncentered"
+) -> tuple[Any, dict[str, Any]]:
+    """Build an exact marginal likelihood with equivalent centered/noncentered hierarchies.
 
     Supports the current common-threshold, three-category model only. No constraint
     is added to random effects (e.g. sum-to-zero would change the prior).
@@ -118,13 +120,23 @@ def build_model(data: OrdinalCalibration) -> tuple[Any, dict[str, Any]]:
     import pytensor.tensor as pt
 
     g = grouped_reports(data)
+    if parameterization not in {"centered", "noncentered"}:
+        raise ValueError("unknown equivalent parameterization")
     with pm.Model() as model:
         beta = pm.Normal("beta", mu=0, sigma=2.5, shape=g["x"].shape[1])
         variances = pm.InverseGamma("variances", alpha=2, beta=1, shape=2)
-        subject_z = pm.Normal("subject_z", mu=0, sigma=1, shape=len(g["subjects"]))
-        context_z = pm.Normal("context_z", mu=0, sigma=1, shape=len(g["contexts"]))
-        subject = pm.Deterministic("subject_effects", subject_z * pt.sqrt(variances[0]))
-        context = pm.Deterministic("context_effects", context_z * pt.sqrt(variances[1]))
+        if parameterization == "noncentered":
+            subject_z = pm.Normal("subject_z", mu=0, sigma=1, shape=len(g["subjects"]))
+            context_z = pm.Normal("context_z", mu=0, sigma=1, shape=len(g["contexts"]))
+            subject = pm.Deterministic("subject_effects", subject_z * pt.sqrt(variances[0]))
+            context = pm.Deterministic("context_effects", context_z * pt.sqrt(variances[1]))
+        else:
+            subject = pm.Normal(
+                "subject_effects", mu=0, sigma=pt.sqrt(variances[0]), shape=len(g["subjects"])
+            )
+            context = pm.Normal(
+                "context_effects", mu=0, sigma=pt.sqrt(variances[1]), shape=len(g["contexts"])
+            )
         cut = pm.TruncatedNormal("upper_threshold", mu=1, sigma=2, lower=0, initval=1.0)
         eta = pt.dot(g["x"], beta) + subject[g["si"]] + context[g["ci"]]
         logp = pm.logp(pm.OrderedProbit.dist(eta=eta, cutpoints=pt.stack([0.0, cut])), g["y"])
@@ -226,6 +238,7 @@ def fit_ordinal_nuts(
     seed: int,
     cores: int,
     target_accept: float = 0.95,
+    parameterization: str = "noncentered",
 ) -> tuple[OrdinalPosterior, dict[str, Any], Any]:
     """Fit reserved calibration subjects with PyMC NUTS; return compatible probit posterior.
 
@@ -237,7 +250,7 @@ def fit_ordinal_nuts(
 
     if draws < 8 or warmup < 1 or chains < 2 or cores < 1 or not 0.8 <= target_accept < 1:
         raise ValueError("invalid fixed NUTS sampling settings")
-    model, g = build_model(data)
+    model, g = build_model(data, parameterization=parameterization)
     with model:
         idata = pm.sample(
             draws=draws,
@@ -259,7 +272,9 @@ def fit_ordinal_nuts(
         k: values[k].values for k in ("beta", "subject_effects", "context_effects", "variances")
     }
     arrays["thresholds"] = cuts
-    arrays.update({name: values[name].values for name in ("subject_z", "context_z")})
+    arrays.update(
+        {name: values[name].values for name in ("subject_z", "context_z") if name in values}
+    )
     diagnostic = arviz_diagnostics(arrays)
     diagnostic.update(
         divergences=int(idata.sample_stats["diverging"].values.sum()),
@@ -269,7 +284,7 @@ def fit_ordinal_nuts(
         likelihood_terms=len(g["y"]),
         missing_reports=g["missing_reports"],
         pymc_version=pm.__version__,
-        parameterization="noncentered_marginal_ordered_probit",
+        parameterization=parameterization + "_marginal_ordered_probit",
     )
     reached = idata.sample_stats.get("reached_max_treedepth")
     diagnostic["tree_depth_limit_events"] = (

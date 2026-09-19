@@ -30,7 +30,8 @@ def plan(source: Path) -> dict[str, Any]:
     expected = {
         "schema_version": 1,
         "family": "masked_content_fmri",
-        "sampler": "pymc_nuts_marginal_probit_noncentered",
+        "sampler": "pymc_nuts_marginal_probit_centered",
+        "parameterization": "centered",
         "probability_model_changed": False,
         "scientific_gates": False,
         "initialization": "jitter+adapt_full",
@@ -166,7 +167,13 @@ def action(
                 stderr=subprocess.STDOUT,
                 check=True,
             )
-        return validate_sampling(settings)
+        result = validate_sampling(settings)
+        atomic_write_json(attempt / "synthetic-validation.json", result)
+        if any(result["hierarchical_diagnostics"]["flags"].values()):
+            raise ValueError(
+                "synthetic sampler has numerical warnings; preserved in synthetic-validation.json"
+            )
+        return result
     if qualification is None:
         raise ValueError("sampler qualification required")
     ensure_within(root / "analysis/masked-neural/QUALIFY_NUTS", qualification)
@@ -179,7 +186,11 @@ def action(
     )
     # Old chains remain untouched and are independently audited, never used as truth.
     audits = []
-    for oldphase, job in (("CALIBRATE", "21417198"), ("CALIBRATE_EXTENDED", "21417467")):
+    for oldphase, job in (
+        ("CALIBRATE", "21417198"),
+        ("CALIBRATE_EXTENDED", "21417467"),
+        ("CALIBRATE_NUTS", "21420707"),
+    ):
         oldstatus = root / "analysis/masked-neural" / oldphase / job / "status.json"
         oldsource = Path(load_structured(oldstatus)["source_release"])
         verify_release(root, oldsource)
@@ -197,7 +208,18 @@ def action(
         )
     posterior, diagnostic, idata = fit_ordinal_nuts(
         data,
-        **{k: settings[k] for k in ("draws", "warmup", "chains", "seed", "cores", "target_accept")},
+        **{
+            k: settings[k]
+            for k in (
+                "draws",
+                "warmup",
+                "chains",
+                "seed",
+                "cores",
+                "target_accept",
+                "parameterization",
+            )
+        },
     )
     payload = {
         k: v.tolist() if isinstance(v, np.ndarray) else v for k, v in asdict(posterior).items()

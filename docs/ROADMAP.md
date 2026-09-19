@@ -3,7 +3,8 @@
 > **Report-sampler repair, 2026-09-19:** longer Gibbs run 21417467 finished but remains
 > unconverged. Independent ArviZ diagnostics confirm the upper-threshold bottleneck.
 > A same-probability-model marginal NUTS backend and synthetic qualification workflow
-> are implemented; execution receipts will be recorded after submission. This repairs
+> are deployed as release `09cf7b2`: qualification 21420706 running and calibration
+> 21420707 pending qualification at 17:35 UTC. New convergence is not yet verified. This repairs
 > a P04/P07 measurement prerequisite, not neural-noise calibration or the full P06–P10
 > inputs. MRI preprocessing continues independently. See
 > [sampler equivalence, diagnostics and limitations](REPORT_SAMPLER_REPAIR_20260919.md).

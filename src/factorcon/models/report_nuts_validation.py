@@ -84,7 +84,14 @@ def validate_sampling(settings: dict[str, Any]) -> dict[str, Any]:
         "synthetic-only",
     )
     posterior, diagnostic, _ = fit_ordinal_nuts(
-        data, draws=draws, warmup=warmup, chains=4, seed=seed + 1, cores=4
+        data,
+        draws=draws,
+        warmup=warmup,
+        chains=4,
+        seed=seed + 1,
+        cores=4,
+        target_accept=settings["target_accept"],
+        parameterization=settings["parameterization"],
     )
     recovery = []
     for name, trace, truth in (

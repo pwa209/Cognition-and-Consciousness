@@ -221,3 +221,13 @@ This ledger is part of the transparent non-preregistered record. Add entries chr
   execution. Synthetic density/gradient and quadrature tests qualify computation,
   not the study's hypothesis. See REPORT_SAMPLER_REPAIR_20260919.md. Numerical
   convergence alone does not resolve calibration sample size or construct validity.
+  Initial NUTS qualification 21420706 passed 218 implementation tests and scalar
+  quadrature, but its hierarchical synthetic fixture had 26 divergences (minimum
+  bulk/tail ESS 391.69/273.55); its SUCCESS did not establish reliable sampling.
+  Preserve it and empirical attempt 21420707. Change only sampling coordinates to
+  centered effects and target_accept to 0.99, with 2,000 warmup/retained synthetic
+  draws per chain. Verify equivalent joint densities and gradients for both
+  parameterizations. Require clean synthetic numerical diagnostics before the new
+  empirical attempt, retaining failed qualification artifacts. The synthetic
+  threshold interval's failure to cover truth is reported and is not a gate or
+  basis for revision; one fixture is not a coverage study.

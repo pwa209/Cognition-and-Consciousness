@@ -123,9 +123,10 @@ def test_arviz_checks_legacy_rhat_and_flags_stuck_parameter():
     assert arviz_diagnostics(data)["flags"]["invalid_diagnostics"]
 
 
-def test_pymc_joint_and_gradient_equal_independent_reference():
+@pytest.mark.parametrize("parameterization", ["noncentered", "centered"])
+def test_pymc_joint_and_gradient_equal_independent_reference(parameterization):
     pytest.importorskip("pymc")
-    model, g = build_model(fixture())
+    model, g = build_model(fixture(), parameterization=parameterization)
     logp = model.compile_logp(jacobian=False)
     logp_jac = model.compile_logp(jacobian=True)
     gradient = model.compile_dlogp()
@@ -144,6 +145,10 @@ def test_pymc_joint_and_gradient_equal_independent_reference():
             "upper_threshold_interval__": np.log(cut),
         }
         reference = reference_log_joint(g, beta, sz, cz, v, cut)
+        if parameterization == "centered":
+            point["subject_effects"] = point.pop("subject_z") * np.sqrt(v[0])
+            point["context_effects"] = point.pop("context_z") * np.sqrt(v[1])
+            reference -= len(sz) * np.log(np.sqrt(v[0])) + len(cz) * np.log(np.sqrt(v[1]))
         np.testing.assert_allclose(logp(point), reference, atol=1e-8)
         np.testing.assert_allclose(
             logp_jac(point), reference + np.log(v).sum() + np.log(cut), atol=1e-8
