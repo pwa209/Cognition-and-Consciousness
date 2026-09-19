@@ -9,7 +9,11 @@ and independent calibration remain missing. See [contracts and exact scope](DOWN
 Masked P03 **21409959 succeeded**; its P04 successor **21409960 failed** on the source
 token `missing data`. A repair retains all 8,235 such rows as unknown reports and
 preserves the original token; the expanded local suite passed 194 tests. The failed
-attempt remains intact and needs a separately qualified retry.
+attempt remains intact. Repair release `7ab472a` is installed; server dry-run passed;
+qualification **21410793 passed 194 tests remotely**; P04 retry **21410794 SUCCESS**
+at 09:32:09 UTC, explicitly reusing verified P03 21409959 from release `0f43141`.
+Output: 192,089 event-file records, 380 files, seven participants. Post-run inspection
+confirmed all 8,235 explicit missing-report rows remain unknown, never E=0.
 
 **Empirical preparation — 2026-09-19:** replacement release `0f43141` installed and
 nine jobs accepted: qualification 21409958, six P03 integrity/schema jobs, and two

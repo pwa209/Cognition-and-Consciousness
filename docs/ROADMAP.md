@@ -2,12 +2,15 @@
 
 > **Compute Canada update, 2026-09-19:** empirical P03 integrity/schema checks are
 > deployed for six families; masked-fMRI and COGITATE-fMRI P04 harmonizers are queued
-> behind their own technical predecessors. The latest qualification passed 179 tests.
+> behind their own technical predecessors. The initial repaired preparation release
+> passed 179 tests; the later downstream/missing-report repair passed **194** remotely.
 > See [commands, job IDs, restart behavior and remaining dependencies](EMPIRICAL_IMPLEMENTATION_20260919.md).
 > P06–P10 now have a separate tested generative execution/dispatch layer; actual
 > empirical execution remains blocked by raw preprocessing and independent calibration.
 > The P06 builder starts from prepared neural summaries, not recordings; P09 covers
 > subject bootstrap only. See [downstream contracts and remaining work](DOWNSTREAM_EXECUTION_20260919.md).
+> Masked P04 retry **21410794 completed**: 192,089 records from 380 event files and
+> seven participants, retaining all 8,235 explicit missing-report rows as unknown.
 
 > **Follow-up, 2026-09-10:** phase entries describe intended deliverables, not universal
 > operational completion. A separate generative-pattern/measurement engine now provides

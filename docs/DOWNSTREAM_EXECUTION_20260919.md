@@ -165,3 +165,20 @@ and every row remain available. An explicit predecessor-release option verifies 
 P03 source/output hashes and unchanged acquisition configuration before reusing its
 byte-integrity evidence with the repaired P04 adapter. No completed P03 marker is
 rewritten. Expanded local tests: **194 passed**, 59.84 seconds, plus lint/Bash checks.
+
+Repair release `7ab472a4a69076ca438cf35a0e1b3a605cdc586d` was installed with all 193
+source files verified; archive SHA-256
+`36b548257179e4082e93c7ce400cb169b1813dfc9244756ccfb42ba575d98d70`.
+The real server P04 dry-run passed, binding the complete 1,314-file acquisition and
+successful P03 job 21409959 to the new consumer release. New qualification
+**21410793** and dependent P04 retry **21410794** were accepted by Slurm. No additional
+P03 full-data rehash, P06-P10 empirical job or replacement of the old failed marker
+was submitted.
+Qualification **21410793 passed all 194 tests remotely** in 61.59 seconds, with
+Slurm COMPLETED/exit 0. P04 **21410794** then started at 09:31:36 UTC. The downstream
+scripts are technically qualified, but raw-to-neural integration and the broader
+scientific P09/P10 deliverables remain unfinished.
+P04 **21410794 completed successfully** (Slurm exit 0; marker 09:32:09 UTC):
+**192,089 event-file records, 380 files, seven participants**. A separate post-run
+scan verified all **8,235** explicit missing-report records remain present with
+unknown report availability, null observed experience and null ordinal code.
