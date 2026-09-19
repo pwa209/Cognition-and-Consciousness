@@ -122,3 +122,11 @@ releases, unchanged scientific configuration and every prepared-input hash; it
 preserves the original posterior. Future warnings remain visible. MRI pilot 21417199
 was running at 15:33 UTC, with the six remaining participants pending that technical
 predecessor. No neural inference depends on this unconverged posterior yet.
+
+The extension release `41da85c6e80d3161ff56e579f20f76baabb60bc1` passed 208 local
+tests, was installed with 207 source files verified, and passed the server dry-run.
+At 15:41:16 UTC, qualification 21417466 and dependent extended-calibration job
+21417467 were accepted. Receipts are under
+`operations/masked-report-extension/41da85c6e80d3161ff56e579f20f76baabb60bc1/`;
+private outputs use `analysis/masked-neural/CALIBRATE_EXTENDED/21417467/`.
+This is a fixed longer run, not automatic iteration until a desired scientific result.

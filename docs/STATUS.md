@@ -13,6 +13,10 @@ report-calibration job 21417198, MRI pilot 21417199 and remaining-subject array
 These are not yet completed MRI derivatives or neural model results. Independent
 neural-noise calibration, task-feature assembly and full empirical P06–P10 bundles
 remain unfinished. Other dataset families' preprocessing is not included here.
+Initial report fitting completed but is unconverged (R-hat 2.51947; minimum bulk
+ESS 4.79452). Sampling-only extension release `41da85c` passed 208 local tests;
+qualification 21417466 and extended fit 21417467 are submitted. Original results
+remain intact; no claim of usable calibration is made from a successful exit alone.
 All available acquisition manifests and seven families' P03 checks were complete
 in today's audit; access/source holds are retained explicitly. Earlier dated states
 below are history, not current acquisition counters.

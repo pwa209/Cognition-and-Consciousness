@@ -10,7 +10,8 @@
 > See [exact scope, source issues and phase mapping](MASKED_NEURAL_EXECUTION_20260919.md).
 > At 15:38 UTC remote qualification passed 207 tests, preparation and initial report
 > fitting completed, and actual MRI processing was running. The first posterior
-> has severe convergence warnings; a computational extension is being deployed.
+> has severe convergence warnings; fixed longer-sampling job 21417467 is submitted
+> behind qualification 21417466 using release `41da85c` (208 local tests passed).
 
 > **Compute Canada update, 2026-09-19:** empirical P03 integrity/schema checks are
 > deployed for six families; masked-fMRI and COGITATE-fMRI P04 harmonizers are queued

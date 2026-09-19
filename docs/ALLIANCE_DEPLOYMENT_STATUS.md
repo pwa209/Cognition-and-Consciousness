@@ -24,6 +24,13 @@ scientific model, prior, participants and predictors unchanged. MRI pilot 214171
 is executing actual fMRIPrep workflows (image validation, nonsteady-state detection,
 anatomical processing); remaining array 21417200 is dependency-pending.
 
+**Sampling extension submitted, 15:41:16 UTC:** release `41da85c6e80d3161ff56e579f20f76baabb60bc1`
+passed **208 local tests** and installed with 207 source files verified. Dry-run
+verified the original preparation and unchanged model/cohort configuration.
+Qualification **21417466** and extended calibration **21417467** were accepted.
+Only sampling counts increase; the first posterior remains intact. This does not
+replace or resubmit MRI jobs, and convergence is still unverified for the extension.
+
 The 14:52 UTC audit found all available acquisition manifests complete and successful
 P03 checks for all seven families. Private DREAM set 8 and the mislinked raw-MEEG
 catalog item remain access/source holds, not missing authorized manifest bytes.
