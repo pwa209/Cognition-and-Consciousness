@@ -41,6 +41,7 @@ def run_phase(
     predecessor: Path | None = None,
     *,
     dry_run: bool = False,
+    predecessor_source: Path | None = None,
 ) -> dict[str, Any]:
     """Execute counts/byte validation or observed-event normalization, no model fitting.
 
@@ -55,7 +56,9 @@ def run_phase(
     if dry_run:
         inputs = resolve_acquired_input(root, dataset)
         if phase == "P04":
-            check_predecessor(root, source, family, inputs.manifest_sha256, predecessor)
+            check_predecessor(
+                root, source, family, inputs.manifest_sha256, predecessor, predecessor_source
+            )
         return {
             "dry_run": True,
             "family": family,
@@ -117,9 +120,12 @@ def run_phase(
             result = verify_downloads(inputs, attempt / "verified-files.jsonl", progress=progress)
             result.update(schema_census="inventory.jsonl", full_archive_crc_checked=False)
         else:
-            check_predecessor(root, source, family, inputs.manifest_sha256, predecessor)
+            check_predecessor(
+                root, source, family, inputs.manifest_sha256, predecessor, predecessor_source
+            )
             details["predecessor"] = str(predecessor)
             details["predecessor_sha256"] = hash_file(predecessor)
+            details["predecessor_source"] = str(predecessor_source or source)
             if family == "cogitate":
                 result = harmonize_cogitate_fmri(
                     inputs,
@@ -163,9 +169,19 @@ def run_phase(
 
 
 def check_predecessor(
-    root: Path, source: Path, family: str, manifest_hash: str, predecessor: Path | None
+    root: Path,
+    source: Path,
+    family: str,
+    manifest_hash: str,
+    predecessor: Path | None,
+    accepted_source: Path | None = None,
 ) -> None:
-    """Require same-run P03 SUCCESS identity, not a scientific effect threshold."""
+    """Require same-run P03 SUCCESS; historical release reuse must be explicit and verified.
+
+    A named earlier producer is allowed only with its immutable source and artifact
+    hashes intact and unchanged family acquisition configuration. This reuses byte
+    integrity evidence, not its scientific adapter or fitted outcomes.
+    """
     if predecessor is None:
         raise ValueError("P03 predecessor required")
     ensure_within(root / "analysis/P03" / family, predecessor)
@@ -174,10 +190,26 @@ def check_predecessor(
         data.get("status") != "SUCCESS"
         or data.get("phase") != "P03"
         or data.get("family") != family
-        or data.get("source_release") != str(source)
+        or data.get("source_release") != str(accepted_source or source)
         or data.get("manifest_sha256") != manifest_hash
     ):
         raise ValueError("P03 predecessor identity/status mismatch")
+    if accepted_source is not None and accepted_source != source:
+        ensure_within(root / "releases", accepted_source)
+        record = read_source_record(root, accepted_source)
+        if record.get("analysis_execution_authorized") is not True:
+            raise ValueError("historical producer is not authorized")
+        if any(hash_file(accepted_source / p) != h for p, h in record["files"].items()):
+            raise ValueError("historical producer source bytes changed")
+        configuration = f"conf/datasets/{family}.yaml"
+        if hash_file(accepted_source / configuration) != hash_file(source / configuration):
+            raise ValueError("historical acquisition configuration changed; repeat P03")
+        if not {"verified-files.jsonl", "report.json"} <= data.get("outputs", {}).keys():
+            raise ValueError("historical P03 integrity artifacts missing")
+        for name, digest in data["outputs"].items():
+            path = ensure_within(predecessor.parent, predecessor.parent / name)
+            if hash_file(path) != digest:
+                raise ValueError("historical P03 output bytes changed")
 
 
 def main() -> int:
@@ -187,6 +219,7 @@ def main() -> int:
     parser.add_argument("--phase", choices=["P03", "P04"], required=True)
     parser.add_argument("--family", required=True)
     parser.add_argument("--predecessor", type=Path)
+    parser.add_argument("--predecessor-source", type=Path)
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
     root = validate_fresh_root(args.root)
@@ -212,6 +245,7 @@ def main() -> int:
                 attempt,
                 args.predecessor,
                 dry_run=args.dry_run,
+                predecessor_source=args.predecessor_source,
             )
         )
     )

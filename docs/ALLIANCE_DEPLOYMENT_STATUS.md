@@ -1,5 +1,16 @@
 # Rorqual deployment status
 
+**Downstream execution layer — 2026-09-19 09:23 UTC:** release `5b8e91f` is installed;
+qualification **21410644 passed 192 tests** and artifact audit **21410645 succeeded**.
+The audit found zero model-ready NPZ candidates. P06 prepared-pattern assembly,
+P07/P08 generative fitting, P09 subject-bootstrap arrays and P10 evidence tables have
+tested Slurm wrappers, but **no empirical P06-P10 jobs are submitted**. Raw preprocessing
+and independent calibration remain missing. See [contracts and exact scope](DOWNSTREAM_EXECUTION_20260919.md).
+Masked P03 **21409959 succeeded**; its P04 successor **21409960 failed** on the source
+token `missing data`. A repair retains all 8,235 such rows as unknown reports and
+preserves the original token; the expanded local suite passed 194 tests. The failed
+attempt remains intact and needs a separately qualified retry.
+
 **Empirical preparation — 2026-09-19:** replacement release `0f43141` installed and
 nine jobs accepted: qualification 21409958, six P03 integrity/schema jobs, and two
 dependent P04 harmonizers (masked fMRI and COGITATE fMRI). Initial qualification

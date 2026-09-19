@@ -113,3 +113,49 @@ def test_p04_harmonization_lifecycle(tmp_path, monkeypatch):
         == 2
     )
     assert json.loads((tmp_path / "p04/status.json").read_text())["status"] == "SUCCESS"
+
+
+def test_historical_p03_reuse_requires_explicit_source_and_intact_artifacts(tmp_path, monkeypatch):
+    from factorcon.util import hash_file
+
+    module = runner()
+    source = Path(__file__).resolve().parents[2]
+    producer = tmp_path / "releases" / ("a" * 40) / "source"
+    configuration = "conf/datasets/masked_content_fmri.yaml"
+    target = producer / configuration
+    target.parent.mkdir(parents=True)
+    target.write_bytes((source / configuration).read_bytes())
+    monkeypatch.setattr(
+        module,
+        "read_source_record",
+        lambda *_: {
+            "analysis_execution_authorized": True,
+            "files": {configuration: hash_file(target)},
+        },
+    )
+    status = tmp_path / "analysis/P03/masked_content_fmri/1/status.json"
+    status.parent.mkdir(parents=True)
+    for name in ("verified-files.jsonl", "report.json"):
+        (status.parent / name).write_text("{}\n")
+    atomic_write_json(
+        status,
+        {
+            "status": "SUCCESS",
+            "phase": "P03",
+            "family": "masked_content_fmri",
+            "source_release": str(producer),
+            "manifest_sha256": "fixture",
+            "outputs": {
+                name: hash_file(status.parent / name)
+                for name in ("verified-files.jsonl", "report.json")
+            },
+        },
+    )
+    with pytest.raises(ValueError, match="identity/status"):
+        module.check_predecessor(tmp_path, source, "masked_content_fmri", "fixture", status)
+    module.check_predecessor(tmp_path, source, "masked_content_fmri", "fixture", status, producer)
+    (status.parent / "report.json").write_text("changed")
+    with pytest.raises(ValueError, match="output bytes"):
+        module.check_predecessor(
+            tmp_path, source, "masked_content_fmri", "fixture", status, producer
+        )

@@ -136,6 +136,10 @@ def harmonize_bids_events(
                 if missing := required - row.keys():
                     raise IntegrityError(f"ds003927 event columns missing: {sorted(missing)}")
                 visibility = _first(row, ("visibility",))
+                # Pinned source contains 8,235 explicit missing-report rows. Preserve
+                # them and the original token, never convert missingness into E=0.
+                if visibility == "missing data":
+                    visibility = None
                 if visibility not in {None, "unconscious", "glimpse", "conscious"}:
                     raise IntegrityError(f"Unrecognized ds003927 visibility: {visibility}")
                 category = _first(row, ("targets",))
@@ -143,6 +147,8 @@ def harmonize_bids_events(
                     raise IntegrityError(f"Unrecognized ds003927 target category: {category}")
                 record = replace(
                     record,
+                    observed_experience=visibility,
+                    report_availability="available" if visibility is not None else "unknown",
                     condition=category or "unspecified",
                     stimulus_id=_first(row, ("paths", "labels")),
                     stimulus_features={

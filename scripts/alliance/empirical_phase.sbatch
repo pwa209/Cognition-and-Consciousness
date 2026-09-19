@@ -22,4 +22,5 @@ assert json.load(open(sys.argv[1]))['status']=='SUCCESS'
 PY
 args=(--root "$FACTORCON_ALLIANCE_ROOT" --phase "$FACTORCON_PHASE" --family "$FACTORCON_FAMILY")
 if [[ -n "${FACTORCON_PREDECESSOR:-}" ]]; then args+=(--predecessor "$FACTORCON_PREDECESSOR"); fi
+if [[ -n "${FACTORCON_PREDECESSOR_SOURCE:-}" ]]; then args+=(--predecessor-source "$FACTORCON_PREDECESSOR_SOURCE"); fi
 python -u scripts/alliance/empirical_phase.py "${args[@]}"

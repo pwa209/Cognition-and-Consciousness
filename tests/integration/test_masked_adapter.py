@@ -59,6 +59,18 @@ def test_masked_counts_and_schema_mismatches_stop_affected_adapter(tmp_path):
         harmonize_bids_events(config(), tmp_path)
 
 
+def test_explicit_missing_data_is_unknown_and_retained(tmp_path):
+    source = event_fixture(tmp_path)
+    source.write_text(source.read_text(encoding="utf-8-sig").replace("unconscious", "missing data"))
+    records, counts = harmonize_bids_events(config(), tmp_path)
+    assert counts["records"] == 2
+    row = records[0]
+    assert row.observed_experience is None
+    assert row.report_availability == "unknown"
+    assert row.metadata["visibility_ordinal_code"] is None
+    assert row.metadata["source_fields"]["visibility"] == "missing data"
+
+
 def test_event_path_resolution_cannot_escape_root(tmp_path, monkeypatch):
     source = event_fixture(tmp_path)
     original = Path.resolve

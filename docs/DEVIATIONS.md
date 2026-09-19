@@ -168,3 +168,15 @@ This ledger is part of the transparent non-preregistered record. Add entries chr
   replicates. Also repair paired_pattern_summary to require identical scored dimensions,
   as well as subjects and weights, before model comparison. Earlier paired artifacts
   were not rewritten. See DOWNSTREAM_EXECUTION_20260919.md for exact scope/contracts.
+  A subsequent live audit found masked P04 21409960 failed on the literal visibility
+  token `missing data`. Census across 380 source event files found 8,235 such rows,
+  alongside the three recognized visibility levels and 760 n/a rows. Normalize only
+  this verified literal to unknown experience/report availability and no ordinal
+  value, retaining the row and original source token. Never equate it with E=0 or
+  silently omit it. Preserve the failed attempt; a new qualified release is needed
+  before a retry. This is a source-missingness repair, not outcome-based selection.
+  Allow explicitly named earlier same-run P03 evidence for a newer P04 adapter only
+  after checking producer release authorization, all producer source hashes, unchanged
+  family acquisition configuration, same family/manifest identity and all P03 output
+  hashes. Default remains same-release. Record both producer and consumer releases;
+  do not falsify the old marker or rehash 159 GB solely because an event parser changed.

@@ -132,3 +132,36 @@ error control or population-wide consciousness probabilities.
 
 No extra account login is required merely to finish the source code. Missing neural
 inputs are implementation work, not something the owner should fabricate or upload.
+
+## Deployment receipt
+
+- Source release: `5b8e91f130ede82fa9cefe6a06f6d4c24d693be2`, pushed to
+  `codex/alliance-fresh-20260916` and installed as a new immutable Rorqual release.
+- Receiver verified 193 committed files; archive SHA-256:
+  `73db41629f46aa1ca60de4e7c75be3a5ee477ff8cc038640d933b176913bb040`.
+- Local verification: **192 tests passed**, 59.43 seconds; Ruff, Bash syntax and
+  diff whitespace checks passed. The duplicate-ZIP-member test intentionally emits
+  one Python warning. These tests use synthetic fixtures, not participant findings.
+- At 09:21:18 UTC, qualification **21410644** and neural artifact audit **21410645**
+  were accepted by Slurm; the audit depends on successful qualification.
+- Dispatcher explicitly returned `empirical_jobs_submitted: false` because no
+  verified neural-bundle campaign was available. **No empirical P06-P10 jobs were
+  queued.** Existing P03/P04/P05 jobs were not cancelled or restarted.
+- Predeployment host/owner/personal quota were checked live: Rorqual / pwa209,
+  approximately 6,411 GB of personal 20 TB scratch and 645K/1M files. Shared-project
+  quota warnings were not used as permission to store this study under `/project`.
+- Qualification **21410644 subsequently passed 192 tests** in 61.54 seconds; audit
+  **21410645 succeeded**, finding zero NPZ candidates. This confirms missing upstream
+  neural inputs, not empirical scientific completion.
+
+### Masked-event upstream repair
+
+The same audit exposed P04 masked-fMRI job **21409960 FAILED**, following successful
+P03 **21409959**. The source census across all 380 event files found visibility counts:
+760 n/a, 47,453 conscious, 77,333 unconscious, 58,308 glimpse and **8,235 missing data**.
+These are event-file rows, not asserted independent trials. The literal missing-data
+token is now retained as an unknown report with no ordinal/E value; original fields
+and every row remain available. An explicit predecessor-release option verifies old
+P03 source/output hashes and unchanged acquisition configuration before reusing its
+byte-integrity evidence with the repaired P04 adapter. No completed P03 marker is
+rewritten. Expanded local tests: **194 passed**, 59.84 seconds, plus lint/Bash checks.
