@@ -141,3 +141,10 @@ This ledger is part of the transparent non-preregistered record. Add entries chr
   MEEG (501 event files/100 participants) and iEEG (38/38) inventory counts only;
   their distinct trigger streams are not parsed by the fMRI adapter. Add safe TAR
   metadata census for BMVP; RAR remains explicitly unparsed.
+  Qualification 21409777 retained a filesystem-sensitive mutation-test failure
+  (177 passed, one failed): a same-size rewrite had no distinguishable mtime in
+  that run. Extend the before/after identity tuple with ctime and inode, and make
+  the concurrent-rewrite test use a guaranteed size change. The separate test of
+  same-size corruption with restored mtime still verifies SHA-256 rejection. This
+  is not a guarantee against a writer mutating bytes after verification; production
+  raw inputs must remain quiescent. Preserve failed qualification and job receipts.

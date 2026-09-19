@@ -63,3 +63,42 @@ or invalid calibration as null scientific effects.
 
 Targeted empirical-input, lifecycle, submission and COGITATE parser tests: 32 passed locally.
 Deployment IDs and final full-suite evidence will be appended after live verification.
+
+## Deployment receipt
+
+Source release `34fce0750e2771e7e679d3d77cc2f129b3d92b0d` was installed under the
+existing personal fresh run, with 182 source files verified. Archive SHA-256:
+`a7e45d639b3e534e46f2cc81a5985ebd662c74cb3613197dacdf194586fd65c9`.
+No acquisition release or original source snapshot was overwritten.
+
+Local full suite: **178 passed** (56.49 s); targeted Ruff and Bash syntax passed.
+The warning is from the deliberately duplicated ZIP-path test fixture.
+
+| Submitted job | Purpose | Dependency |
+|---|---|---|
+| 21409777 | Isolated environment and full tests | None |
+| 21409778 | P03 masked fMRI | Qualification success |
+| 21409779 | P04 masked fMRI | 21409778 success |
+| 21409781 | P03 awakening EEG | Qualification success |
+| 21409782 | P03 Volition fMRI | Qualification success; 21409778 terminal |
+| 21409783 | P03 COGITATE | Qualification success; 21409781 terminal |
+| 21409784 | P04 COGITATE fMRI only | 21409783 success |
+| 21409785 | P03 public DREAM | Qualification success; 21409782 terminal |
+| 21409786 | P03 BMVP | Qualification success; 21409783 terminal |
+
+At 08:40 UTC, qualification was RUNNING and all eight preparation jobs were pending
+on their declared dependencies. These are submission receipts, not completion claims.
+Personal quota before deployment: 6,398 GB / 20 TB and 624K / 1M files. Shared-project
+quota warnings are unrelated; these jobs use no shared-project data/output paths.
+
+Private scheduler receipts/logs:
+`operations/empirical-deployment/34fce0750e2771e7e679d3d77cc2f129b3d92b0d/`.
+Stage artifacts: `analysis/PHASE/FAMILY/JOB_ID/`. None are committed to Git.
+
+**Qualification correction:** 21409777 finished FAILED with 177 passed and one
+filesystem-sensitive test failure. Its concurrent-mutation fixture happened to
+replace a file with an equal-length string and relied on an mtime change that was
+not observable in that run. Add ctime/inode to change checks and give this fixture
+a guaranteed different length. Same-size corruption with restored mtime remains a
+separate SHA-256 test. Initial dependent jobs must be cancelled/replaced explicitly;
+they did not start empirical work. Records of the failed attempt remain intact.

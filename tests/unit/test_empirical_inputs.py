@@ -129,7 +129,10 @@ def test_changed_file_during_hash_rejected(tmp_path, monkeypatch):
 
     def changing(p):
         value = original(p)
-        path.write_text("changed during hash")
+        # Parallel filesystems can expose coarse timestamps; guarantee a size change.
+        replacement = b"changed during hash; deliberately a different byte count"
+        assert len(replacement) != path.stat().st_size
+        path.write_bytes(replacement)
         return value
 
     monkeypatch.setattr(empirical, "hash_file", changing)

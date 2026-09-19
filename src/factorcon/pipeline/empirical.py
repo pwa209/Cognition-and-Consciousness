@@ -174,9 +174,11 @@ def verify_downloads(
                 )
             digest = hash_file(path)
             after = path.stat()
-            if (before.st_size, before.st_mtime_ns) != (
+            if (before.st_size, before.st_mtime_ns, before.st_ctime_ns, before.st_ino) != (
                 after.st_size,
                 after.st_mtime_ns,
+                after.st_ctime_ns,
+                after.st_ino,
             ) or digest != expected:
                 raise IntegrityError(f"file changed or SHA-256 mismatch: {record.relative_path}")
             if record.checksum_algorithm == "sha256" and digest != record.checksum.lower():
