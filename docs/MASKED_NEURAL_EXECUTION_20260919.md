@@ -90,3 +90,35 @@ Only verified outputs count as complete, not a queued job or zero exit alone.
 Local tests use tiny synthetic path/event fixtures, not real MRI. A real cluster
 pilot is still needed to validate container behavior and empirical output naming.
 No other dataset family is declared preprocessed by this release.
+
+## Deployment receipt (2026-09-19 15:29:55 UTC)
+
+Code `5c3cb879099efd4b59b210d6fc109af218a74447` is on the project GitHub branch and
+installed as an immutable fresh-run release; 204 transferred source files verified.
+Local full suite: 207 passed. Reference prefetch completed (256 hashed files).
+Licence contents are private and absent from this repository.
+
+| Scheduler job | Scope | State at 15:31 UTC |
+|---|---|---|
+| 21417196 | Isolated software/tests | Running |
+| 21417197 | Trial/run preparation | Pending qualification |
+| 21417198 | Independent report posterior | Pending preparation |
+| 21417199 | First-participant actual fMRIPrep | Pending preparation |
+| 21417200_[1-6%2] | Remaining six participants | Pending technical pilot |
+
+Receipt directory, relative to the personal fresh root:
+`operations/masked-neural/5c3cb879099efd4b59b210d6fc109af218a74447/`.
+Private stage outputs are under `analysis/masked-neural/`. Submitted is not complete.
+
+### Initial execution (15:33 UTC)
+
+Qualification passed all 207 tests remotely. PREPARE completed with 12,087 actual
+trials, 521 missing reports, 186 missing frame counts and 3,447 calibration trials.
+The first report fit completed at 15:31:56 UTC but has R-hat 2.51947 and minimum
+bulk ESS 4.79452: **not reliable for interpretation**. A sampling-only extension is
+specified in `conf/masked_report_sampling_extension.yaml`: four chains, 20,000
+warmup and 10,000 retained draws each. Its runner verifies producer and consumer
+releases, unchanged scientific configuration and every prepared-input hash; it
+preserves the original posterior. Future warnings remain visible. MRI pilot 21417199
+was running at 15:33 UTC, with the six remaining participants pending that technical
+predecessor. No neural inference depends on this unconverged posterior yet.

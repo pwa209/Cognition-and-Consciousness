@@ -159,3 +159,51 @@ def test_prepare_failure_preserved_and_successful_new_attempt(tmp_path, monkeypa
     m.run_phase(root, source, "PREPARE", base / "retry", p03=p03, producer=source)
     assert load_structured(base / "retry/status.json")["status"] == "SUCCESS"
     assert load_structured(base / "failed/status.json")["status"] == "FAILED"
+
+
+def test_sampling_extension_lifecycle_preserves_model_and_failures(tmp_path, monkeypatch):
+    m = module("extend_masked_report", monkeypatch)
+    source, root, _raw, _p03 = fixture(tmp_path)
+    atomic_write_json(
+        source / "conf/masked_report_sampling_extension.yaml",
+        load_structured(SOURCE / "conf/masked_report_sampling_extension.yaml"),
+    )
+    original = load_structured(source / "conf/analysis_spec.yaml")
+    spec = m.extended_spec(source)
+    assert spec["report_measurement"]["draws"] == 10000
+    original["report_measurement"].update(draws=10000, warmup=20000)
+    assert spec == original
+    prepared = root / "analysis/masked-neural/PREPARE/1/status.json"
+    atomic_write_json(prepared, {"status": "SUCCESS"})
+    atomic_write_json(prepared.with_name("calibration-input.json"), {"fixture": True})
+    monkeypatch.setattr(m, "preparation", lambda *_: None)
+    monkeypatch.setattr(m, "load_report_calibration", lambda *_: None)
+    monkeypatch.setattr(m, "ScratchQuotaGuard", lambda _: lambda _: None)
+    base = root / "analysis/masked-neural/CALIBRATE_EXTENDED"
+    assert m.run_extension(root, source, source, prepared, base / "dry", dry_run=True)["dry_run"]
+    assert not (base / "dry").exists()
+
+    def fail(*_a, **_k):
+        raise ValueError("synthetic sampler failure")
+
+    monkeypatch.setattr(m, "fit_report_file", fail)
+    with pytest.raises(ValueError, match="sampler failure"):
+        m.run_extension(root, source, source, prepared, base / "failed")
+    assert load_structured(base / "failed/status.json")["status"] == "FAILED"
+
+    def fit(path, output, **kwargs):
+        value = {
+            "calibration_ids": ["fixture:1", "fixture:2"],
+            "diagnostic_flags": {"poor_mixing": True},
+            "posterior": {"diagnostics": {"fixture": True}},
+        }
+        atomic_write_json(output, value)
+        return value
+
+    monkeypatch.setattr(m, "fit_report_file", fit)
+    m.run_extension(root, source, source, prepared, base / "retry")
+    assert load_structured(base / "retry/status.json")["status"] == "SUCCESS"
+    assert load_structured(base / "retry/provenance.json")["outputs"]["posterior.json"]
+    assert load_structured(base / "failed/status.json")["status"] == "FAILED"
+    with pytest.raises(FileExistsError):
+        m.run_extension(root, source, source, prepared, base / "retry")

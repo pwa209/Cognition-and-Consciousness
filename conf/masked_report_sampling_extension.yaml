@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "family": "masked_content_fmri",
+  "chains": 4,
+  "warmup": 20000,
+  "draws": 10000,
+  "seed": 260830,
+  "reason": "First empirical run had R-hat 2.519 and minimum bulk ESS 4.795; increase Monte Carlo budget without changing model, cohort, predictors or outcomes.",
+  "scientific_gates": false,
+  "select_best_run_by_scientific_score": false
+}

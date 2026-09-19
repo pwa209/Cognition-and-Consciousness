@@ -1,6 +1,21 @@
 # Project status
 
-Last updated: 2026-09-16
+Last updated: 2026-09-19
+
+## Current implementation and execution
+
+Release `5c3cb87` implements real masked-fMRI raw preprocessing and independent
+report calibration, with 207 passing local tests. Qualification/preparation,
+report-calibration job 21417198, MRI pilot 21417199 and remaining-subject array
+21417200 were submitted on Rorqual at 15:29 UTC, all on personal scratch. See
+[current deployment receipts](ALLIANCE_DEPLOYMENT_STATUS.md) and the
+[scoped implementation/remaining work](MASKED_NEURAL_EXECUTION_20260919.md).
+These are not yet completed MRI derivatives or neural model results. Independent
+neural-noise calibration, task-feature assembly and full empirical P06–P10 bundles
+remain unfinished. Other dataset families' preprocessing is not included here.
+All available acquisition manifests and seven families' P03 checks were complete
+in today's audit; access/source holds are retained explicitly. Earlier dated states
+below are history, not current acquisition counters.
 
 ## Fresh Compute Canada execution
 

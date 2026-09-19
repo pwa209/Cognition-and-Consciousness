@@ -1,5 +1,17 @@
 # Phase-mapped implementation roadmap
 
+> **Masked raw-MRI update, 2026-09-19 15:29 UTC:** release `5c3cb87` passed 207 local
+> tests and is deployed. Actual masked-fMRI preprocessing and independent report
+> calibration are now submitted: qualification 21417196, PREPARE 21417197,
+> CALIBRATE 21417198, MRI pilot 21417199 and remaining six-subject array 21417200.
+> This advances the P04 measurement/P06 raw-preprocessing prerequisites; it does
+> not complete independent neural-noise calibration, task-feature assembly or
+> empirical P06–P10 model inputs. Other families are not declared preprocessed.
+> See [exact scope, source issues and phase mapping](MASKED_NEURAL_EXECUTION_20260919.md).
+> At 15:38 UTC remote qualification passed 207 tests, preparation and initial report
+> fitting completed, and actual MRI processing was running. The first posterior
+> has severe convergence warnings; a computational extension is being deployed.
+
 > **Compute Canada update, 2026-09-19:** empirical P03 integrity/schema checks are
 > deployed for six families; masked-fMRI and COGITATE-fMRI P04 harmonizers are queued
 > behind their own technical predecessors. The initial repaired preparation release

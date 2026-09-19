@@ -1,5 +1,34 @@
 # Rorqual deployment status
 
+**Masked preprocessing/report calibration — 2026-09-19 15:29:55 UTC:** code release
+`5c3cb879099efd4b59b210d6fc109af218a74447` installed with 204 source files verified;
+207 local tests passed. Actual software behind module fmriprep/25.1.1 is 25.1.3;
+256 public reference-template files are prefetched and hashed on personal scratch.
+Owner-provided FreeSurfer licence is installed privately, mode 0600, outside Git.
+Scheduler receipts: qualification **21417196**, preparation **21417197**, disjoint
+report calibration **21417198**, raw MRI pilot **21417199**, six-subject MRI array
+**21417200_[1-6%2]**. At 15:31 UTC qualification was running and successors pending
+their technical dependencies. No model/effect-size selection controls dependencies.
+Personal quota at dispatch: **6,513 GB / 20 TB; 664K / 1,000K files**. Study writes
+remain below the personal fresh root; no shared project storage is used.
+See [implementation and remaining boundaries](MASKED_NEURAL_EXECUTION_20260919.md).
+Independent neural residual/feature calibration and model-ready empirical bundles
+remain unfinished; queued report calibration is not evidence those are complete.
+
+**Execution update, 15:38 UTC:** qualification 21417196 passed **207 tests remotely**;
+preparation 21417197 succeeded (12,087 trials; 3,447 reserved calibration trials).
+Calibration 21417198 completed but has severe mixing warnings (R-hat 2.51947,
+minimum bulk ESS 4.79452), so the posterior is not ready for interpretation.
+A fixed sampling-budget extension preserves the original output and leaves the
+scientific model, prior, participants and predictors unchanged. MRI pilot 21417199
+is executing actual fMRIPrep workflows (image validation, nonsteady-state detection,
+anatomical processing); remaining array 21417200 is dependency-pending.
+
+The 14:52 UTC audit found all available acquisition manifests complete and successful
+P03 checks for all seven families. Private DREAM set 8 and the mislinked raw-MEEG
+catalog item remain access/source holds, not missing authorized manifest bytes.
+Historical partial-download and earlier failed-job records below are preserved.
+
 **Downstream execution layer — 2026-09-19 09:23 UTC:** release `5b8e91f` is installed;
 qualification **21410644 passed 192 tests** and artifact audit **21410645 succeeded**.
 The audit found zero model-ready NPZ candidates. P06 prepared-pattern assembly,

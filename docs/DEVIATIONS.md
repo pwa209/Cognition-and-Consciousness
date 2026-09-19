@@ -197,3 +197,14 @@ This ledger is part of the transparent non-preregistered record. Add entries chr
   no scientific outcome controls dependencies. See MASKED_NEURAL_EXECUTION_20260919.md.
   This does not complete neural residual/feature calibration, dataset-general raw
   integration, common anchors, or empirical P06–P10 input bundles.
+
+- **2026-09-19 calibration computational extension:** the first empirical masked
+  report posterior (job 21417198) completed but had maximum rank/folded split R-hat
+  2.51947 and minimum bulk ESS 4.79452. Preserve it; do not interpret its success
+  marker as calibrated inference. Add one fixed larger run of the identical model,
+  prior, cohort and predictors: four chains, 20,000 warmup and 10,000 retained draws
+  per chain. This responds to Monte Carlo diagnostics, not scientific model scores;
+  no neural evaluation rows are opened and MRI jobs continue independently. Keep
+  diagnostics even if warnings remain; longer sampling is not guaranteed to resolve
+  convergence or identifiability. The derived full analysis configuration is private,
+  hashed and tied to the tracked extension plan. No original posterior is replaced.
