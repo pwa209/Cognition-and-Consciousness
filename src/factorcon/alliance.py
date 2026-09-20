@@ -104,8 +104,8 @@ def parse_personal_quota(report: str) -> PersonalQuota:
     if len(lines) != 1:
         raise CapacityError("exactly one personal /scratch (user pwa209) quota row required")
     pattern = (
-        r"/scratch\s+\(user pwa209\)\s+([\d.]+)\s*(B|KB|MB|GB|TB)\s*/\s*"
-        r"([\d.]+)\s*(B|KB|MB|GB|TB)\s+([\d.]+)\s*([KMG]?)\s*/\s*([\d.]+)\s*([KMG]?)"
+        r"/scratch\s+\(user pwa209\)\s+(?:->\s*)?([\d.]+)\s*(B|KB|MB|GB|TB)\s*/\s*"
+        r"([\d.]+)\s*(B|KB|MB|GB|TB)\s+(?:->\s*)?([\d.]+)\s*([KMG]?)\s*/\s*([\d.]+)\s*([KMG]?)\s*$"
     )
     match = re.search(pattern, lines[0])
     if not match:

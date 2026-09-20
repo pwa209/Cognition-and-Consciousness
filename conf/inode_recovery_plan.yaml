@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "root": "/scratch/pwa209/cognition-and-consciousness/fresh-20260916",
+  "old_mri_array": "21417200",
+  "archive_attempts": ["21417199-0", "21417200-1", "21417200-2"],
+  "mri_source": "5c3cb879099efd4b59b210d6fc109af218a74447",
+  "mri_environment": "qualification-21417196",
+  "mri_subject_indices": [1, 2, 3, 4, 5, 6],
+  "prepared_job": "21417197",
+  "p03_job": "21409959",
+  "p03_source": "0f4314128bf66a58e98aa8e21f703cb5665edd26",
+  "pattern_source": "2d4e03e6b2c9ae582730dfb6778484c754017ef7",
+  "pattern_environment": "qualification-21169236",
+  "pattern_failed_array": "21169423",
+  "expected_failed_replicates": 45,
+  "qualification_environment": "report-pymc-5.24.0-arviz-0.22.0-v1",
+  "mri_start_free_files": 180000,
+  "live_reserve_files": 50000,
+  "live_reserve_bytes": 500000000000,
+  "quota_interval_seconds": 60,
+  "scientific_changes": false,
+  "scientific_gates": false
+}

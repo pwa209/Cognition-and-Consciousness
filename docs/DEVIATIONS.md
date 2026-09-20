@@ -235,3 +235,15 @@ This ledger is part of the transparent non-preregistered record. Add entries chr
   Empirical job 21421582 then completed with maximum R-hat 1.000616, minimum
   bulk/tail ESS 12374.73/8186.17 and zero divergences; all numerical flags clear.
   This resolves the observed sampling problem, not broader scientific limitations.
+
+- **2026-09-20 file-count recovery:** preserve all completed outputs and historical
+  failures while repairing the personal quota parser for its `->` warning marker.
+  Cancel the quota-stalled MRI array 21417200, consolidate only quiescent work and
+  regenerable cache/test files into verified archives, and queue original-code,
+  original-seed retries. MRI concurrency changes from two to one with periodic
+  quota checks and per-participant work archiving. This is storage/runtime repair,
+  not a change in scientific specification or an outcome gate. The 45 failed
+  pattern replicates are selected by the exact quota-parser exception, not scores.
+  Completed MRI pilot and converged calibration are retained without repetition.
+  See INODE_RECOVERY_20260920.md and conf/inode_recovery_plan.yaml for scope,
+  provenance, reconstruction and restart safeguards.

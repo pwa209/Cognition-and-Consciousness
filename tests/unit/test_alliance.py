@@ -33,6 +33,25 @@ def test_personal_quota_not_shared_capacity():
         parse_personal_quota("/scratch (group def-ptewarie) 1GB/100TB 4/1000K")
 
 
+@pytest.mark.parametrize("space_marker,file_marker", [("", "-> "), ("-> ", ""), ("-> ", "-> ")])
+def test_quota_warning_arrows_preserve_actual_limits(space_marker, file_marker):
+    report = f" /scratch (user pwa209) {space_marker}7683GB/20TB {file_marker}998K/1000K"
+    quota = parse_personal_quota(report)
+    assert quota.used_bytes == 7684 * 1000**3
+    assert quota.used_files == 999000 and quota.limit_files == 1000000
+
+
+def test_arrow_warning_still_stops_inode_reserve(tmp_path, monkeypatch):
+    import factorcon.alliance as module
+
+    quota = parse_personal_quota("/scratch (user pwa209) 7683GB/20TB -> 998K/1000K")
+    monkeypatch.setattr(module, "read_personal_quota", lambda: quota)
+    with pytest.raises(CapacityError, match="reserve"):
+        module.ScratchQuotaGuard(tmp_path / "quota.json")(0)
+    with pytest.raises(CapacityError, match="format"):
+        parse_personal_quota("/scratch (user pwa209) 1GB/20TB 1K/1000K unknown")
+
+
 @pytest.mark.parametrize(
     "root",
     [
