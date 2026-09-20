@@ -29,6 +29,16 @@ Bootstrap archive (private personal scratch):
 SHA-256: `872660310b1e2e3e2678be5350afbad8a253b849e32aefc9eec24a9eb055e017`.
 These are recoverable consolidation operations, not deletion of unique research data.
 
+The small bootstrap did not immediately restore new-inode allocation. A second
+verified archive consolidated **5,422** entries from inactive synthetic test trees,
+including **499 symlinks stored only as link metadata** (never followed). This
+preserves fixture bytes and links, and leaves qualification status/provenance and
+test logs in place. The fixture archive is 17,182,720 bytes:
+`operations/inode-fixtures-20260920.tar`, SHA-256
+`f79e989b413ac4fdbf2af05fdd7443fca9d5bb2511bf6b9660da15667244561c`.
+It uses a previously empty synthetic test inode, not a research-data file.
+The second consolidation restored enough headroom to install the repair release.
+
 ## Recovery sequence
 
 1. Verify exact source hashes, Rorqual ownership and terminal scheduler records.
@@ -83,3 +93,27 @@ Local validation before deployment: **238 passed, 4 skipped** (one Windows symli
 privilege test, three tests needing unavailable local ArviZ/PyMC), plus clean Ruff,
 shell syntax and whitespace checks. Server qualification will exercise the full
 suite with the existing PyMC/ArviZ environment; local skips are not counted as passes.
+
+## Live dispatch receipt — 07:07 UTC
+
+Repair release **4f605344e420b1511cbbd5f5dd3093b2cb5e8696** was installed with
+226 source files verified (archive SHA-256
+`c72573435c83ea83f1f0c0fc7ad22e281537eea41f772cd94884dd6bd48c3c7a`).
+
+| Stage | Job ID | Observed state |
+|---|---|---|
+| Archive three historical MRI work trees | 21450695 | RUNNING; 21 server archive/quota tests passed |
+| Full server qualification | 21450696 | PENDING after successful archive |
+| Pattern replicates 155–199, same seeds/code | 21450697 | PENDING; concurrency one, after qualification |
+| Remaining MRI subject indices 1–6 | 21450698, 21450699, 21450700, 21450701, 21450703, 21450704 | PENDING in a sequential afterok chain |
+
+The first MRI retry depends on qualification; subsequent MRI retries depend on
+their predecessor completing both preprocessing and verified work consolidation.
+The quota snapshot reported **7,685 GB / 20 TB and 994K / 1,000K files**. This is
+the small-bootstrap improvement, not a claim that the large MRI archives have
+completed. Other jobs using the same personal quota were observed but not modified.
+
+The additional fixture-bootstrap implementation and fixture test were then validated
+locally with **239 passed, 4 skipped**, with the same local limitations above.
+Private detailed receipts remain on personal scratch and in the ignored local
+SSH bridge work directory; Git contains code and aggregate operational records only.

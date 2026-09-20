@@ -1,5 +1,15 @@
 # Phase-mapped implementation roadmap
 
+> **Storage recovery, 2026-09-20 07:07 UTC:** completed MRI pilot 21417199 and
+> converged report calibration 21421582 are retained. The quota-stalled MRI array
+> 21417200 is canceled, preserving failed attempts. Verified work-archive job
+> 21450695 is running; server qualification 21450696, original-code retries for
+> 45 quota-parser-failed P05 patterns (21450697), and six serial MRI retries
+> (21450698–21450704, excluding 21450702) are queued behind technical dependencies.
+> Every successful MRI retry archives its work before the next participant starts.
+> This restores operational prerequisites, not empirical P06–P10 findings. See
+> [storage repair, exact job IDs and preservation safeguards](INODE_RECOVERY_20260920.md).
+
 > **Report-sampler repair, 2026-09-19:** longer Gibbs run 21417467 finished but remains
 > unconverged. Independent ArviZ diagnostics confirm the upper-threshold bottleneck.
 > A same-probability-model marginal NUTS backend and synthetic qualification workflow
