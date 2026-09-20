@@ -44,6 +44,12 @@ live source identities are rechecked before any loose copy is removed. Research
 inputs/outputs cannot be archive targets. These are reversible consolidation
 operations, not purges of unique information.
 
+The non-atomic directory census measured approximately **426K total project entries**:
+123,889 raw-data entries; 217,741 analysis entries (mostly MRI work);
+72,424 environment entries; 5,083 cache entries; and approximately 7K source,
+qualification, operational and other metadata entries. The consolidation target is
+about **59% of this project's entries**, with no conversion/removal of raw data.
+
 For an old result rerun, first restore the matching archived environment to its
 **original absolute path**, after inspecting its manifest and verifying every
 checksum. Do not activate it directly from a different extraction path: venv
@@ -64,3 +70,17 @@ Commands: `scripts/alliance/archive_environments.sbatch` runs the versioned
 separate operational status/provenance under `operations/environment-consolidation`.
 Packing and retirement have tested dry-run, checksum rejection, success, failure
 and interrupted-retirement restart behavior; failed packing is never overwritten.
+
+## Dispatch
+
+Release `dd8e28269139275a5ecbb25d0f620e8af45f2d6b` was deployed with 233 source
+files verified (archive SHA-256
+`a68614f7d4bb8f7f0d7a7adb17ad505e51f2582d8a25c79b245ccf6c35632011`).
+Additional environment archive job **21451328** was submitted independently of the
+MRI archive/retry chain. At 07:22 UTC it was pending scheduler priority. MRI archive
+21450695 was still running, with 137.8 GB copied into the first tar at 07:21 UTC;
+its original work files had not yet been retired. No large-archive completion is
+claimed at that snapshot. Local validation: **241 passed, 5 skipped** (two Windows
+symlink-privilege checks and three missing-local-ArviZ/PyMC tests), clean Ruff and
+shell syntax. The environment archive job runs its scoped tests again on Linux
+before any retirement.
