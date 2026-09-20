@@ -84,3 +84,20 @@ claimed at that snapshot. Local validation: **241 passed, 5 skipped** (two Windo
 symlink-privilege checks and three missing-local-ArviZ/PyMC tests), clean Ruff and
 shell syntax. The environment archive job runs its scoped tests again on Linux
 before any retirement.
+
+### Verified completion of additional environment consolidation
+
+Job **21451328** completed its operational work successfully at **07:26:38 UTC**.
+All seven archives have `RETIRED` markers, per-file and whole-tar SHA-256 evidence,
+and `source_removed=true`: **43,953 loose entries consolidated** into seven tars
+and their small manifests/status/provenance records. All ten scoped Linux tests
+passed before retirement. The three protected current runtimes were not targeted.
+The old environments are recoverable from `archives/environments/<name>/work.tar`.
+
+At **07:26:41 UTC**, the entire personal scratch allocation reported **953,241
+entries** (not this project's count). MRI consolidation was still running, with
+173.7 GB copied into the first tar and no original MRI work removed yet. Thus the
+additional ~209K-entry MRI reduction remains pending verification/retirement.
+The personal counter also includes ongoing changes from other projects.
+The proposed one-hour scheduler backfill adjustment was not applied because the
+environment job had already started; its submitted four-hour bound stayed intact.

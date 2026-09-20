@@ -1,5 +1,13 @@
 # Phase-mapped implementation roadmap
 
+> **Additional consolidation, 2026-09-20 07:26 UTC:** job 21451328 successfully
+> combined 43,953 entries from seven inactive software environments into verified,
+> recoverable archives, protecting current MRI/P05/PyMC runtimes. MRI work archiving
+> continues separately. Combined target is approximately 253K fewer project entries
+> (~59% of the measured project count), not yet a completed reduction. Raw data,
+> completed outputs and scientific specifications remain unchanged. See
+> [file-count reduction and verified completion receipt](FILE_COUNT_REDUCTION_20260920.md).
+
 > **Storage recovery, 2026-09-20 07:07 UTC:** completed MRI pilot 21417199 and
 > converged report calibration 21421582 are retained. The quota-stalled MRI array
 > 21417200 is canceled, preserving failed attempts. Verified work-archive job
