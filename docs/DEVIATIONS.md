@@ -247,3 +247,12 @@ This ledger is part of the transparent non-preregistered record. Add entries chr
   Completed MRI pilot and converged calibration are retained without repetition.
   See INODE_RECOVERY_20260920.md and conf/inode_recovery_plan.yaml for scope,
   provenance, reconstruction and restart safeguards.
+
+- **2026-09-20 additional inode consolidation:** the owner requested a significant
+  further reduction. Add lossless archiving of seven terminal, unconsumed older
+  qualification environments (43,953 entries), protecting the three runtimes used
+  by current work. Keep original source releases, package inventories, logs, all
+  raw data and completed derivatives directly readable. Reconstruct old environments
+  at their original paths when needed. Current MRI archive/retry jobs are unchanged.
+  No scientific specification, seed, participant partition or outcome is altered.
+  See FILE_COUNT_REDUCTION_20260920.md for targets and consumer/restore safeguards.

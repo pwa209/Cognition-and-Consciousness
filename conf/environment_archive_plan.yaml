@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "root": "/scratch/pwa209/cognition-and-consciousness/fresh-20260916",
+  "targets": ["qualification-21169188", "qualification-21409777", "qualification-21409958", "qualification-21410131", "qualification-21410644", "qualification-21410793", "qualification-21417466"],
+  "protected": ["qualification-21169236", "qualification-21417196", "report-pymc-5.24.0-arviz-0.22.0-v1"],
+  "active_campaign_source": "4f605344e420b1511cbbd5f5dd3093b2cb5e8696",
+  "expected_members_each": 6279,
+  "expected_total_members": 43953,
+  "reserve_bytes": 500000000000,
+  "scientific_changes": false
+}

@@ -1,4 +1,4 @@
-"""Verified consolidation of quiescent MRI work trees, never raw data or derivatives."""
+"""Verified consolidation of quiescent MRI work or retired environments, never research inputs."""
 
 from __future__ import annotations
 
@@ -27,6 +27,32 @@ def work_target(root: Path, work: Path) -> Path:
     return work
 
 
+def environment_target(root: Path, environment: Path) -> Path:
+    """Accept only numeric qualification environments; explicitly protect current MRI/P05 runtimes.
+
+    The caller additionally checks live scheduler consumers. This function never
+    permits raw data, derivatives, source releases or the named PyMC environment.
+    """
+    if (
+        root.resolve() != root
+        or environment.resolve() != environment
+        or environment.parent != root / "environments"
+        or not re.fullmatch(r"qualification-\d+", environment.name)
+        or environment.name in {"qualification-21169236", "qualification-21417196"}
+    ):
+        raise ValueError("only an inactive numeric qualification environment is permitted")
+    return environment
+
+
+def _target(root: Path, path: Path, category: str) -> None:
+    if category == "mri-work":
+        work_target(root, path)
+    elif category == "environments":
+        environment_target(root, path)
+    else:
+        raise ValueError("unknown archive category")
+
+
 def identity(path: Path) -> dict[str, Any]:
     """Capture non-followed filesystem identity, bytes and modification metadata, not outcomes."""
     s = path.lstat()
@@ -53,16 +79,23 @@ def identity(path: Path) -> dict[str, Any]:
     }
 
 
-def inventory(root: Path, work: Path) -> dict[str, dict[str, Any]]:
-    """Enumerate a quiescent work tree without following links; reject targets outside study."""
-    work_target(root, work)
-    rows = {"work": identity(work)}
+def inventory(root: Path, work: Path, *, category: str = "mri-work") -> dict[str, dict[str, Any]]:
+    """Enumerate a quiescent scoped tree; only environment links may point to read-only CVMFS."""
+    _target(root, work, category)
+    rows = {work.name: identity(work)}
     for folder, dirs, files in os.walk(work, followlinks=False):
         for name in sorted(dirs + files):
             path = Path(folder) / name
             row = identity(path)
-            if row["kind"] == "symlink" and not path.resolve().is_relative_to(root):
-                raise ValueError("work link resolves outside study root")
+            if (
+                row["kind"] == "symlink"
+                and not path.resolve().is_relative_to(root)
+                and (
+                    category != "environments"
+                    or not path.resolve().is_relative_to(Path("/cvmfs"))
+                )
+            ):
+                raise ValueError("archive link resolves outside approved study/software roots")
             rows[path.relative_to(work.parent).as_posix()] = row
     return dict(sorted(rows.items()))
 
@@ -122,20 +155,32 @@ def _verify_member(
             raise ValueError("archive checksum mismatch")
 
 
-def pack(root: Path, work: Path, destination: Path, *, dry_run: bool = False) -> dict[str, Any]:
+def pack(
+    root: Path,
+    work: Path,
+    destination: Path,
+    *,
+    dry_run: bool = False,
+    category: str = "mri-work",
+) -> dict[str, Any]:
     """Create a new verified tar plus manifest; never remove originals in this operation.
 
     Caller must establish job quiescence. No raw/derivative data are targeted. Bytes
     are copied exactly, with symlinks preserved rather than followed. A failed
     attempt cannot be overwritten; a retry requires another destination directory.
     """
-    rows = inventory(root, work)
+    rows = inventory(root, work, category=category)
     total = sum(row["bytes"] for row in rows.values())
     if destination.resolve() != destination or not destination.is_relative_to(
-        root / "archives/mri-work"
+        root / "archives" / category
     ):
-        raise ValueError("archive destination must be inside study archives/mri-work")
-    summary = {"source": str(work), "members": len(rows), "source_bytes": total}
+        raise ValueError("archive destination must be inside its scoped study archive category")
+    summary = {
+        "source": str(work),
+        "members": len(rows),
+        "source_bytes": total,
+        "category": category,
+    }
     if dry_run:
         return {**summary, "dry_run": True}
     destination.mkdir(parents=True, exist_ok=False)
@@ -187,7 +232,9 @@ def pack(root: Path, work: Path, destination: Path, *, dry_run: bool = False) ->
     return state
 
 
-def retire(root: Path, work: Path, destination: Path) -> dict[str, Any]:
+def retire(
+    root: Path, work: Path, destination: Path, *, category: str = "mri-work"
+) -> dict[str, Any]:
     """Remove only verified duplicate work members, retaining recoverable tar and manifest.
 
     No broad recursive deletion is used. Validate archive SHA, member payloads and
@@ -195,12 +242,14 @@ def retire(root: Path, work: Path, destination: Path) -> dict[str, Any]:
     the recorded immutable inventory. Raw data, derivative paths and attempt logs
     cannot be targets. The caller must keep the source job quiescent throughout.
     """
-    work_target(root, work)
+    _target(root, work, category)
     if destination.resolve() != destination or not destination.is_relative_to(
-        root / "archives/mri-work"
+        root / "archives" / category
     ):
         raise ValueError("invalid archive destination")
     state = load_structured(destination / "status.json")
+    if state.get("category", "mri-work") != category:
+        raise ValueError("archive category mismatch")
     if state.get("status") not in {"VERIFIED", "RETIRING", "RETIRED"} or state.get("source") != str(
         work
     ):
@@ -215,7 +264,7 @@ def retire(root: Path, work: Path, destination: Path) -> dict[str, Any]:
             raise ValueError("retired source unexpectedly reappeared")
         return state
     if work.exists():
-        current = inventory(root, work)
+        current = inventory(root, work, category=category)
         if not current.keys() <= rows.keys():
             raise ValueError("new source member appeared")
         for name, row in current.items():
