@@ -256,3 +256,15 @@ This ledger is part of the transparent non-preregistered record. Add entries chr
   at their original paths when needed. Current MRI archive/retry jobs are unchanged.
   No scientific specification, seed, participant partition or outcome is altered.
   See FILE_COUNT_REDUCTION_20260920.md for targets and consumer/restore safeguards.
+
+- **2026-09-21 MRI plotting compatibility:** after two additional MRI participants
+  completed, job 21450700 failed in diagnostic plotting because fMRIPrep's custom
+  warning handler does not accept Python 3.12's `skip_file_prefixes` keyword. Add an
+  exact-checksum, read-only single-file container bind accepting that keyword while
+  retaining the original warning logging body. Test the baseline failure and fixed
+  plotting/warnings in the original container and a forkserver worker before four
+  unfinished participant retries. Preserve completed subjects, original source,
+  settings, cohort partition, calibration, old failed work and all failure records.
+  Fresh retries recompute from raw inputs; no incomplete outputs are promoted.
+  This technical repair is not a scientific change or outcome gate. See
+  MRI_WARNING_REPAIR_20260921.md and conf/mri_warning_recovery_plan.yaml.

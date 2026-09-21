@@ -1,4 +1,4 @@
-"""Storage-only recovery using original science releases, immutable attempts and verified tars."""
+"""Technical recovery using original science releases, immutable attempts and verified tars."""
 
 from __future__ import annotations
 
@@ -123,7 +123,7 @@ class _ProcessProxy:
 
 
 def retry_legacy(root: Path, repair: Path, plan: dict[str, Any], mode: str) -> None:
-    """Execute original MRI/simulation code with only a runtime quota parser repair.
+    """Execute original MRI/simulation code with quota and optional warning-signature repairs.
 
     Python must start with the original release's PYTHONPATH. Preserve seeds,
     scenario counts, model code, calibration partition and configuration hashes.
@@ -185,6 +185,18 @@ def retry_legacy(root: Path, repair: Path, plan: dict[str, Any], mode: str) -> N
     guard(0)
     guard.reserve_files = plan["live_reserve_files"]
     module.subprocess = _ProcessProxy(guard, plan["quota_interval_seconds"])
+    if spec := plan.get("warning_compatibility"):
+        compatibility = load_module(
+            "warning_compatibility", repair / "scripts/alliance/fmriprep_warning_compat.py"
+        )
+        patch = compatibility.prepare_patch(root, repair, spec)
+        original_runtime = module.runtime
+
+        def patched_runtime(*args: Any) -> Any:
+            prefix, env = original_runtime(*args)
+            return compatibility.bind_patch(prefix, patch, spec), env
+
+        module.runtime = patched_runtime
     kwargs = {
         "p03": root / "analysis/P03/masked_content_fmri" / plan["p03_job"] / "status.json",
         "producer": root / "releases" / plan["p03_source"] / "source",
@@ -200,9 +212,15 @@ def main() -> int:
     """Run a Slurm recovery stage with atomic status/provenance and unchanged scientific fitting."""
     parser = argparse.ArgumentParser()
     parser.add_argument("--mode", choices=["archive", "qualify", "mri", "pattern"], required=True)
+    parser.add_argument(
+        "--plan",
+        choices=["inode_recovery_plan.yaml", "mri_warning_recovery_plan.yaml"],
+        default="inode_recovery_plan.yaml",
+    )
     args = parser.parse_args()
     repair = Path(__file__).resolve().parents[2]
-    plan = load_structured(repair / "conf/inode_recovery_plan.yaml")
+    plan_path = repair / "conf" / args.plan
+    plan = load_structured(plan_path)
     root = validate_fresh_root(Path(plan["root"]))
     verify_source(root, repair)
     job = os.environ["SLURM_JOB_ID"]
@@ -217,7 +235,8 @@ def main() -> int:
         "status": "RUNNING",
         "mode": args.mode,
         "repair_source": str(repair),
-        "plan_sha256": hash_file(repair / "conf/inode_recovery_plan.yaml"),
+        "plan_sha256": hash_file(plan_path),
+        "plan": args.plan,
         "job": job,
         "task": task,
         "started_utc": utc_now(),
@@ -283,11 +302,59 @@ def main() -> int:
                 cwd=repair,
                 check=True,
             )
+            if spec := plan.get("warning_compatibility"):
+                compatibility = load_module(
+                    "warning_compatibility", repair / "scripts/alliance/fmriprep_warning_compat.py"
+                )
+                patch = compatibility.prepare_patch(root, repair, spec)
+                source = root / "releases" / plan["mri_source"] / "source"
+                verify_source(root, source)
+                sys.path.insert(0, str(source / "scripts/alliance"))
+                legacy = load_module(
+                    "qualify_masked_runtime", source / "scripts/alliance/masked_neural_phase.py"
+                )
+                prefix, env = legacy.runtime(
+                    root, load_structured(source / "conf/masked_neural_plan.yaml")
+                )
+                for mode in ["baseline", "patched"]:
+                    command = (
+                        prefix
+                        if mode == "baseline"
+                        else compatibility.bind_patch(prefix, patch, spec)
+                    )
+                    with (attempt / f"warning-smoke-{mode}.log").open("x") as stream:
+                        subprocess.run(
+                            [
+                                *command,
+                                "python",
+                                str(repair / "scripts/alliance/warning_compat_smoke.py"),
+                                "--mode",
+                                mode,
+                                "--output",
+                                str(attempt / f"smoke-{mode}"),
+                            ],
+                            env=env,
+                            stdout=stream,
+                            stderr=subprocess.STDOUT,
+                            check=True,
+                            timeout=300,
+                        )
+                details["warning_smoke_passed"] = True
+                details["warning_patch_sha256"] = hash_file(patch)
+                details["warning_smoke_sha256"] = {
+                    path.name: hash_file(path) for path in attempt.glob("warning-smoke-*.log")
+                }
         else:
             qualification = load_structured(operations / "qualification.json")["job_id"]
             state = load_structured(operations / f"qualify-{qualification}-single/status.json")
-            if state.get("status") != "SUCCESS" or state.get("repair_source") != str(repair):
+            if (
+                state.get("status") != "SUCCESS"
+                or state.get("repair_source") != str(repair)
+                or state.get("plan_sha256") != hash_file(plan_path)
+            ):
                 raise ValueError("successful same-repair qualification required")
+            if plan.get("warning_compatibility") and state.get("warning_smoke_passed") is not True:
+                raise ValueError("container warning regression must pass")
             retry_legacy(root, repair, plan, args.mode)
         details.update(status="SUCCESS", ended_utc=utc_now())
     except BaseException as exc:

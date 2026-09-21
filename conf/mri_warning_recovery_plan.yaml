@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "root": "/scratch/pwa209/cognition-and-consciousness/fresh-20260916",
+  "mri_source": "5c3cb879099efd4b59b210d6fc109af218a74447",
+  "mri_environment": "qualification-21417196",
+  "mri_subject_indices": [3, 4, 5, 6],
+  "previous_jobs": {"3": "21450700", "4": "21450701", "5": "21450703", "6": "21450704"},
+  "prepared_job": "21417197",
+  "p03_job": "21409959",
+  "p03_source": "0f4314128bf66a58e98aa8e21f703cb5665edd26",
+  "qualification_environment": "report-pymc-5.24.0-arviz-0.22.0-v1",
+  "mri_start_free_files": 180000,
+  "live_reserve_files": 50000,
+  "live_reserve_bytes": 500000000000,
+  "quota_interval_seconds": 60,
+  "warning_compatibility": {
+    "image": "/cvmfs/containers.computecanada.ca/content/containers/fmriprep-25.1.1",
+    "container_path": "/opt/conda/envs/fmriprep/lib/python3.12/site-packages/fmriprep/_warnings.py",
+    "original_sha256": "46b8867618f34511847d3c6036dc15a66123433036814415cf05a9001cf42e2f"
+  },
+  "scientific_changes": false,
+  "scientific_gates": false
+}

@@ -1,5 +1,15 @@
 # Phase-mapped implementation roadmap
 
+> **MRI runtime repair, 2026-09-21 05:24 UTC:** three of seven masked-MRI
+> participants are complete. The fourth failed in diagnostic plotting with a
+> warning-handler compatibility error; its three successors were canceled.
+> P05 reports are 200/200 complete; patterns are 188/200 with one running and 11
+> queued. The September 20 cleanup completed, consolidating 252,681 entries; two
+> further successful MRI work trees are also archived. A narrow tested runtime
+> repair is being prepared for the four unfinished participants. Empirical neural
+> feature integration and M0–M5 comparisons remain incomplete. See
+> [repair scope, validation and deployment receipts](MRI_WARNING_REPAIR_20260921.md).
+
 > **Additional consolidation, 2026-09-20 07:26 UTC:** job 21451328 successfully
 > combined 43,953 entries from seven inactive software environments into verified,
 > recoverable archives, protecting current MRI/P05/PyMC runtimes. MRI work archiving
