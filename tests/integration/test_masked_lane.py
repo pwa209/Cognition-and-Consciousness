@@ -5,6 +5,7 @@ from __future__ import annotations
 import importlib.util
 import zipfile
 from pathlib import Path
+from types import SimpleNamespace
 
 import numpy as np
 import pytest
@@ -132,7 +133,12 @@ def test_noise_bundle_and_future_handoff(tmp_path, monkeypatch):
         "context_specific_thresholds": False,
     }
     atomic_write_json(
-        report / "posterior.json", {"posterior": posterior, "calibration_ids": cal_ids}
+        report / "posterior.json",
+        {
+            "posterior": posterior,
+            "calibration_ids": cal_ids,
+            "diagnostic_flags": {"rhat_above_1_01": False},
+        },
     )
     reports = status(root, report, "CALIBRATE_NUTS")
     bundle = root / "analysis/masked-lane/BUNDLE/2"
@@ -174,10 +180,91 @@ def test_queued_dag_preserves_cohort_and_has_actual_phase_commands(tmp_path, mon
     monkeypatch.setattr(m, "submit_one", submit)
     operations = tmp_path / "operations"
     result = m.dispatch(tmp_path, SOURCE, operations, "aux/status.json")
-    assert len(calls) == 15
+    assert len(calls) == 16
     assert set(result["jobs"]) >= {"P06", "P07", "P08", "P09", "P10", "bundle", "noise"}
     noise = load_structured(operations / "noise-input.json")
     assert set(noise["extractions"]) == {"sub-02", "sub-07"}
     assert "--array=0-999%2" in next(c for p, c in calls if p.name == "P09.json")
-    assert "--dependency=afterok:111" in next(c for p, c in calls if p.name == "P07.json")
+    assert "--dependency=afterok:112" in next(c for p, c in calls if p.name == "P07.json")
     assert len(load_structured(operations / "P10-input.json")["results"]) == 1002
+
+
+def test_corrected_report_input_reuses_model_not_old_posterior(tmp_path, monkeypatch):
+    from factorcon.models import report_nuts
+    from factorcon.models.report_measurement import OrdinalPosterior
+
+    m = script("masked_lane_phase", monkeypatch)
+    monkeypatch.setattr(m, "ScratchQuotaGuard", lambda _: lambda _: None)
+    monkeypatch.setattr(
+        m, "version", lambda name: {"pymc": "5.24.0", "arviz": "0.22.0"}.get(name, "test")
+    )
+    root = tmp_path
+    prepared = root / "prepared"
+    atomic_write_json(
+        prepared / "partition.json",
+        {"calibration_subjects": ["sub-02", "sub-07"], "evaluation_subjects": ["sub-01"]},
+    )
+    prepared_status = status(root, prepared, "PREPARE")
+    oldsource = root / "releases/old/source"
+    for name in (
+        "conf/masked_report_nuts_plan.yaml",
+        "conf/analysis_spec.yaml",
+        "src/factorcon/models/report_nuts.py",
+        "src/factorcon/models/report_measurement.py",
+    ):
+        path = oldsource / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes((SOURCE / name).read_bytes())
+    old = root / "old-reports"
+    atomic_write_json(old / "posterior.json", {"preserve": True})
+    oldstatus = status(root, old, "CALIBRATE_NUTS", oldsource)
+    aux = root / "aux"
+    ids = ["masked_content_fmri:sub-02", "masked_content_fmri:sub-07"]
+    value = {
+        "schema_version": 1,
+        "predictor_source": "non_neural_fixed_units",
+        "categories": 3,
+        "anchor_id": "synthetic",
+        "design": [[1, 1.2, 0, 0], [1, 1.5, 1, 0]],
+        "reports": [0, 2],
+        "subjects": ids,
+        "contexts": [i + ":ses-01" for i in ids],
+    }
+    atomic_write_json(aux / "calibration-input.json", value)
+    auxstatus = status(root, aux, "AUX")
+
+    def fit(data, **settings):
+        assert np.allclose(data.design[:, 1], [1.2, 1.5])
+        assert settings["parameterization"] == "centered" and settings["draws"] == 4000
+        posterior = OrdinalPosterior(
+            np.zeros((1, 32, 4)),
+            np.zeros((1, 32, 2)),
+            np.zeros((1, 32, 2)),
+            np.zeros((1, 32, 1, 2)),
+            np.ones((1, 32, 2)),
+            tuple(ids),
+            tuple(value["contexts"]),
+            "synthetic",
+            {},
+        )
+        fake = SimpleNamespace(data_vars={"fixture": SimpleNamespace(values=np.zeros(1))})
+        return (
+            posterior,
+            {"flags": {"rhat": False}},
+            SimpleNamespace(posterior=fake, sample_stats=fake),
+        )
+
+    monkeypatch.setattr(report_nuts, "fit_ordinal_nuts", fit)
+    config = {
+        "stage": "REPORT",
+        "prepared": prepared_status,
+        "previous_reports": oldstatus,
+        "auxiliary": auxstatus,
+    }
+    attempt = root / "analysis/masked-lane/REPORT/1"
+    result = m.run(root, SOURCE, config, attempt)
+    assert result["corrected_physical_frame_counts"]
+    assert load_structured(old / "posterior.json") == {"preserve": True}
+    assert load_structured(attempt / "status.json")["status"] == "SUCCESS"
+    with pytest.raises(FileExistsError):
+        m.run(root, SOURCE, config, attempt)

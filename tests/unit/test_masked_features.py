@@ -11,7 +11,7 @@ import numpy as np
 import pytest
 
 from factorcon.errors import IntegrityError
-from factorcon.pipeline.masked_auxiliary import read_member, select_behavior
+from factorcon.pipeline.masked_auxiliary import acquire, read_member, select_behavior
 from factorcon.pipeline.masked_features import (
     ar_transform,
     combine_partitions,
@@ -20,7 +20,14 @@ from factorcon.pipeline.masked_features import (
     run_design,
     validate_feature_plan,
 )
-from factorcon.pipeline.masked_timing import align_run, behavior_path, behavior_trials, git_blob_sha
+from factorcon.pipeline.masked_timing import (
+    align_run,
+    audit_run,
+    behavior_path,
+    behavior_trials,
+    git_blob_sha,
+    publisher_codes,
+)
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -70,10 +77,26 @@ def test_source_timing_and_missing_reports():
     assert result["event_alignment_verified"]
     with pytest.raises(ValueError, match="volume-count"):
         align_run(data, behavior, volumes=20, tr_seconds=1)
+    audit = audit_run(data, behavior, volumes=13, tr_seconds=1)
+    assert audit["event_alignment_verified"] is False and audit["trials"][1]["report"] == -1
     with pytest.raises(ValueError, match="linkage"):
         align_run(data.replace(b"bird.jpg", b"other.jpg"), behavior, volumes=30, tr_seconds=1)
     with pytest.raises(ValueError, match="order"):
         behavior_trials(behavior.replace(b"1,22", b"0,22"))
+    corrected = behavior_trials(behavior.replace(b"'2'\n", b"'12'\n"))
+    assert corrected[0]["probe_frames"] == 12
+    assert corrected[0]["publisher_probe_frames"] == 1
+    assert publisher_codes(["10", "3"]) == [99, 99]
+    assert publisher_codes(["'10'", "3"]) == [1, 3]
+    assert len(behavior_trials(behavior.replace(b"\nexpName", b"\nextraInfo\nexpName"))) == 2
+    name = b"small-saucepan_24.jpg"
+    repaired = align_run(
+        data.replace(b"bird.jpg", name[:20]),
+        behavior.replace(b"bird.jpg", name),
+        volumes=30,
+        tr_seconds=1,
+    )
+    assert repaired["uniquely_resolved_truncated_filenames"] == [1]
 
 
 def test_packed_source_paths_counts_and_integrity():
@@ -110,6 +133,50 @@ def test_packed_source_paths_counts_and_integrity():
             read_member(archive, "link", {**expected, "bytes": 0})
         with pytest.raises(ValueError):
             read_member(archive, path, {**expected, "sha256": "0" * 64})
+
+
+def test_auxiliary_download_checks_upstream_md5_and_pinned_sha256(tmp_path):
+    run = {"run_id": "sub-01_ses-02_task-recog_run-1", "subject": "sub-01", "session": "ses-02"}
+    behavior = (ROOT / "tests/fixtures/masked_timing/behavior.csv").read_bytes()
+    atlas, licence = b"SYNTHETIC-NOT-NIFTI", b"TEST LICENCE"
+    path = behavior_path(run)
+    tree = {
+        "sha": "tree-id",
+        "truncated": False,
+        "tree": [
+            {"type": "blob", "path": p, "sha": git_blob_sha(b)}
+            for p, b in ((path, behavior), ("LICENSE", licence))
+        ],
+    }
+    plan = {
+        "publisher_revision": "commit",
+        "atlas_revision": "template-commit",
+        "expected_runs": 1,
+        "expected_source_behavior_files": 1,
+        "atlas": "atlas.nii.gz",
+        "atlas_labels": "labels.tsv",
+        "atlas_sha256": hashlib.sha256(atlas).hexdigest(),
+    }
+
+    def reader(url):
+        if "git/trees" in url:
+            return json.dumps(tree).encode()
+        if "unconfeats" in url:
+            return licence if url.endswith("LICENSE") else behavior
+        if "s3.amazonaws.com" in url:
+            return atlas
+        if url.endswith("atlas.nii.gz"):
+            identity = hashlib.md5(atlas).hexdigest()
+            pointer = f".git/annex/objects/MD5E-s{len(atlas)}--{identity}.nii.gz"
+            return pointer.encode()
+        return b"fixture-metadata"
+
+    result = acquire(tmp_path, [run], plan, reader=reader)
+    assert result["behavior_runs"] == 1 and (tmp_path / "atlas.nii.gz").read_bytes() == atlas
+    other = tmp_path / "bad"
+    other.mkdir()
+    with pytest.raises(ValueError, match="hash mismatch"):
+        acquire(other, [run], {**plan, "atlas_sha256": "0" * 64}, reader=reader)
 
 
 def test_fixed_linear_gls_and_aggregation():

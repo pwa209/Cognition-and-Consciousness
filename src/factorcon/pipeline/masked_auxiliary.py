@@ -105,13 +105,18 @@ def acquire(
         content = reader(atlas_base + name)
         if name.endswith(".nii.gz"):
             pointer = content.decode()
-            match = re.search(r"SHA256E-s(\d+)--([a-f0-9]{64})\.nii\.gz", pointer)
+            match = re.search(r"(SHA256E|MD5E)-s(\d+)--([a-f0-9]+)\.nii\.gz", pointer)
             if not match:
-                raise ValueError("pinned atlas must expose its annex SHA-256 identity")
+                raise ValueError("pinned atlas must expose its annex identity")
             content = reader(
                 f"https://templateflow.s3.amazonaws.com/tpl-MNI152NLin2009cAsym/{name}"
             )
-            if len(content) != int(match[1]) or hashlib.sha256(content).hexdigest() != match[2]:
+            digest = hashlib.sha256 if match[1] == "SHA256E" else hashlib.md5
+            if (
+                len(content) != int(match[2])
+                or digest(content).hexdigest() != match[3]
+                or hashlib.sha256(content).hexdigest() != plan["atlas_sha256"]
+            ):
                 raise ValueError("atlas annex size/hash mismatch")
         with (attempt / name).open("xb") as handle:
             handle.write(content)

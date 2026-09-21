@@ -15,6 +15,8 @@ import struct
 import subprocess
 import tarfile
 import zipfile
+from dataclasses import asdict
+from importlib.metadata import version
 from pathlib import Path
 from typing import Any
 
@@ -29,7 +31,7 @@ from factorcon.pipeline.masked_features import (
     run_design,
     validate_feature_plan,
 )
-from factorcon.pipeline.masked_timing import align_run, behavior_path
+from factorcon.pipeline.masked_timing import align_run, audit_run, behavior_path
 from factorcon.util import (
     atomic_write_json,
     ensure_within,
@@ -103,12 +105,27 @@ def extract_subject(
     hashes = load_structured(preproc / "derivative-hashes.json")
     aux = proof(root, config["auxiliary"], phase="AUX", source=source)
     record = load_structured(aux / "source-record.json")
+    timing_audit = {r["run_id"]: r for r in load_structured(aux / "timing-audit.json")["runs"]}
     ledger, source_hashes = [], {}
     with (
         tarfile.open(aux / "behavior.tar") as behavior,
         zipfile.ZipFile(attempt / "runs.zip", "x") as packed,
     ):
         for index, run in enumerate(runs):
+            checked = timing_audit[run["run_id"]]
+            if not checked["event_alignment_verified"]:
+                ledger.append(
+                    {
+                        **run,
+                        "partition": index % 2,
+                        "timing": checked,
+                        "qc": {
+                            "excluded": True,
+                            "exclusion_reason": checked["technical_exclusion_reason"],
+                        },
+                    }
+                )
+                continue
             prefix = f"derivatives/{run['subject']}/{run['session']}/func/{run['run_id']}"
             names = {
                 "bold": prefix + "_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz",
@@ -172,7 +189,8 @@ def extract_subject(
         "subject": config["subject"],
         "runs": len(runs),
         "included_runs": sum(not r["qc"]["excluded"] for r in ledger),
-        "event_alignment_verified": True,
+        "retained_run_alignment_verified": True,
+        "technical_exclusions": sum(r["qc"]["excluded"] for r in ledger),
         "independent_noise_calibrated": False,
     }
 
@@ -326,6 +344,8 @@ def build_bundle(root: Path, source: Path, config: dict[str, Any], attempt: Path
     noise_record = load_structured(noise_dir / "calibration.json")
     reports = proof(root, config["reports"])
     posterior = load_structured(reports / "posterior.json")
+    if not posterior.get("diagnostic_flags") or any(posterior["diagnostic_flags"].values()):
+        raise ValueError("report sampler has unresolved numerical diagnostic flags")
     if set(posterior["calibration_ids"]) != set(noise_record["calibration_ids"]):
         raise ValueError("report/noise reserved cohort mismatch")
     collected = {
@@ -445,6 +465,93 @@ def build_bundle(root: Path, source: Path, config: dict[str, Any], attempt: Path
     }
 
 
+def recalibrate_reports(
+    root: Path, source: Path, config: dict[str, Any], attempt: Path
+) -> dict[str, Any]:
+    """Refit reserved reports from complete original frame counts; same qualified model/priors."""
+    from repair_masked_report import plan as sampler_plan
+
+    from factorcon.models.report_nuts import fit_ordinal_nuts
+    from factorcon.pipeline.measurement import load_report_calibration
+
+    aux = proof(root, config["auxiliary"], phase="AUX", source=source)
+    old = proof(root, config["previous_reports"])
+    previous_source = Path(load_structured(old / "status.json")["source_release"])
+    ensure_within(root / "releases", previous_source)
+    for name in (
+        "conf/masked_report_nuts_plan.yaml",
+        "conf/analysis_spec.yaml",
+        "src/factorcon/models/report_nuts.py",
+        "src/factorcon/models/report_measurement.py",
+    ):
+        if hash_file(source / name) != hash_file(previous_source / name):
+            raise ValueError("reused qualified report model/settings changed")
+    data = load_report_calibration(aux / "calibration-input.json")
+    prepared = proof(root, config["prepared"], phase="PREPARE")
+    partition = load_structured(prepared / "partition.json")
+    if set(data.subjects) != {
+        f"masked_content_fmri:{s}" for s in partition["calibration_subjects"]
+    }:
+        raise ValueError("reserved report calibration cohort mismatch")
+    settings = sampler_plan(source)
+    for package in ("pymc", "arviz"):
+        if version(package) != settings[package + "_version"]:
+            raise ValueError("qualified sampler runtime version mismatch")
+    atomic_write_json(
+        attempt / "runtime.json", {p: version(p) for p in ("pymc", "arviz", "numpy", "scipy")}
+    )
+    posterior, diagnostic, idata = fit_ordinal_nuts(
+        data,
+        **{
+            k: settings[k]
+            for k in (
+                "draws",
+                "warmup",
+                "chains",
+                "seed",
+                "cores",
+                "target_accept",
+                "parameterization",
+            )
+        },
+    )
+    payload = {
+        k: v.tolist() if isinstance(v, np.ndarray) else v for k, v in asdict(posterior).items()
+    }
+    atomic_write_json(
+        attempt / "posterior.json",
+        {
+            "schema_version": 1,
+            "implementation": "hierarchical_ordinal_probit_v1",
+            "sampler": settings["sampler"],
+            "posterior": payload,
+            "calibration_ids": sorted(set(data.subjects)),
+            "operational_E": "probability_report_liability_exceeds_first_threshold",
+            "universal_consciousness_probability": False,
+            "diagnostic_flags": diagnostic["flags"],
+            "input_sha256": hash_file(aux / "calibration-input.json"),
+            "old_posterior_preserved": str(old / "posterior.json"),
+            "corrected_physical_frame_counts": True,
+        },
+    )
+    atomic_write_json(attempt / "diagnostics.json", diagnostic)
+    with (attempt / "sampler-traces.npz").open("xb") as stream:
+        np.savez_compressed(
+            stream,
+            **{
+                f"{group}__{name}": value.values
+                for group in ("posterior", "sample_stats")
+                for name, value in getattr(idata, group).data_vars.items()
+            },
+        )
+    return {
+        "reports": len(data.reports),
+        "calibration_participants": len(set(data.subjects)),
+        "diagnostic_flags": diagnostic["flags"],
+        "corrected_physical_frame_counts": True,
+    }
+
+
 def run(
     root: Path, source: Path, config: dict[str, Any], attempt: Path, *, dry_run: bool = False
 ) -> dict[str, Any]:
@@ -452,7 +559,7 @@ def run(
     stage = config["stage"]
     plan = load_structured(source / "conf/masked_feature_plan.yaml")
     validate_feature_plan(plan)
-    if stage not in {"AUX", "EXTRACT", "NOISE", "BUNDLE"}:
+    if stage not in {"AUX", "EXTRACT", "NOISE", "BUNDLE", "REPORT"}:
         raise ValueError("unknown masked lane stage")
     ensure_within(root / "analysis/masked-lane" / stage, attempt)
     if dry_run:
@@ -486,10 +593,23 @@ def run(
     try:
         ScratchQuotaGuard(attempt / "personal-quota.json")(0)
         if stage == "AUX":
-            runs, _, raw = read_runs(root, config, source)
+            runs, partition, raw = read_runs(root, config, source)
             result = acquire(attempt, runs, plan)
             source_record = load_structured(attempt / "source-record.json")
             audit = []
+            calibration = {
+                "schema_version": 1,
+                "predictor_source": "non_neural_fixed_units",
+                "categories": 3,
+                "anchor_id": load_structured(source / "conf/masked_neural_plan.yaml")["anchor_id"],
+                "design": [],
+                "reports": [],
+                "subjects": [],
+                "contexts": [],
+                "trial_ids": [],
+                "physical_frame_source": "original_complete_integer_not_publisher_first_digit",
+                "scientific_gate": None,
+            }
             with tarfile.open(attempt / "behavior.tar") as archive:
                 for item in runs:
                     with gzip.open(
@@ -504,7 +624,7 @@ def run(
                     events = ensure_within(raw, raw / safe_relative_path(item["events"]))
                     if hash_file(events) != item["events_sha256"]:
                         raise ValueError("source events changed during timing audit")
-                    value = align_run(
+                    value = audit_run(
                         events.read_bytes(),
                         read_member(archive, path, source_record["behavior"][path]),
                         volumes=dimensions[4],
@@ -516,8 +636,42 @@ def run(
                             **{k: v for k, v in value.items() if k != "trials"},
                         }
                     )
+                    if item["subject"] in partition["calibration_subjects"]:
+                        for trial in value["trials"]:
+                            calibration["design"].append(
+                                [
+                                    1,
+                                    (trial["probe_frames"] or 0) / 10,
+                                    trial["nonliving"],
+                                    int(trial["probe_frames"] is None),
+                                ]
+                            )
+                            calibration["reports"].append(trial["report"])
+                            calibration["subjects"].append(f"masked_content_fmri:{item['subject']}")
+                            calibration["contexts"].append(
+                                f"masked_content_fmri:{item['subject']}:{item['session']}"
+                            )
+                            calibration["trial_ids"].append(
+                                f"{item['run_id']}:trial-{trial['trial']}"
+                            )
             atomic_write_json(attempt / "timing-audit.json", {"runs": audit})
-            result["aligned_runs"] = len(audit)
+            atomic_write_json(attempt / "calibration-input.json", calibration)
+            result["audited_runs"] = len(audit)
+            result["aligned_runs"] = sum(r["event_alignment_verified"] for r in audit)
+            result["unverified_neural_runs_excluded"] = len(audit) - result["aligned_runs"]
+            for subject in {r["subject"] for r in runs}:
+                if (
+                    sum(
+                        r["event_alignment_verified"]
+                        for r in audit
+                        if r["run_id"].startswith(subject + "_")
+                    )
+                    < 2
+                ):
+                    raise ValueError(
+                        "participant lacks two verified runs; empirical lane not ready"
+                    )
+            result["corrected_frame_codes"] = sum(r["corrected_frame_codes"] for r in audit)
         elif stage == "EXTRACT":
             from masked_neural_phase import runtime
 
@@ -549,6 +703,8 @@ def run(
             result = load_structured(attempt / "child-result.json")
         elif stage == "NOISE":
             result = calibrate_noise(root, source, config, attempt)
+        elif stage == "REPORT":
+            result = recalibrate_reports(root, source, config, attempt)
         else:
             result = build_bundle(root, source, config, attempt)
         atomic_write_json(attempt / "result.json", result)

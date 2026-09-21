@@ -15,7 +15,10 @@ experience label or a universally validated probability of consciousness. Its
 condition means depend on duration/category composition; this limitation must
 accompany every interpretation. No E=0 label is assigned to missing reports.
 
-The existing report posterior and all completed MRI outputs are preserved. Reserved
+The existing report posterior and all completed MRI outputs are preserved. A new
+report calibration is required because the publisher's helper extracts only the
+first digit of string frame counts (and returns 99 for numeric-typed values).
+Original source counts reach 15 frames; they must not become 1 frame. Reserved
 subjects sub-02/sub-07 supply report and neural-noise calibration; sub-01/sub-03/
 sub-04/sub-05/sub-06 enter participant-grouped neural evaluation. A, K_memory,
 K_task and K_volition remain absent, not silently equated with other constructs.
@@ -31,7 +34,9 @@ K_task and K_volition remain absent, not silently equated with other constructs.
   than raw scans and are not image onsets. Original scanner-coordinate image times
   are used with each preprocessed image's explicit `StartTime` and TR.
 - Same-space TemplateFlow MNI152NLin2009cAsym res-2 Schaefer400/7-network labels,
-  revision `15d7c02160f79f5218d2545b4febebeecc11531d`, with annex SHA-256 verification.
+  revision `15d7c02160f79f5218d2545b4febebeecc11531d`, checking its upstream MD5E
+  annex identity plus independently recorded SHA-256
+  `e5dfdc5674fe6122609fa8d223d7d7c17f989ff1b03d7746559c95b11da1d264`.
   Nearest-neighbour label resampling reconciles grids only; no template-space
   substitution or smoothing. Parcel means retain unscaled fMRIPrep intensity.
 - Six conditions: living/nonliving × three observed ordinal reports. Missing
@@ -70,6 +75,7 @@ receipt, not inferred from these planned steps.
 | Stage | Actual command implementation | Technical dependency |
 | --- | --- | --- |
 | Auxiliary inputs | `masked_lane_phase.py`, stage AUX | verified P03/PREPARE; pinned source/atlas and all-run timing audit |
+| Corrected report calibration | same runner, REPORT | AUX original physical frame counts; same reserved subjects, qualified sampler and priors |
 | Neural extraction | same runner, EXTRACT, one job/participant | release qualification, AUX and that participant's MRI SUCCESS |
 | Independent neural noise | same runner, NOISE | sub-02 and sub-07 extraction SUCCESS |
 | Model input bundle | same runner, BUNDLE | noise calibration, all five evaluation extractions, converged report calibration |
@@ -106,5 +112,24 @@ contrasts, justified equivalence margins and multiplicity policy. P09 is conditi
 on fixed external calibration, conditions and families; P10 is evidence-table
 generation, not a completed manuscript. None of these limitations is hidden by a
 successful Slurm exit. The hourly local monitor remains paused.
+
+## Source-integrity findings before model fitting
+
+The all-run audit found 312 timing/identity-verified runs: sub-01 55, sub-02 38,
+sub-03 3, sub-04/05/06/07 54 each. Released image names truncated to 20 characters
+are accepted only when the prefix identifies exactly one original image within
+the run; no fuzzy match or data-dependent time shift is used. The 68 unverified
+runs are quarantined from neural analysis with a retained ledger: 18 volume-timing
+discrepancies in sub-02, one 13-volume aborted sub-03 acquisition with 508 event
+rows, and 49 sub-03 trial-label/run mismatches. Their raw files are not changed or
+deleted. Resolving those crosswalks remains open; choosing whichever behavioural
+file makes a neural result better is forbidden. Calibration reports can still use
+independent original behavioural records, whose measurement does not depend on MRI
+alignment. The reduced and very unequal run coverage, particularly sub-03, limits
+the initial lane and must be reported alongside every empirical comparison.
+The three verified sub-03 runs were checked against their actual confound designs:
+individual task ranks are 6, 6 and 5; both fixed aggregate partitions are rank 6.
+No neural values were used in this estimability check. It does not repair the 49
+unverified crosswalks or make three runs as informative as 54.
 
 Deployment receipt: pending live qualification/queue verification at authoring.

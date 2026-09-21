@@ -282,3 +282,13 @@ This ledger is part of the transparent non-preregistered record. Add entries chr
   are documented in MASKED_EMPIRICAL_LANE_20260921.md and conf/masked_feature_plan.yaml.
   No observed model score informed these choices; no unfavorable result stops later
   phases. Missing/invalid inputs produce technical failure records, not null findings.
+
+  The source audit additionally identified lossy first-digit stimulus-frame decoding
+  in the publisher helper, 20-character image-name truncation, 18 unreconciled timing
+  runs and 50 sub-03 acquisition/crosswalk problems (including a 13-volume scan).
+  Correct full physical frame counts and rerun the same reserved-subject report
+  model/priors; preserve the original posterior. Resolve only unique exact truncated
+  prefixes. Quarantine 68 unverified neural runs with explicit failure ledgers while
+  retaining 312 verified runs and all seven participants. No neural outcome was read
+  to make these source-integrity decisions. The incomplete run coverage and unresolved
+  crosswalks are limitations, not operational completion of the full study.

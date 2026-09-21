@@ -81,6 +81,13 @@ def dispatch(root: Path, source: Path, operations: Path, auxiliary: str) -> dict
         )
 
     jobs["qualification"] = submit("qualification", "QUALIFY", {}, None, ["--time=00:45:00"])
+    jobs["reports"] = submit(
+        "reports",
+        "REPORT",
+        {"prepared": plan["prepared"], "auxiliary": auxiliary, "previous_reports": plan["reports"]},
+        "afterok:" + jobs["qualification"],
+        ["--time=08:00:00"],
+    )
     extract_status = {}
     for subject, item in plan["preprocessing"].items():
         name = "extract-" + subject
@@ -105,13 +112,17 @@ def dispatch(root: Path, source: Path, operations: Path, auxiliary: str) -> dict
         "BUNDLE",
         {
             "prepared": plan["prepared"],
-            "reports": plan["reports"],
+            "reports": f"analysis/masked-lane/REPORT/{jobs['reports']}/status.json",
             "noise": f"analysis/masked-lane/NOISE/{jobs['noise']}/status.json",
             "extractions": {s: extract_status[s] for s in partition["evaluation_subjects"]},
         },
         "afterok:"
         + ":".join(
-            [jobs["noise"], *[jobs["extract-" + s] for s in partition["evaluation_subjects"]]]
+            [
+                jobs["noise"],
+                jobs["reports"],
+                *[jobs["extract-" + s] for s in partition["evaluation_subjects"]],
+            ]
         ),
     )
     bundle = f"analysis/masked-lane/BUNDLE/{jobs['bundle']}/status.json"
