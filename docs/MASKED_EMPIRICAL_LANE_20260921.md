@@ -167,4 +167,13 @@ P10's graph maps all 1,000 global replicate paths, not merely the 50 scheduler I
 The local test suite covers dry-run, failure, fresh-attempt restart, exact index
 coverage, original-job duplicate refusal and the repaired P10 graph.
 
-Packed P09/P10 job IDs: pending scheduler receipt at authoring.
+Packed **P09 job 21502684** and **P10 job 21502685** were accepted at 07:06:47 UTC.
+The scheduler runner is release `9acd74a5a23c2b280d855f6904272d1e413e67e1`; actual
+statistical calculations remain on qualified release `6c92cf2`. Two additional
+batch-runner tests passed on the server; the latest full local suite passed 257
+tests with five documented platform/dependency skips. The complete dispatch receipt
+is `operations/masked-lane/6c92cf26c76ee2bea83ceafe75cf135fc9ed9192/dispatch.json`
+under the personal scratch run. P09 waits for P06; P10 uses afterany P07/P08/P09.
+P08 remains an applicability record, not a cross-family test. The complete initial
+lane is now deployed/queued; MRI dependencies, feature/noise completion and fitting
+are not claimed complete. Unresolved source crosswalks and broader study work remain.

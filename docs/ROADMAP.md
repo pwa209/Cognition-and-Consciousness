@@ -6,8 +6,9 @@
 > Corrected report calibration and the three-run sub-03 extraction completed;
 > sub-01/sub-02 extraction is running. Remaining extractions, independent neural
 > calibration, bundle assembly and P06–P08 are queued behind their technical inputs.
-> A rejected P09 array is being repacked without reducing the 1,000 replicates;
-> P09/P10 receipts remain to be verified. This first cortical lane uses 312 verified
+> P09 `21502684` is queued as 50 tasks covering all 1,000 unchanged replicates;
+> P10 `21502685` is queued after P07/P08/P09. All initial-lane stages are submitted,
+> not completed. This first cortical lane uses 312 verified
 > runs; 68 have explicit unresolved source-integrity exclusions, not null results.
 > See [scope, commands, dependencies and limits](MASKED_EMPIRICAL_LANE_20260921.md).
 
