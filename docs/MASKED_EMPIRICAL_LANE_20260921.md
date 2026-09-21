@@ -177,3 +177,10 @@ under the personal scratch run. P09 waits for P06; P10 uses afterany P07/P08/P09
 P08 remains an applicability record, not a cross-family test. The complete initial
 lane is now deployed/queued; MRI dependencies, feature/noise completion and fitting
 are not claimed complete. Unresolved source crosswalks and broader study work remain.
+
+Final live check at **07:09 UTC / 09:09 Amsterdam** confirmed every P06–P10
+dependency in Slurm, including the P09 throttle of two. Sub-02 extraction had also
+completed; sub-01 was running and sub-04–07 were awaiting MRI. Corrected report
+calibration had maximum R-hat 1.000902, minimum bulk ESS 12,720.70, zero divergences
+and no numerical flags. Independent **neural-noise calibration remains queued**, not
+completed. Conservative live personal usage was 9.771 TB/20 TB and 805K/1M files.
