@@ -48,7 +48,8 @@ def load_bundle(
     """Validate bundle v1 then whiten features using disjoint calibration subjects only.
 
     Arrays are G x R x C x F neural summaries, N x F independent residuals,
-    D x C x Q design draws, C x J sensory regressors and RC x RC design noise.
+    D x C x Q (or D x G x C x Q) design draws, C x J (or G x C x J)
+    sensory regressors and RC x RC (or G x RC x RC) design noise.
     It is a technical contract, not proof that upstream preprocessing is valid.
     Empirical E requires external report calibration; missing constructs stay absent.
     """

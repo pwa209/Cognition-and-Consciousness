@@ -31,8 +31,10 @@ class PatternData:
     """One family in common calibrated units, with independently whitened features.
 
     Patterns: independent groups x partitions x conditions x features. Design:
-    draws x conditions x named constructs. Sensory: conditions x fixed covariates.
-    Noise: partition-condition x partition-condition covariance, known up to scale
+    draws x conditions x named constructs (or draws x groups x conditions x constructs).
+    Sensory: conditions x fixed covariates, optionally preceded by a group axis.
+    Noise: partition-condition x partition-condition covariance, optionally preceded
+    by a group axis for unequal first-level designs, known up to scale
     from design/independent calibration, never estimated on evaluation outcomes.
     Design draws must come from fixed design or calibration disjoint from ALL neural
     groups. Group IDs must be globally namespaced across families. E is in [0,1].
@@ -74,19 +76,28 @@ class PatternData:
             raise ValueError("unique known construct names required")
         if "S" in self.names:
             raise ValueError("sensory covariates belong in sensory, not scalar S coding")
-        if x.ndim != 3 or not len(x) or x.shape[1:] != (y.shape[2], len(self.names)):
+        if (
+            x.ndim not in {3, 4}
+            or not len(x)
+            or x.shape[1:]
+            not in {(y.shape[2], len(self.names)), (len(y), y.shape[2], len(self.names))}
+        ):
             raise ValueError("design_draws must be draws x conditions x named constructs")
-        if self.sensory.ndim != 2 or self.sensory.shape[0] != y.shape[2]:
+        if self.sensory.ndim not in {2, 3} or self.sensory.shape[:-1] not in {
+            (y.shape[2],),
+            (len(y), y.shape[2]),
+        }:
             raise ValueError("sensory must be conditions x covariates")
-        if self.noise.shape != (y.shape[1] * y.shape[2],) * 2:
+        matrix_shape = (y.shape[1] * y.shape[2],) * 2
+        if self.noise.shape not in {matrix_shape, (len(y), *matrix_shape)}:
             raise ValueError("noise covariance has incompatible partition-condition dimensions")
         if not all(np.isfinite(v).all() for v in (y, x, self.sensory, self.noise)):
             raise ValueError("all numerical inputs must be finite")
-        if not np.allclose(self.noise, self.noise.T):
+        if not np.allclose(self.noise, self.noise.swapaxes(-1, -2)):
             raise ValueError("noise covariance must be symmetric")
         np.linalg.cholesky(self.noise)
         if "E" in self.names:
-            e = x[:, :, self.names.index("E")]
+            e = x[..., self.names.index("E")]
             if np.any((e < 0) | (e > 1)):
                 raise ValueError("E must use the declared operational probability scale [0,1]")
 
@@ -96,6 +107,11 @@ class PatternData:
             self,
             group_ids=tuple(self.group_ids[i] for i in indices),
             patterns=self.patterns[indices].copy(),
+            design_draws=self.design_draws[:, indices].copy()
+            if self.design_draws.ndim == 4
+            else self.design_draws.copy(),
+            sensory=self.sensory[indices].copy() if self.sensory.ndim == 3 else self.sensory.copy(),
+            noise=self.noise[indices].copy() if self.noise.ndim == 3 else self.noise.copy(),
             group_weights=None
             if self.group_weights is None
             else self.group_weights[indices].copy(),
@@ -170,6 +186,24 @@ def signal_covariance(
     """
     if theta.shape != (len(shape.labels),):
         raise ValueError("parameter shape mismatch")
+    if data.design_draws.ndim == 4 or data.sensory.ndim == 3:
+        return np.stack(
+            [
+                signal_covariance(
+                    shape,
+                    theta,
+                    replace(
+                        data,
+                        design_draws=data.design_draws[:, i]
+                        if data.design_draws.ndim == 4
+                        else data.design_draws,
+                        sensory=data.sensory[i] if data.sensory.ndim == 3 else data.sensory,
+                    ),
+                    draw,
+                )
+                for i in range(len(data.group_ids))
+            ]
+        )
     x = np.zeros((data.patterns.shape[2], len(shape.names)))
     for j, name in enumerate(shape.names):
         if name in data.names:
@@ -236,9 +270,9 @@ def pattern_log_density(
     """
     groups, partitions, conditions, features = data.patterns.shape
     if (
-        signal.shape != (conditions, conditions)
+        signal.shape not in {(conditions, conditions), (groups, conditions, conditions)}
         or not np.isfinite(signal).all()
-        or not np.allclose(signal, signal.T)
+        or not np.allclose(signal, signal.swapaxes(-1, -2))
     ):
         raise ValueError("signal covariance must be symmetric conditions x conditions")
     if not np.isfinite(noise_variance) or noise_variance <= 0:
@@ -251,15 +285,16 @@ def pattern_log_density(
         @ (np.kron(np.ones((partitions, partitions)), signal) + noise_variance * data.noise)
         @ projection.T
     )
-    chol = cho_factor(covariance, lower=True)
-    logdet = 2 * np.log(np.diag(chol[0])).sum()
     projected = np.einsum("ij,njf->nif", projection, data.patterns.reshape(groups, -1, features))
     scores = []
-    for y in projected:
+    shared = cho_factor(covariance, lower=True) if covariance.ndim == 2 else None
+    for group, y in enumerate(projected):
+        chol = shared if shared is not None else cho_factor(covariance[group], lower=True)
+        logdet = 2 * np.log(np.diag(chol[0])).sum()
         scores.append(
             -0.5
             * (
-                features * (logdet + len(covariance) * np.log(2 * np.pi))
+                features * (logdet + len(projection) * np.log(2 * np.pi))
                 + np.sum(y * cho_solve(chol, y))
             )
         )

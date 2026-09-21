@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "scientific_gates": false,
+  "prepared": "analysis/masked-neural/PREPARE/21417197/status.json",
+  "p03": "analysis/P03/masked_content_fmri/21409959/status.json",
+  "p03_source": "releases/0f4314128bf66a58e98aa8e21f703cb5665edd26/source",
+  "reports": "analysis/masked-neural/CALIBRATE_NUTS/21421582/status.json",
+  "preprocessing": {
+    "sub-01": {"status": "analysis/masked-neural/PREPROCESS/21417199-0/status.json", "pending_job": null},
+    "sub-02": {"status": "analysis/masked-neural/PREPROCESS/21450698-1/status.json", "pending_job": null},
+    "sub-03": {"status": "analysis/masked-neural/PREPROCESS/21450699-2/status.json", "pending_job": null},
+    "sub-04": {"status": "analysis/masked-neural/PREPROCESS/21500395-3/status.json", "pending_job": "21500395"},
+    "sub-05": {"status": "analysis/masked-neural/PREPROCESS/21500396-4/status.json", "pending_job": "21500396"},
+    "sub-06": {"status": "analysis/masked-neural/PREPROCESS/21500397-5/status.json", "pending_job": "21500397"},
+    "sub-07": {"status": "analysis/masked-neural/PREPROCESS/21500398-6/status.json", "pending_job": "21500398"}
+  }
+}

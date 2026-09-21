@@ -268,3 +268,17 @@ This ledger is part of the transparent non-preregistered record. Add entries chr
   Fresh retries recompute from raw inputs; no incomplete outputs are promoted.
   This technical repair is not a scientific change or outcome gate. See
   MRI_WARNING_REPAIR_20260921.md and conf/mri_warning_recovery_plan.yaml.
+
+- **2026-09-21 initial masked-fMRI empirical lane:** owner approved proceeding with
+  the existing five evaluation/two calibration subjects and P08 not applicable
+  until a compatible second family exists. Add pinned original behavioural timing,
+  same-space Schaefer400 parcel extraction, independent AR(1)/feature-noise calibration,
+  and a producer-bound P06–P10 dependency graph. Extend the generative input contract
+  to participant-specific construct/sensory/design-noise matrices without changing
+  architecture definitions. The initial cortical association analysis is explicitly
+  narrower than the full whole-brain/multifamily study; report-liability E is not
+  ground-truth experience, and exact-image/category confounding remains. Fixed
+  implementation settings, approximations, leakage boundaries and affected outputs
+  are documented in MASKED_EMPIRICAL_LANE_20260921.md and conf/masked_feature_plan.yaml.
+  No observed model score informed these choices; no unfavorable result stops later
+  phases. Missing/invalid inputs produce technical failure records, not null findings.

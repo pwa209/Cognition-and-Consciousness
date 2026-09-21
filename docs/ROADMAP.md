@@ -1,5 +1,11 @@
 # Phase-mapped implementation roadmap
 
+> **Initial empirical lane implementation, 2026-09-21:** owner approved masked fMRI
+> first, with five evaluation/two calibration subjects and explicit P08 not applicable.
+> New timing, cortical feature, independent noise and producer-bound P06–P10 scripts
+> are under deployment validation. This is not yet a verified queue/completion claim.
+> See [scope, commands, dependencies and limits](MASKED_EMPIRICAL_LANE_20260921.md).
+
 > **Repair deployed, 2026-09-21 05:39 UTC:** release `5a62fa4` passed 250 server
 > tests plus real-container baseline/fixed-warning regressions, including a
 > forkserver worker. Qualification 21500394 succeeded; MRI retry 21500395 is

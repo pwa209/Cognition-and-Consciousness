@@ -1,0 +1,5 @@
+order,image_onset_time_raw,category,probe_path,visible.keys_raw,response.keys_raw,response.corr_raw,response.rt_raw,probe_Frames_raw
+1,22,Nonliving_Things,../stimuli/table.jpg,[],[],0,n/a,'3'
+0,12,Living_Things,../stimuli/bird.jpg,'1','2',1,0.8,'2'
+
+expName,Expt_DEF

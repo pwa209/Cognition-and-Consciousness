@@ -83,6 +83,30 @@ def test_joint_density_matches_independent_scipy_reference():
     np.testing.assert_allclose(pattern_log_density(shifted, signal, 0.7), expected, rtol=1e-12)
 
 
+def test_group_noise_matches_independent_densities_and_subset():
+    d = fixture()
+    signal = d.design_draws[0] @ d.design_draws[0].T
+    group = replace(d, noise=np.stack([d.noise * scale for scale in (0.3, 1, 2)]))
+    group.validate()
+    scores = pattern_log_density(group, signal, 0.7)
+    expected = [
+        pattern_log_density(replace(d.subset(np.array([i])), noise=group.noise[i]), signal, 0.7)[0]
+        for i in range(3)
+    ]
+    np.testing.assert_allclose(scores, expected)
+    subset = group.subset(np.array([2, 0]))
+    np.testing.assert_array_equal(subset.noise, group.noise[[2, 0]])
+    np.testing.assert_allclose(pattern_log_density(subset, signal, 0.7), scores[[2, 0]])
+    common = replace(d, noise=np.repeat(d.noise[None], 3, axis=0))
+    np.testing.assert_allclose(
+        pattern_log_density(common, signal, 0.7), pattern_log_density(d, signal, 0.7)
+    )
+    with pytest.raises(ValueError, match="symmetric"):
+        bad = group.noise.copy()
+        bad[0, 0, 1] = 1
+        replace(group, noise=bad).validate()
+
+
 @pytest.mark.parametrize("model", [f"M{i}" for i in range(6)])
 def test_all_covariances_psd_and_parameters_learned(model):
     d = fixture()
@@ -229,3 +253,33 @@ def test_failed_optimizer_preserves_every_start_and_anchor_guard():
     fit = fit_generative((d,), shape, penalty=0.01, starts=1, max_iter=250)
     with pytest.raises(ValueError, match="anchors"):
         predictive_scores(fit, replace(d, anchor_id="unrelated_units"))
+
+
+def test_group_specific_design_and_sensory_match_separate_density():
+    base = fixture()
+    design = np.stack([base.design_draws * v for v in (0.3, 0.6, 1)], axis=1)
+    sensory = np.arange(12, dtype=float).reshape(3, 4, 1) / 12
+    noise = np.stack([base.noise * v for v in (0.3, 1, 2)])
+    data = replace(base, design_draws=design, sensory=sensory, noise=noise)
+    data.validate()
+    shape = ModelShape("M4", data.names)
+    theta = np.arange(len(shape.labels), dtype=float) / 10
+    signal = signal_covariance(shape, theta, data)
+    assert signal.shape == (3, 4, 4)
+    result = pattern_log_density(data, signal, 0.7)
+    for i in range(3):
+        single = replace(
+            base,
+            group_ids=(base.group_ids[i],),
+            patterns=base.patterns[i : i + 1],
+            design_draws=design[:, i],
+            sensory=sensory[i],
+            noise=noise[i],
+        )
+        assert np.allclose(
+            result[i], pattern_log_density(single, signal_covariance(shape, theta, single), 0.7)[0]
+        )
+    selected = data.subset(np.array([2, 0]))
+    selected.validate()
+    assert np.array_equal(selected.design_draws, design[:, [2, 0]])
+    assert np.array_equal(selected.sensory, sensory[[2, 0]])
