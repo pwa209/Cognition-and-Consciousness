@@ -292,3 +292,8 @@ This ledger is part of the transparent non-preregistered record. Add entries chr
   retaining 312 verified runs and all seven participants. No neural outcome was read
   to make these source-integrity decisions. The incomplete run coverage and unresolved
   crosswalks are limitations, not operational completion of the full study.
+
+  The 1,000-task P09 array was rejected by the scheduler; accounting/live-queue
+  reconciliation found no submitted job. Pack the same 1,000 global replicate IDs
+  into 50 tasks of 20, retaining concurrency two, the qualified analysis source,
+  every seed and every failure record. This changes scheduling only, not inference.

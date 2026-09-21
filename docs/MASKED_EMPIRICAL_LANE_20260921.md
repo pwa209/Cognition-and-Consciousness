@@ -132,4 +132,39 @@ individual task ranks are 6, 6 and 5; both fixed aggregate partitions are rank 6
 No neural values were used in this estimability check. It does not repair the 49
 unverified crosswalks or make three runs as informative as 54.
 
-Deployment receipt: pending live qualification/queue verification at authoring.
+## Verified deployment, 2026-09-21
+
+Analysis release `6c92cf26c76ee2bea83ceafe75cf135fc9ed9192` is deployed and pushed.
+Auxiliary acquisition `source-6c92cf2` succeeded: all 380 original files audited,
+312 neural runs verified, 68 explicitly quarantined, and 297 physical frame codes
+restored (including the publisher's numeric-column parsing failures).
+Qualification **21502351** succeeded at 06:53:11 UTC: **260 server tests passed**
+and the real-container NIfTI parcel smoke test passed.
+
+| Stage | Submitted job |
+| --- | --- |
+| Corrected report calibration | 21502422 |
+| Extraction sub-01/sub-02/sub-03 | 21502423 / 21502424 / 21502425 |
+| Extraction sub-04/sub-05/sub-06/sub-07 | 21502426 / 21502427 / 21502428 / 21502429 |
+| Independent neural noise | 21502430 |
+| Verified model bundle | 21502431 |
+| P06 / P07 / P08 | 21502432 / 21502433 / 21502434 |
+
+By 07:04 UTC, corrected report calibration completed on 3,520 reports from the two
+reserved subjects with all numerical diagnostic flags false. Sub-03 extraction
+also completed, retaining its three verified runs and explicitly recording 50
+technical exclusions. Sub-01/sub-02 extraction was running; the four remaining
+extractions depend on the existing MRI jobs. No completed MRI or prior posterior
+was overwritten.
+
+The initial 1,000-task P09 submission was rejected. A separate reconciliation
+confirmed no corresponding job in the live queue or accounting records; the rejected
+receipt is preserved. A scheduling-only runner packs all original 1,000 replicate
+IDs into **50 tasks × 20 sequential replicates**, at concurrency two. It invokes the
+same qualified analysis release, with unchanged models, folds and seeds. A fresh
+batch attempt is required after technical failure; old per-replicate outputs remain.
+P10's graph maps all 1,000 global replicate paths, not merely the 50 scheduler IDs.
+The local test suite covers dry-run, failure, fresh-attempt restart, exact index
+coverage, original-job duplicate refusal and the repaired P10 graph.
+
+Packed P09/P10 job IDs: pending scheduler receipt at authoring.

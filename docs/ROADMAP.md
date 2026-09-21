@@ -2,8 +2,13 @@
 
 > **Initial empirical lane implementation, 2026-09-21:** owner approved masked fMRI
 > first, with five evaluation/two calibration subjects and explicit P08 not applicable.
-> New timing, cortical feature, independent noise and producer-bound P06–P10 scripts
-> are under deployment validation. This is not yet a verified queue/completion claim.
+> Analysis release `6c92cf2` passed 260 server tests and actual NIfTI runtime checks.
+> Corrected report calibration and the three-run sub-03 extraction completed;
+> sub-01/sub-02 extraction is running. Remaining extractions, independent neural
+> calibration, bundle assembly and P06–P08 are queued behind their technical inputs.
+> A rejected P09 array is being repacked without reducing the 1,000 replicates;
+> P09/P10 receipts remain to be verified. This first cortical lane uses 312 verified
+> runs; 68 have explicit unresolved source-integrity exclusions, not null results.
 > See [scope, commands, dependencies and limits](MASKED_EMPIRICAL_LANE_20260921.md).
 
 > **Repair deployed, 2026-09-21 05:39 UTC:** release `5a62fa4` passed 250 server
