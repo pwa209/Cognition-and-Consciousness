@@ -66,4 +66,36 @@ Local validation: 17 targeted tests passed; full suite 245 passed, 5 skipped
 syntax checks passed. The complete suite is also required on Rorqual, where the
 protected qualification environment contains the scientific dependencies.
 
-Submission IDs and live verification will be appended after deployment.
+## Submission receipt
+
+Release `5a62fa467f924e0b5b2f1aeb5bc52ca818efd9e0` was deployed with all 239
+tracked source hashes verified. At 05:35:57 UTC, durable receipts recorded:
+
+| Stage | Slurm job | Technical predecessor |
+|---|---|---|
+| Full tests and actual-container regression | 21500394 | none |
+| MRI participant index 3 | 21500395 | 21500394 |
+| MRI participant index 4 | 21500396 | 21500395 |
+| MRI participant index 5 | 21500397 | 21500396 |
+| MRI participant index 6 | 21500398 | 21500397 |
+
+At 05:36:22 UTC qualification was running; four MRI jobs were dependency-pending.
+The existing P05 array had progressed to task 189 running (189/200 complete,
+10 later tasks pending). Those jobs were not modified. This receipt is not yet a
+claim that the actual-container qualification or MRI retry has completed.
+
+### Verified startup, 05:39:46 UTC
+
+Qualification **21500394 succeeded at 05:39:11 UTC**: all **250 server tests
+passed** (the sole warning is the expected deliberately stuck-chain diagnostic
+fixture). The unpatched container reproduced the exact `skip_file_prefixes`
+TypeError. The patched fMRIPrep 25.1.3 container rendered synthetic figures in
+both parent and forkserver processes, retaining warning messages; each produced
+a 17,245-byte plot. Both processes read the same patched source SHA-256:
+`d0929948943fb3ec2b836ea7ab7bc640764d1802a89817f51c304f1d381dc8ed`.
+
+MRI **21500395** is RUNNING with a fresh participant attempt and original
+configuration/P03/preparation hashes. Jobs **21500396–21500398** are pending on
+the recorded serial dependencies. Old failure records and completed outputs are
+preserved. This verifies deployment and startup, not eventual completion of the
+four participants or empirical neural model comparisons.

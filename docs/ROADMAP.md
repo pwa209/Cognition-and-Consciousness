@@ -1,12 +1,20 @@
 # Phase-mapped implementation roadmap
 
+> **Repair deployed, 2026-09-21 05:39 UTC:** release `5a62fa4` passed 250 server
+> tests plus real-container baseline/fixed-warning regressions, including a
+> forkserver worker. Qualification 21500394 succeeded; MRI retry 21500395 is
+> running, followed by queued 21500396–21500398. Original science settings,
+> three completed participants and report calibration are preserved. The existing
+> P05 simulations continue; the hourly local monitor remains paused. See
+> [verified repair and exact queue](MRI_WARNING_REPAIR_20260921.md).
+
 > **MRI runtime repair, 2026-09-21 05:24 UTC:** three of seven masked-MRI
 > participants are complete. The fourth failed in diagnostic plotting with a
 > warning-handler compatibility error; its three successors were canceled.
 > P05 reports are 200/200 complete; patterns are 188/200 with one running and 11
 > queued. The September 20 cleanup completed, consolidating 252,681 entries; two
-> further successful MRI work trees are also archived. A narrow tested runtime
-> repair is being prepared for the four unfinished participants. Empirical neural
+> further successful MRI work trees are also archived. At that check a runtime
+> repair was needed for the four unfinished participants (deployed above). Empirical neural
 > feature integration and M0–M5 comparisons remain incomplete. See
 > [repair scope, validation and deployment receipts](MRI_WARNING_REPAIR_20260921.md).
 
