@@ -47,5 +47,26 @@ not start unless archiving has restored the stricter 180K free-file margin.
 Local targeted recovery tests passed 27/27. The complete local suite passed 262
 tests with five documented Windows/local-dependency skips and one intentional
 duplicate-archive warning. Changed Python passed Ruff and `git diff --check`.
-Server qualification, archive counts, release hash, job IDs and post-archive quota
-must be appended here after the immutable release is installed and dispatched.
+Immutable repair release `f4de98eb17d337f2c09bf478819b9bbf3b0234f6`
+was installed with 263 files and source-archive SHA-256
+`36665ec21510bef3845bf4f023cad6b26fbabca7cdf9cfada4198e8134f00667`.
+Qualification **21571206** completed successfully: 267 server tests passed and both
+baseline/patched real-container warning smokes passed. Preflight measured the failed
+work tree as 149 GB and 61,755 loose entries; its archive target was absent and all
+predecessor states matched the retained failure records.
+
+The accepted recovery graph is:
+
+| Stage | Job |
+| --- | ---: |
+| Verify/archive failed sub-05 work | 21571207 |
+| MRI sub-05 / sub-06 / sub-07 | 21571208 / 21571209 / 21571210 |
+| Extract sub-05 / sub-06 / sub-07 | 21571211 / 21571212 / 21571213 |
+| Independent noise / bundle | 21571214 / 21571215 |
+| P06 / P07 / P08 | 21571216 / 21571217 / 21571218 |
+| P09 packed / P10 | 21571219 / 21571220 |
+
+At 07:41 UTC archive job 21571207 was running after qualification. P09 is 50 tasks
+at concurrency two, covering all 1,000 original replicate IDs. P10 depends on both
+bundle success and terminal P07/P08/P09. Post-archive quota and net inode reduction
+remain to be measured after verification and retirement; no completion is claimed yet.

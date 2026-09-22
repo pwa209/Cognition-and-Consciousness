@@ -1,13 +1,16 @@
 # Phase-mapped implementation roadmap
 
-> **Transient-quota recovery prepared, 2026-09-22:** sub-05 MRI job 21500396
+> **Transient-quota recovery deployed, 2026-09-22:** sub-05 MRI job 21500396
 > stopped when the personal quota-reporting service timed out three times, not on
 > a measured capacity exceedance. Its serial successors and P06-P09 were cancelled;
 > P10 failed immediately because its bundle was absent. A tested repair now requires
 > fresh start evidence, uses bounded and pessimistically charged stale readings only
 > during active MRI, archives the failed work tree before retry, archives every
 > successful MRI work tree serially, and prevents P10 from starting without a
-> successful bundle. See [repair and inode controls](MRI_QUOTA_RECOVERY_20260922.md).
+> successful bundle. Release `f4de98e` passed 267 server tests and real-container
+> smokes. Archive 21571207 is running; serial MRI 21571208-10 and repaired
+> extraction/noise/bundle/P06-P10 jobs 21571211-20 are queued. See
+> [repair and inode controls](MRI_QUOTA_RECOVERY_20260922.md).
 
 > **Initial empirical lane implementation, 2026-09-21:** owner approved masked fMRI
 > first, with five evaluation/two calibration subjects and explicit P08 not applicable.
