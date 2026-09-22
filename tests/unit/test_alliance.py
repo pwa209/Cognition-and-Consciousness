@@ -119,3 +119,93 @@ def test_quota_service_exhaustion_fails_closed(monkeypatch, tmp_path):
     with pytest.raises(CapacityError, match="after 3 attempts"):
         guard(1024)
     assert guard.bound == 0 and guard.quota is None
+
+
+def test_bounded_stale_quota_grace_requires_fresh_start_and_charges_files(
+    monkeypatch, tmp_path
+):
+    import factorcon.alliance as module
+
+    quota = parse_personal_quota("/scratch (user pwa209) 10TB/20TB 700K/1000K")
+    calls = []
+
+    def read():
+        calls.append(len(calls))
+        if len(calls) == 2:
+            raise CapacityError("personal quota service unavailable after 3 attempts")
+        return quota
+
+    clock = [0.0]
+    monkeypatch.setattr(module, "read_personal_quota", read)
+    monkeypatch.setattr(module.time, "monotonic", lambda: clock[0])
+    guard = module.ScratchQuotaGuard(
+        tmp_path / "quota.json",
+        stale_grace_seconds=1800,
+        stale_charge_bytes=50_000_000_000,
+        stale_charge_files=10_000,
+        stale_reserve_bytes=1_000_000_000_000,
+        stale_reserve_files=100_000,
+    )
+    guard(0)
+    initial_bytes, initial_files = guard.bound, guard.file_bound
+    clock[0] = 61
+    guard(0)
+    assert guard.bound == initial_bytes + 50_000_000_000
+    assert guard.file_bound == initial_files + 10_000
+    stale = __import__("json").loads((tmp_path / "quota.json").read_text())
+    assert stale["quota_source"] == "bounded_stale" and stale["stale_failures"] == 1
+    clock[0] = 62
+    guard(0)
+    fresh = __import__("json").loads((tmp_path / "quota.json").read_text())
+    assert fresh["quota_source"] == "fresh" and fresh["stale_failures"] == 0
+
+
+def test_bounded_stale_quota_grace_stops_at_pessimistic_inode_reserve(
+    monkeypatch, tmp_path
+):
+    import factorcon.alliance as module
+
+    quota = parse_personal_quota("/scratch (user pwa209) 10TB/20TB 850K/1000K")
+    readings = iter([quota, CapacityError("personal quota service unavailable after 3 attempts")])
+
+    def read():
+        value = next(readings)
+        if isinstance(value, Exception):
+            raise value
+        return value
+
+    clock = [0.0]
+    monkeypatch.setattr(module, "read_personal_quota", read)
+    monkeypatch.setattr(module.time, "monotonic", lambda: clock[0])
+    guard = module.ScratchQuotaGuard(
+        tmp_path / "quota.json",
+        stale_grace_seconds=1800,
+        stale_charge_bytes=50_000_000_000,
+        stale_charge_files=60_000,
+        stale_reserve_bytes=1_000_000_000_000,
+        stale_reserve_files=100_000,
+    )
+    guard(0)
+    clock[0] = 61
+    with pytest.raises(CapacityError, match="bounded stale quota reserve"):
+        guard(0)
+
+
+def test_stale_grace_never_substitutes_for_initial_fresh_quota(monkeypatch, tmp_path):
+    import factorcon.alliance as module
+
+    monkeypatch.setattr(
+        module,
+        "read_personal_quota",
+        lambda: (_ for _ in ()).throw(
+            CapacityError("personal quota service unavailable after 3 attempts")
+        ),
+    )
+    guard = module.ScratchQuotaGuard(
+        tmp_path / "quota.json",
+        stale_grace_seconds=1800,
+        stale_charge_bytes=1,
+        stale_charge_files=1,
+    )
+    with pytest.raises(CapacityError, match="after 3 attempts"):
+        guard(0)

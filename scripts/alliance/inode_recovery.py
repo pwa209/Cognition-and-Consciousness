@@ -181,9 +181,17 @@ def retry_legacy(root: Path, repair: Path, plan: dict[str, Any], mode: str) -> N
         root / "operations/inode-recovery" / repair.parent.name / f"live-quota-{job}.json",
         reserve_files=plan["mri_start_free_files"],
         reserve_bytes=plan["live_reserve_bytes"],
+        stale_grace_seconds=plan.get("quota_stale_grace_seconds", 0),
+        stale_charge_bytes=plan.get("quota_stale_charge_bytes", 0),
+        stale_charge_files=plan.get("quota_stale_charge_files", 0),
+        stale_reserve_bytes=plan.get("quota_stale_reserve_bytes"),
+        stale_reserve_files=plan.get("quota_stale_reserve_files"),
     )
     guard(0)
     guard.reserve_files = plan["live_reserve_files"]
+    guard.stale_reserve_files = max(
+        plan["live_reserve_files"], plan.get("quota_stale_reserve_files", 0)
+    )
     module.subprocess = _ProcessProxy(guard, plan["quota_interval_seconds"])
     if spec := plan.get("warning_compatibility"):
         compatibility = load_module(
@@ -214,7 +222,11 @@ def main() -> int:
     parser.add_argument("--mode", choices=["archive", "qualify", "mri", "pattern"], required=True)
     parser.add_argument(
         "--plan",
-        choices=["inode_recovery_plan.yaml", "mri_warning_recovery_plan.yaml"],
+        choices=[
+            "inode_recovery_plan.yaml",
+            "mri_warning_recovery_plan.yaml",
+            "mri_quota_recovery_plan.yaml",
+        ],
         default="inode_recovery_plan.yaml",
     )
     args = parser.parse_args()

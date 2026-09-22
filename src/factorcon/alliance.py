@@ -164,43 +164,117 @@ class ScratchQuotaGuard:
         *,
         reserve_bytes: int = 500_000_000_000,
         reserve_files: int = 50_000,
+        stale_grace_seconds: float = 0,
+        stale_charge_bytes: int = 0,
+        stale_charge_files: int = 0,
+        stale_reserve_bytes: int | None = None,
+        stale_reserve_files: int | None = None,
     ) -> None:
-        if reserve_bytes < 0 or reserve_files < 0:
+        values = (
+            reserve_bytes,
+            reserve_files,
+            stale_grace_seconds,
+            stale_charge_bytes,
+            stale_charge_files,
+        )
+        optional_reserves = (stale_reserve_bytes, stale_reserve_files)
+        if any(value < 0 for value in values) or any(
+            value is not None and value < 0 for value in optional_reserves
+        ):
             raise ValueError("quota reserves must be nonnegative")
+        if stale_grace_seconds and (stale_charge_bytes <= 0 or stale_charge_files <= 0):
+            raise ValueError("stale quota grace requires positive pessimistic charges")
         self.status_path = status_path
         self.reserve_bytes = reserve_bytes
         self.reserve_files = reserve_files
+        self.stale_grace_seconds = stale_grace_seconds
+        self.stale_charge_bytes = stale_charge_bytes
+        self.stale_charge_files = stale_charge_files
+        self.stale_reserve_bytes = max(
+            reserve_bytes,
+            reserve_bytes if stale_reserve_bytes is None else stale_reserve_bytes,
+        )
+        self.stale_reserve_files = max(
+            reserve_files,
+            reserve_files if stale_reserve_files is None else stale_reserve_files,
+        )
         self.lock = threading.Lock()
         self.checked_at = 0.0
         self.bound = 0
+        self.file_bound = 0
         self.quota: PersonalQuota | None = None
+        self.stale_failures = 0
+
+    def _record(self, *, source: str, error: str | None = None) -> None:
+        """Persist the storage bound and evidence source, without participant data."""
+        assert self.quota is not None
+        value = {
+            "checked_utc": utc_now(),
+            "quota": self.quota.__dict__,
+            "quota_source": source,
+            "charged_bound_bytes": self.bound,
+            "charged_bound_files": self.file_bound,
+            "reserve_bytes": self.reserve_bytes,
+            "reserve_files": self.reserve_files,
+            "stale_reserve_bytes": self.stale_reserve_bytes,
+            "stale_reserve_files": self.stale_reserve_files,
+            "stale_failures": self.stale_failures,
+        }
+        if error:
+            value["quota_error"] = error
+            value["stale_age_seconds"] = max(0.0, time.monotonic() - self.checked_at)
+        atomic_write_json(self.status_path, value)
+
+    def _require_headroom(self, incoming_bytes: int, *, stale: bool) -> None:
+        """Enforce byte and inode reserves against fresh or pessimistic stale bounds."""
+        assert self.quota is not None
+        reserve_bytes = self.stale_reserve_bytes if stale else self.reserve_bytes
+        reserve_files = self.stale_reserve_files if stale else self.reserve_files
+        if (
+            self.bound + incoming_bytes > self.quota.limit_bytes - reserve_bytes
+            or self.file_bound > self.quota.limit_files - reserve_files
+        ):
+            mode = "bounded stale quota" if stale else "personal scratch quota"
+            raise CapacityError(f"{mode} reserve reached; partial outputs retained")
 
     def __call__(self, incoming_bytes: int) -> None:
-        """Check/charge an imminent write in bytes; raise before exceeding the reserve."""
+        """Check/charge an imminent write, with optional bounded stale-service grace.
+
+        Default callers remain fail-closed. A long-running compute caller may opt into
+        grace only after a successful fresh reading. Every unavailable refresh then
+        charges declared worst-case bytes/files and uses stricter reserves until a
+        fresh personal counter is obtained; shared filesystem capacity is never used.
+        """
         if incoming_bytes < 0:
             raise ValueError("incoming bytes must be nonnegative")
         with self.lock:
             if self.quota is None or time.monotonic() - self.checked_at >= 60:
-                self.quota = read_personal_quota()
+                try:
+                    quota = read_personal_quota()
+                except CapacityError as exc:
+                    now = time.monotonic()
+                    transient = str(exc).startswith("personal quota service unavailable")
+                    if (
+                        not transient
+                        or self.quota is None
+                        or self.stale_grace_seconds <= 0
+                        or now - self.checked_at > self.stale_grace_seconds
+                    ):
+                        raise
+                    self.stale_failures += 1
+                    self.bound += self.stale_charge_bytes
+                    self.file_bound += self.stale_charge_files
+                    self._record(source="bounded_stale", error=str(exc))
+                    self._require_headroom(incoming_bytes, stale=True)
+                    self.bound += incoming_bytes
+                    return
+                self.quota = quota
                 self.checked_at = time.monotonic()
-                self.bound = max(self.bound, self.quota.used_bytes)
-                atomic_write_json(
-                    self.status_path,
-                    {
-                        "checked_utc": utc_now(),
-                        "quota": self.quota.__dict__,
-                        "charged_bound_bytes": self.bound,
-                        "reserve_bytes": self.reserve_bytes,
-                        "reserve_files": self.reserve_files,
-                    },
-                )
-            if (
-                self.bound + incoming_bytes > self.quota.limit_bytes - self.reserve_bytes
-                or self.quota.used_files > self.quota.limit_files - self.reserve_files
-            ):
-                raise CapacityError(
-                    "personal scratch quota reserve reached; partial downloads retained"
-                )
+                self.bound = max(self.bound, quota.used_bytes)
+                self.file_bound = max(self.file_bound, quota.used_files)
+                self.stale_failures = 0
+                self._record(source="fresh")
+            self._require_headroom(incoming_bytes, stale=False)
             self.bound += incoming_bytes
 
 

@@ -297,3 +297,16 @@ This ledger is part of the transparent non-preregistered record. Add entries chr
   reconciliation found no submitted job. Pack the same 1,000 global replicate IDs
   into 50 tasks of 20, retaining concurrency two, the qualified analysis source,
   every seed and every failure record. This changes scheduling only, not inference.
+
+- **2026-09-22 transient quota service and inode recovery:** MRI job 21500396 was
+  terminated while actively processing sub-05 because three personal-quota service
+  calls timed out. Later fresh counters showed capacity remained; this is a technical
+  service failure, not scientific evidence. Preserve the failed attempt and archive
+  its loose work tree with checksums before a fresh retry. Require a fresh 180K-file
+  start margin, then permit a bounded 30-minute stale-reading grace only for the
+  already-running MRI monitor, charging 50 GB and 10K files per failed refresh and
+  enforcing stricter 1 TB/100K reserves. Acquisition remains fail-closed. Retry
+  sub-05/06/07 serially and archive each successful work tree before the next.
+  Requeue the unchanged extraction/noise/bundle/P06-P10 graph, retaining all 1,000
+  bootstrap identities and adding a successful-bundle prerequisite to P10. See
+  MRI_QUOTA_RECOVERY_20260922.md and conf/mri_quota_recovery_plan.yaml.
