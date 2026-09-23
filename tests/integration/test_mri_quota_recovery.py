@@ -41,6 +41,9 @@ def test_recovery_dag_archives_first_and_keeps_all_bootstraps(tmp_path, monkeypa
     assert "--dependency=afterok:1002" in calls[2][1]
     assert "--dependency=afterok:1003" in calls[3][1]
     assert "--dependency=afterok:1004" in calls[4][1]
+    for _receipt, command in calls[2:5]:
+        exported = next(item for item in command if item.startswith("--export="))
+        assert "FACTORCON_QUALIFICATION_JOB=1001" in exported
     assert "--dependency=afterok:1003" in calls[5][1]
     assert "--dependency=afterok:1004" in calls[6][1]
     assert "--dependency=afterok:1005" in calls[7][1]

@@ -70,3 +70,23 @@ At 07:41 UTC archive job 21571207 was running after qualification. P09 is 50 tas
 at concurrency two, covering all 1,000 original replicate IDs. P10 depends on both
 bundle success and terminal P07/P08/P09. Post-archive quota and net inode reduction
 remain to be measured after verification and retirement; no completion is claimed yet.
+
+## September 23 follow-up
+
+Archive 21571207 completed: attempt `21500396-4/work` was packed into a verified
+160,024,176,640-byte archive with 61,755 members, and only the duplicate loose work
+tree was retired. Personal scratch then reported 11 TB/20 TB and 791K/1M files.
+
+MRI 21571208 failed after four seconds, before fMRIPrep or a live quota check. The
+runtime attempted to read `qualification.json` under its lifecycle-marker directory,
+`operations/inode-recovery/<release>`, while this dispatcher stores submission
+receipts under `operations/mri-quota-recovery/<release>`. Slurm consequently
+cancelled all `afterok` descendants 21571209–21571220. No MRI derivative, feature,
+model result or scientific gate caused the failure.
+
+The follow-up passes the numeric same-dispatch qualification job directly in the MRI
+environment, validates it, and keeps the old receipt lookup only for legacy warning
+recovery. Regression tests cover both the explicit job binding and the full recovery
+DAG. The complete local suite passes 263 tests with five dependency/platform skips
+and one intentional duplicate-archive warning. A fresh immutable operational release
+and new scheduler identities are required; failed and cancelled records remain intact.

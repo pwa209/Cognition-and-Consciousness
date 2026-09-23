@@ -55,6 +55,16 @@ def terminal(job: str) -> list[str]:
     return states
 
 
+def resolve_qualification_job(operations: Path) -> str:
+    """Resolve the exact qualification job explicitly, with legacy receipt fallback."""
+    job = os.environ.get("FACTORCON_QUALIFICATION_JOB")
+    if job is None:
+        job = load_structured(operations / "qualification.json").get("job_id")
+    if not isinstance(job, str) or not job.isdigit():
+        raise ValueError("numeric recovery qualification job required")
+    return job
+
+
 def archive_work(root: Path, repair: Path, work: Path, destination: Path) -> dict[str, Any]:
     """Copy/verify then retire only an MRI work tree; byte reserve remains 500 GB.
 
@@ -357,7 +367,7 @@ def main() -> int:
                     path.name: hash_file(path) for path in attempt.glob("warning-smoke-*.log")
                 }
         else:
-            qualification = load_structured(operations / "qualification.json")["job_id"]
+            qualification = resolve_qualification_job(operations)
             state = load_structured(operations / f"qualify-{qualification}-single/status.json")
             if (
                 state.get("status") != "SUCCESS"

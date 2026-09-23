@@ -146,3 +146,13 @@ def test_warning_recovery_lifecycle_markers(tmp_path, monkeypatch):
     assert json.loads(failed.read_text())["status"] == "FAILED"
     with pytest.raises(FileExistsError):
         m.main()
+
+
+def test_explicit_qualification_job_avoids_wrong_receipt_directory(tmp_path, monkeypatch):
+    m = module("inode_recovery", monkeypatch)
+    operations = tmp_path / "operations/inode-recovery/repair"
+    monkeypatch.setenv("FACTORCON_QUALIFICATION_JOB", "21571206")
+    assert m.resolve_qualification_job(operations) == "21571206"
+    monkeypatch.setenv("FACTORCON_QUALIFICATION_JOB", "not-a-job")
+    with pytest.raises(ValueError, match="numeric"):
+        m.resolve_qualification_job(operations)

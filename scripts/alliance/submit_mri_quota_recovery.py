@@ -139,6 +139,11 @@ def dispatch(
         )
         if subject_index is not None:
             export += f",FACTORCON_SUBJECT_INDEX={subject_index}"
+        if mode == "mri":
+            qualification_job = jobs.get("qualification")
+            if qualification_job is None or not qualification_job.isdigit():
+                raise ValueError("MRI requires the same-dispatch qualification job")
+            export += f",FACTORCON_QUALIFICATION_JOB={qualification_job}"
         resources = (
             ["--cpus-per-task=8", "--mem=64G", "--time=5-00:00:00"]
             if mode == "mri"

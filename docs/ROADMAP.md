@@ -1,5 +1,18 @@
 # Phase-mapped implementation roadmap
 
+> **Transient-quota recovery follow-up, 2026-09-23:** the 61,755-entry failed MRI
+> work tree was checksum-archived and retired successfully, reducing personal scratch
+> use to 791K/1M files. Qualification 21571206 and archive 21571207 completed. MRI
+> 21571208 then failed before preprocessing because its runtime looked for the new
+> qualification receipt in `operations/inode-recovery` while the dispatcher had
+> written it in `operations/mri-quota-recovery`; dependent jobs 21571209–21571220
+> were cancelled automatically. This was a four-second operational path error, not
+> a data, quota, fMRIPrep or scientific-result failure. The repair now passes the
+> same-dispatch qualification job explicitly and retains the legacy receipt fallback;
+> the exact regression and full local suite pass. A new immutable release and fresh
+> technical retry graph are being deployed. See
+> [repair and inode controls](MRI_QUOTA_RECOVERY_20260922.md).
+
 > **Transient-quota recovery deployed, 2026-09-22:** sub-05 MRI job 21500396
 > stopped when the personal quota-reporting service timed out three times, not on
 > a measured capacity exceedance. Its serial successors and P06-P09 were cancelled;
@@ -8,8 +21,8 @@
 > during active MRI, archives the failed work tree before retry, archives every
 > successful MRI work tree serially, and prevents P10 from starting without a
 > successful bundle. Release `f4de98e` passed 267 server tests and real-container
-> smokes. Archive 21571207 is running; serial MRI 21571208-10 and repaired
-> extraction/noise/bundle/P06-P10 jobs 21571211-20 are queued. See
+> smokes. The initial recovery graph used jobs 21571207–21571220; its final state and
+> follow-up are recorded above. See
 > [repair and inode controls](MRI_QUOTA_RECOVERY_20260922.md).
 
 > **Initial empirical lane implementation, 2026-09-21:** owner approved masked fMRI
