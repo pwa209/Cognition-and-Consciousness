@@ -90,3 +90,24 @@ recovery. Regression tests cover both the explicit job binding and the full reco
 DAG. The complete local suite passes 263 tests with five dependency/platform skips
 and one intentional duplicate-archive warning. A fresh immutable operational release
 and new scheduler identities are required; failed and cancelled records remain intact.
+
+### Follow-up deployment
+
+Commit and immutable Rorqual release
+`cabee37ad9070462e79427f20ce957b25df47db6` contain the explicit qualification
+binding. The transfer verified 263 Git source files; its source archive SHA-256 is
+`867ae3f0c5f71b72f01cf8e7cfd495e6b3fb5b4535b34ecb4be9907710fd7a47`.
+
+| Stage | Job |
+| --- | ---: |
+| Qualification | 21654485 |
+| Verify retained failed-work archive | 21654486 |
+| MRI sub-05 / sub-06 / sub-07 | 21654487 / 21654488 / 21654489 |
+| Extract sub-05 / sub-06 / sub-07 | 21654490 / 21654491 / 21654492 |
+| Independent noise / bundle | 21654493 / 21654494 |
+| P06 / P07 / P08 | 21654495 / 21654496 / 21654497 |
+| P09 packed / P10 | 21654498 / 21654499 |
+
+At 08:02 UTC on September 23, qualification was running and every downstream job
+was dependency-held. P09 remains 50 tasks at concurrency two for all 1,000 fixed
+replicates. This records submission, not completion.
