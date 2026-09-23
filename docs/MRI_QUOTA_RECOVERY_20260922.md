@@ -108,6 +108,8 @@ binding. The transfer verified 263 Git source files; its source archive SHA-256 
 | P06 / P07 / P08 | 21654495 / 21654496 / 21654497 |
 | P09 packed / P10 | 21654498 / 21654499 |
 
-At 08:02 UTC on September 23, qualification was running and every downstream job
-was dependency-held. P09 remains 50 tasks at concurrency two for all 1,000 fixed
-replicates. This records submission, not completion.
+Qualification 21654485 completed at 08:06 UTC on September 23: all 268 server tests
+passed and both real-container warning smokes passed. Archive verification 21654486
+then started; all later jobs remained dependency-held. P09 remains 50 tasks at
+concurrency two for all 1,000 fixed replicates. This records successful qualification
+and active archive verification, not completion of MRI or the empirical phases.

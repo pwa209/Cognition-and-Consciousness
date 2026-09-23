@@ -10,8 +10,9 @@
 > a data, quota, fMRIPrep or scientific-result failure. The repair now passes the
 > same-dispatch qualification job explicitly and retains the legacy receipt fallback;
 > the exact regression and full local suite pass. Immutable release `cabee37` is
-> installed and fresh jobs 21654485–21654499 are queued; qualification 21654485 was
-> running at 08:02 UTC, with every later stage dependency-held. See
+> installed and fresh jobs 21654485–21654499 are queued. Qualification 21654485
+> completed with 268 server tests and both real-container smokes; verified-archive
+> job 21654486 is running, with every later stage dependency-held. See
 > [repair and inode controls](MRI_QUOTA_RECOVERY_20260922.md).
 
 > **Transient-quota recovery deployed, 2026-09-22:** sub-05 MRI job 21500396
