@@ -66,14 +66,17 @@ def test_noise_bundle_and_future_handoff(tmp_path, monkeypatch):
         with zipfile.ZipFile(directory / "runs.zip", "w") as packed:
             for index in range(2):
                 name = f"{subject}-{index}.npz"
-                x = rng.normal(size=(80, 6))
-                series = rng.normal(size=(80, 400))
+                short = subject == "sub-07" and index == 1
+                rows_count = 29 if short else 80
+                x = rng.normal(size=(rows_count, 6))
+                series = rng.normal(size=(rows_count, 400))
                 coverage = np.zeros(400)
                 coverage[:4] = 1
                 packed.writestr(
                     name,
                     m.npz_bytes(
-                        series=series, coverage=coverage, task=x, nuisance=np.ones((80, 1))
+                        series=series, coverage=coverage, task=x,
+                        nuisance=np.eye(rows_count) if short else np.ones((rows_count, 1))
                     ),
                 )
                 trials = [
@@ -110,6 +113,11 @@ def test_noise_bundle_and_future_handoff(tmp_path, monkeypatch):
     assert m.run(root, SOURCE, cfg, noise, dry_run=True)["dry_run"] and not noise.exists()
     result = m.run(root, SOURCE, cfg, noise)
     assert result["evaluation_neural_data_used"] is False
+    assert result["retained_runs"] == 3
+    assert result["design_excluded_runs"] == [{
+        "subject": "sub-07", "member": "sub-07-1.npz", "rows": 29,
+        "residual_df": 0, "reason": "design_residual_df_below_10",
+    }]
     assert load_structured(noise / "provenance.json")["status"] == "SUCCESS"
     with pytest.raises(FileExistsError):
         m.run(root, SOURCE, cfg, noise)
@@ -187,6 +195,48 @@ def test_queued_dag_preserves_cohort_and_has_actual_phase_commands(tmp_path, mon
     assert "--array=0-999%2" in next(c for p, c in calls if p.name == "P09.json")
     assert "--dependency=afterok:112" in next(c for p, c in calls if p.name == "P07.json")
     assert len(load_structured(operations / "P10-input.json")["results"]) == 1002
+
+
+def test_noise_recovery_dispatch_reuses_only_pinned_receipts(tmp_path, monkeypatch):
+    """Retry graph preserves seven producers and all 1,000 seed identities."""
+    m = script("submit_masked_noise_recovery", monkeypatch)
+    root = tmp_path / "fresh-test"
+    source = tmp_path / "new-release" / "source"
+    operations = root / "operations/noise-recovery/new-release"
+    producer = root / "releases" / ("a" * 40) / "source"
+    batch = root / "releases" / ("b" * 40) / "source"
+    plan = {
+        "root": str(root), "scientific_gates": False,
+        "extraction_source": str(producer.relative_to(root)).replace("\\", "/"),
+        "batch_source": "b" * 40, "failed_noise_job": "123",
+        "prepared": "prep/status.json", "reports": "reports/status.json",
+        "calibration_extractions": {"sub-02": "extractions/02/status.json", "sub-07": "extractions/07/status.json"},
+        "evaluation_extractions": {f"sub-0{i}": f"extractions/0{i}/status.json" for i in (1, 3, 4, 5, 6)},
+        "bootstrap_replicates": 1000, "bootstrap_scheduler_tasks": 50,
+        "bootstrap_concurrency": 2,
+    }
+    real_load = m.load_structured
+    monkeypatch.setattr(m, "load_structured", lambda path: plan if path == source / "conf" / m.PLAN else real_load(path))
+    monkeypatch.setattr(m, "verify_source", lambda *_: None)
+    monkeypatch.setattr(m, "terminal", lambda _: ["FAILED"])
+    monkeypatch.setattr(m, "ScratchQuotaGuard", lambda _: lambda _: None)
+    atomic_write_json(root / "qualification/777/status.json", {"status": "SUCCESS", "source_release": str(source)})
+    atomic_write_json(root / "analysis/masked-lane/NOISE/123/status.json", {"status": "FAILED", "error": "ValueError: insufficient residual degrees of freedom"})
+    for subject, relative in (plan["calibration_extractions"] | plan["evaluation_extractions"]).items():
+        atomic_write_json(root / relative, {"status": "SUCCESS", "phase": "EXTRACT", "configuration": {"subject": subject}, "source_release": str(producer)})
+    commands = []
+
+    def submit(_receipt, command):
+        commands.append(command)
+        return str(800 + len(commands))
+
+    monkeypatch.setattr(m, "submit_one", submit)
+    result = m.dispatch(root, source, operations, "777")
+    assert set(result["jobs"]) == {"noise", "bundle", "P06", "P07", "P08", "P09", "P10"}
+    assert result["P09_replicates"] == 1000 and result["P09_scheduler_tasks"] == 50
+    assert len(load_structured(operations / "P10-input.json")["results"]) == 1002
+    assert any("--array=0-49%2" in item for command in commands for item in command)
+    assert plan["extraction_source"] == load_structured(operations / "noise-input.json")["extraction_source"]
 
 
 def test_corrected_report_input_reuses_model_not_old_posterior(tmp_path, monkeypatch):

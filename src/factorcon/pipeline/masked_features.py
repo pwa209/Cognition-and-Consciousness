@@ -131,6 +131,20 @@ def ar_transform(values: np.ndarray, rho: float) -> np.ndarray:
     return result
 
 
+def residual_degrees_of_freedom(task: np.ndarray, nuisance: np.ndarray) -> int:
+    """Return design-only residual time-point degrees of freedom, without BOLD access.
+
+    Rows are scan volumes; task and nuisance columns are fixed design regressors.
+    The joint rank, not a second rank of numerical projection remnants, defines df.
+    An invertible AR(1) transform leaves this rank unchanged.
+    """
+    if task.ndim != 2 or nuisance.ndim != 2 or len(task) != len(nuisance):
+        raise ValueError("aligned two-dimensional designs required")
+    if not np.isfinite(task).all() or not np.isfinite(nuisance).all():
+        raise ValueError("finite designs required")
+    return int(len(task) - np.linalg.matrix_rank(np.column_stack((nuisance, task))))
+
+
 def linear_summary(
     y: np.ndarray, task: np.ndarray, nuisance: np.ndarray, rho: float = 0.0
 ) -> dict[str, Any]:
@@ -158,7 +172,7 @@ def linear_summary(
     score = x.T @ yr
     beta = np.linalg.pinv(information, rcond=1e-10) @ score
     residual = yr - x @ beta
-    df = len(y) - rank - np.linalg.matrix_rank(x)
+    df = residual_degrees_of_freedom(task, nuisance)
     if df < 10:
         raise ValueError("insufficient residual degrees of freedom")
     return {

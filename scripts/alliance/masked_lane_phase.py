@@ -28,6 +28,7 @@ from factorcon.pipeline.masked_features import (
     combine_partitions,
     estimate_ar1,
     linear_summary,
+    residual_degrees_of_freedom,
     run_design,
     validate_feature_plan,
 )
@@ -216,6 +217,21 @@ def extracted(
     return records, arrays
 
 
+def extraction_source(root: Path, source: Path, config: dict[str, Any]) -> Path:
+    """Resolve a pinned, intact same-run extraction producer; never trust a loose path.
+
+    Only previously completed extraction artifacts may be read from this release.
+    New NOISE/BUNDLE outputs remain identified by the current immutable source.
+    """
+    if "extraction_source" not in config:
+        return source
+    from inode_recovery import verify_source
+
+    producer = ensure_within(root / "releases", root / safe_relative_path(config["extraction_source"]))
+    verify_source(root, producer)
+    return producer
+
+
 def calibrate_noise(
     root: Path, source: Path, config: dict[str, Any], attempt: Path
 ) -> dict[str, Any]:
@@ -224,13 +240,23 @@ def calibrate_noise(
     partition = load_structured(prepared / "partition.json")
     if set(config["extractions"]) != set(partition["calibration_subjects"]):
         raise ValueError("noise calibration must use exactly the reserved subjects")
-    all_arrays, coverage = [], []
+    producer = extraction_source(root, source, config)
+    all_arrays, coverage, excluded = [], [], []
+    retained_subjects = set()
     for subject, status in config["extractions"].items():
-        rows, arrays = extracted(root, source, status)
+        rows, arrays = extracted(root, producer, status)
         if not rows or any(r["subject"] != subject for r in rows):
             raise ValueError("calibration extraction participant mismatch")
-        all_arrays.extend(arrays)
-        coverage.extend(a["coverage"] for a in arrays)
+        for row, array in zip(rows, arrays, strict=True):
+            df = residual_degrees_of_freedom(array["task"], array["nuisance"])
+            if df < 10:
+                excluded.append({"subject": subject, "member": row["member"], "rows": len(array["task"]), "residual_df": df, "reason": "design_residual_df_below_10"})
+                continue
+            retained_subjects.add(subject)
+            all_arrays.append(array)
+            coverage.append(array["coverage"])
+    if retained_subjects != set(config["extractions"]):
+        raise ValueError("both reserved participants require estimable calibration runs")
     plan = load_structured(source / "conf/masked_feature_plan.yaml")
     keep = np.min(coverage, axis=0) >= plan["minimum_parcel_coverage"]
     if keep.sum() < 3:
@@ -249,6 +275,9 @@ def calibrate_noise(
         "source_units": "unscaled_fmriprep_intensity",
         "temporal_model": "pooled_AR1",
         "evaluation_neural_data_used": False,
+        "extraction_source_release": str(producer),
+        "retained_runs": len(all_arrays),
+        "design_excluded_runs": excluded,
     }
     atomic_write_json(attempt / "calibration.json", result)
     return result
@@ -348,8 +377,11 @@ def build_bundle(root: Path, source: Path, config: dict[str, Any], attempt: Path
         raise ValueError("report sampler has unresolved numerical diagnostic flags")
     if set(posterior["calibration_ids"]) != set(noise_record["calibration_ids"]):
         raise ValueError("report/noise reserved cohort mismatch")
+    producer = extraction_source(root, source, config)
+    if noise_record.get("extraction_source_release", str(source)) != str(producer):
+        raise ValueError("noise/evaluation extraction release mismatch")
     collected = {
-        subject: extracted(root, source, path)
+        subject: extracted(root, producer, path)
         for subject, path in sorted(config["extractions"].items())
     }
     with np.load(noise_dir / "noise.npz", allow_pickle=False) as archive:

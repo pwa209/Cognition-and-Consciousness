@@ -310,3 +310,19 @@ This ledger is part of the transparent non-preregistered record. Add entries chr
   Requeue the unchanged extraction/noise/bundle/P06-P10 graph, retaining all 1,000
   bootstrap identities and adding a successful-bundle prerequisite to P10. See
   MRI_QUOTA_RECOVERY_20260922.md and conf/mri_quota_recovery_plan.yaml.
+
+- **2026-09-24 masked-fMRI calibration design-rank repair:** Job 21654493 failed
+  because one retained sub-07 recognition run has 29 volumes and nuisance rank 29;
+  it provides zero residual degrees of freedom. Its previous projected-task rank
+  appeared as one from floating-point remnants, producing a misleading df of -1.
+  Compute df from the joint nuisance/task design rank. Exclude calibration runs
+  with fewer than the existing 10 residual df **before using their BOLD values
+  in noise fitting**, preserve a per-run design exclusion ledger, and require
+  both reserved calibration participants to retain estimable runs. The known
+  affected run is `sub-07_ses-05_task-recog_run-1.npz`; the other 91 retained
+  calibration runs remain eligible. This is a technical estimability rule, not
+  outcome selection or a scientific gate. The repaired AR(1)/residual covariance
+  and all dependent BUNDLE/P06-P10 outputs need a new immutable source release;
+  prior successful extraction ZIPs are reused only by an explicit same-run,
+  manifest-verified producer release. The prior failure and all excluded-run
+  records remain preserved. See conf/masked_noise_recovery_20260924.yaml.

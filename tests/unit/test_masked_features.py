@@ -17,6 +17,7 @@ from factorcon.pipeline.masked_features import (
     combine_partitions,
     estimate_ar1,
     linear_summary,
+    residual_degrees_of_freedom,
     run_design,
     validate_feature_plan,
 )
@@ -201,6 +202,16 @@ def test_fixed_linear_gls_and_aggregation():
     for i in range(1, len(residual)):
         residual[i] += 0.7 * residual[i - 1]
     assert abs(estimate_ar1([residual]) - 0.7) < 0.04
+
+
+def test_full_row_rank_design_has_zero_not_negative_residual_df():
+    """A short fully censored design cannot contribute calibration residuals."""
+    rng = np.random.default_rng(29)
+    task = rng.normal(size=(29, 6))
+    nuisance = np.eye(29)
+    assert residual_degrees_of_freedom(task, nuisance) == 0
+    with pytest.raises(ValueError, match="insufficient residual degrees"):
+        linear_summary(rng.normal(size=(29, 4)), task, nuisance)
 
 
 def test_design_unknown_report_not_condition_zero_and_technical_censoring():

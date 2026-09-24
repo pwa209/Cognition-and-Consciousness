@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "root": "/scratch/pwa209/cognition-and-consciousness/fresh-20260916",
+  "extraction_source": "releases/6c92cf26c76ee2bea83ceafe75cf135fc9ed9192/source",
+  "batch_source": "9acd74a5a23c2b280d855f6904272d1e413e67e1",
+  "prepared": "analysis/masked-neural/PREPARE/21417197/status.json",
+  "reports": "analysis/masked-lane/REPORT/21502422/status.json",
+  "failed_noise_job": "21654493",
+  "calibration_extractions": {
+    "sub-02": "analysis/masked-lane/EXTRACT/21502424/status.json",
+    "sub-07": "analysis/masked-lane/EXTRACT/21654492/status.json"
+  },
+  "evaluation_extractions": {
+    "sub-01": "analysis/masked-lane/EXTRACT/21502423/status.json",
+    "sub-03": "analysis/masked-lane/EXTRACT/21502425/status.json",
+    "sub-04": "analysis/masked-lane/EXTRACT/21502426/status.json",
+    "sub-05": "analysis/masked-lane/EXTRACT/21654490/status.json",
+    "sub-06": "analysis/masked-lane/EXTRACT/21654491/status.json"
+  },
+  "bootstrap_replicates": 1000,
+  "bootstrap_scheduler_tasks": 50,
+  "bootstrap_concurrency": 2,
+  "scientific_gates": false
+}
