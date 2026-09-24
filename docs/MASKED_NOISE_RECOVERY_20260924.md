@@ -23,3 +23,19 @@ ZIPs and the packed P09 layout limit additional file count.
 Interpretation remains the narrow masked-fMRI cortical association lane. This
 retry does not restore timing-excluded runs or make P08 cross-family synthesis
 applicable. Report-liability E is not ground-truth consciousness.
+
+## Deployed checkpoint, 24 September 2026
+
+Immutable analysis source `27ce5d1d4c565b5e5506fb4dce5e0843cd3b8dbe` was
+installed in the existing personal-scratch fresh run; the source archive and
+266 files passed SHA-256 verification. Slurm qualification `21744804` passed
+270 tests plus the synthetic imaging-runtime smoke. The recovery dispatcher
+recorded job IDs: NOISE `21744872`, BUNDLE `21744873`, P06 `21744874`, P07
+`21744875`, P08 `21744876`, packed P09 array `21744877` (50 tasks × 20
+replicates), and P10 `21744878`. At this checkpoint, NOISE, BUNDLE, P06, and
+P08 have SUCCESS receipts; P07 and P09 are running, and P10 waits on their
+terminal states. The NOISE ledger excludes only
+`sub-07_ses-05_task-recog_run-1.npz` at design residual df 0. Scheduler
+receipts and all detailed provenance are retained on personal scratch; no
+participant-level data are committed here. This is an operational checkpoint,
+not a scientific finding or a claim that the full multi-family study is done.
