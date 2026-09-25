@@ -63,6 +63,10 @@ At 08:39 UTC, `diskusage_report` showed personal scratch at 12 TB/20 TB
 and 823K/1,000K files; the packed P09 campaign remains inside the current
 file-count limit. This is a live quota snapshot, not a reservation for later
 BMVP extraction.
+At 08:51 UTC, the 25 running P09 batch receipts collectively recorded 42 of
+the 1,000 original replicate IDs complete, with no failed batch receipts.
+P10 remained dependency-pending. These counts are a snapshot, not a prediction
+of completion time.
 
 The BMVP compatibility audit is recorded separately in
 [P08_BMVP_COMPATIBILITY_AUDIT_20260925.md](P08_BMVP_COMPATIBILITY_AUDIT_20260925.md).

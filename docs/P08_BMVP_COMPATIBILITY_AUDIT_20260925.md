@@ -83,6 +83,31 @@ cross-family calibration, and the new multi-family P08 are **not queued**. The
 existing P08 result remains correctly `not_applicable` for the one-family lane.
 This is an honest technical dependency, not a scientific gate.
 
+## First parser pilot deployed, 25 September 2026
+
+Immutable source release `4516b7e3426b783480c7e46983dd0328d3508d08`
+adds `factorcon.pipeline.bmvp_csv`, a read-only TAR/CSV pilot that validates
+archive member safety and expected CSV counts, retains the source clock as
+unverified, counts calibration separately, and emits separate center/quadrant
+stimulus candidates. A response attaches only to the task-relevant stimulus;
+the task-irrelevant candidate is `not_requested`, never E=0. Focused parser
+tests passed 10/10, and the full local suite passed 275 tests (five skipped for
+documented environment limitations).
+
+Compute-node pilot `21790807` completed successfully without extraction:
+
+| Original archive | Trial CSVs | Calibration rows | Task rows | Stimulus candidates | Task-irrelevant/unrequested |
+|---|---:|---:|---:|---:|---:|
+| `191_RP_MRI.tar` | 1 | 400 | 128 | 128 | 0 |
+| `238_NRP.tar` | 6 | 1,600 | 480 | 960 | 480 |
+
+The per-attempt SUCCESS/provenance receipt is stored only on personal scratch
+under `operations/bmvp-csv-pilot/<release>/`. This validates two representative
+archive schemas; it does **not** establish correct trial-to-BOLD timing, prove
+eye calibration, qualify all archive variants, activate P04, make a neural
+bundle, or justify P08 transfer. The active masked-fMRI release and jobs were
+not changed by installing this separate pilot source.
+
 ## Alternative-family search
 
 The [Hatamimajoumerd et al. visual-masking fMRI study](https://par.nsf.gov/servlets/purl/10353317)

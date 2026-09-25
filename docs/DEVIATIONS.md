@@ -342,3 +342,15 @@ This ledger is part of the transparent non-preregistered record. Add entries chr
   restricted E–R estimand only after independent calibration. These are
   technical estimability conditions, never scientific result gates. See
   docs/P08_BMVP_COMPATIBILITY_AUDIT_20260925.md.
+
+- **2026-09-25 BMVP schema pilot (not P04 activation):** After inspecting the
+  official archives and published task design, add a parser pilot that
+  distinguishes calibration from task rows and the task-relevant from the
+  task-irrelevant stimulus within a no-report archive. Preserve original
+  source-clock values without claiming scan alignment or latent E labels.
+  Run two representative archives on a one-core compute allocation without
+  extraction; both passed with a hashed, immutable source release and
+  personal-scratch SUCCESS/provenance receipts. Do not add BMVP to
+  `harmonization_ready` or queue its neural/P08 phases until full schema,
+  timing, and independent anchor checks are done. This change addresses
+  measurement validity, not scientific result direction; see the P08 audit.

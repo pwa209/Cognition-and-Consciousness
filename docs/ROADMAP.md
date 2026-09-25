@@ -9,6 +9,13 @@
 > multi-family P08 is not queued. See the [execution checkpoint](MASKED_NOISE_RECOVERY_20260924.md)
 > and [P08 compatibility audit](P08_BMVP_COMPATIBILITY_AUDIT_20260925.md).
 
+> **BMVP parser pilot, 2026-09-25:** a separate, versioned compute-node pilot
+> (`21790807`) successfully parsed representative report and no-report TAR
+> trial CSVs without extraction, retaining source-clock uncertainty and
+> distinguishing task-relevant responses from unrequested stimuli. This is
+> progress toward P04, not P04 completion or a verified P06 bundle. At 08:51
+> UTC, P09 had 42/1,000 replicate IDs recorded across 25 running batches.
+
 > **Transient-quota recovery follow-up, 2026-09-23:** the 61,755-entry failed MRI
 > work tree was checksum-archived and retired successfully, reducing personal scratch
 > use to 791K/1M files. Qualification 21571206 and archive 21571207 completed. MRI
