@@ -20,6 +20,10 @@ from factorcon.pipeline.downstream import (
     validate_downstream_plan,
 )
 from factorcon.pipeline.neural_bundle import load_campaign, write_pattern_file
+from factorcon.pipeline.lofo_contract import (
+    audit_exploratory_er_transfer,
+    nonestimable_lofo_rows,
+)
 from factorcon.pipeline.patterns import validate_pattern_inputs
 from factorcon.util import atomic_write_json, ensure_within, hash_file, load_structured, utc_now
 
@@ -105,7 +109,7 @@ def run_phase(
         datasets, _ = validate_pattern_inputs(
             files, source / "conf/analysis_spec.yaml", mode="within"
         )
-        return datasets, None
+        return datasets, tuple(files)
 
     if dry_run:
         data, _ = inputs()
@@ -202,6 +206,24 @@ def run_phase(
                 )
             elif phase == "P08" and len(data) < 2:
                 result = {"status": "not_applicable", "reason": "LOFO requires >=2 families"}
+            elif phase == "P08":
+                issues = (
+                    audit_exploratory_er_transfer(metadata, data)
+                    if all(set(d.names) == {"E", "R"} for d in data)
+                    else (
+                        "full or mixed-construct cross-family measurement bridge is not independently validated",
+                    )
+                )
+                result = (
+                    nonestimable_lofo_rows(data, issues)
+                    if issues
+                    else evaluate_patterns(data, **options)
+                )
+                result["estimand"] = (
+                    "exploratory_report_evidence_E_R"
+                    if all(set(d.names) == {"E", "R"} for d in data)
+                    else "full_construct_transfer_not_validated"
+                )
             else:
                 result = evaluate_patterns(data, **options)
         atomic_write_json(attempt / "result.json", result)

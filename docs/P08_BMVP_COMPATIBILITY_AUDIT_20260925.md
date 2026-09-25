@@ -211,3 +211,36 @@ their respective trains. That one onset is a technical exception to resolve
 or mark unavailable for neural analysis; it is not evidence about E and must
 not be silently shifted or discarded because of a model result. No no-report
 run has yet been promoted to a P04/P06 bundle.
+
+## Fixed three-participant report conversion extension
+
+A scheduled, read-only scan of the BMVP P03 inventory found 37 report-MRI TAR
+archives. Thirteen contain at least three filename-pattern-matched long DICOM
+series; 24 do not match that specific DICOM filename/count check and are not
+declared unusable. Among the first three report-MRI archives with complete
+task logs/CSVs and long scanner-trigger trains, `191` has four 720-trigger
+task runs, `223` has five and `238` has four. Every task block has 32 task
+trials; first onsets follow the run's first trigger by approximately ten
+seconds. These are design/timing checks, not outcome-based cohort selection.
+
+The versioned `conf/bmvp_report_cohort_pilot.yaml` fixes the five 223 and four
+238 720-DICOM series for bounded conversion, supplementing the four already
+converted 191 series. `submit_bmvp_report_cohort.py` limits active conversions
+to two 2-CPU Slurm lanes, uses durable per-series submission receipts, personal
+scratch quota reserves and immutable source, and refuses unreconciled duplicate
+attempts. DICOM conversion alone is not neural preprocessing or multi-family
+transfer readiness. The original P08 remains not applicable; the exploratory
+E–R route requires a new, separately labeled campaign and independent anchors.
+
+## Restricted P08 execution contract
+
+The downstream runner now treats a two-family, E/R-only input as the separately
+labeled `exploratory_report_evidence_E_R` estimand. It requires a matching
+independently reviewed bridge declaration plus compatible design and neural
+axes before calling the leave-one-family-out fitter. Otherwise it writes
+all twelve family-by-M0–M5 rows as `not_estimable` with explicit reasons,
+without invented scores. The single-family masked receipt is unchanged.
+Matching metadata is necessary but cannot itself establish cross-study
+measurement equivalence; an independent review of the actual report and
+feature calibration remains a human scientific task. No such bridge or BMVP
+P06 bundle exists yet, so a multi-family P08 fit is not currently queueable.

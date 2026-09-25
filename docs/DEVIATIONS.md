@@ -373,3 +373,22 @@ This ledger is part of the transparent non-preregistered record. Add entries chr
   DICOM inter-run clock cross-check. This validates a pilot run origin only,
   not the complete BMVP neural bundle or any cross-family E/R anchor. Retain
   calibration trains and the isolated trigger as distinct, never as task runs.
+
+- **2026-09-25 BMVP fixed report-cohort conversion extension:** Following
+  non-neural archive/log/CSV inventory, define 191/223/238 as the first three
+  report-MRI pilot archives with complete 720-trigger task runs. The four 191
+  conversions already exist; submit only the five 223 and four 238 DICOM
+  series in two bounded Slurm lanes. The plan does not use P07/P08 scores or
+  neural values to select subjects or runs. Conversion is not P04/P06/P08
+  completion; no common E/R/feature anchor is claimed. See the P08 BMVP audit.
+
+- **2026-09-25 restricted P08 compatibility contract:** Add a separately
+  labeled exploratory E–R transfer branch for a future two-family campaign.
+  Before model fitting it checks empirical provenance, an independently
+  reviewed measurement-bridge declaration, joint E/R design support, and
+  identical condition/feature/partition/sensory axes and units. Failed checks
+  retain all M0–M5 rows as `not_estimable`, never substitute scores or affect
+  the existing masked-only P08 receipt. This is a technical anti-mislabeling
+  check, not evidence that a declared bridge is scientifically valid and not
+  a result-based stopping rule. BMVP preprocessing and bridge validation are
+  still required before a real cross-family fit can be queued.

@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "scope": "technical_report_mri_conversion_pilot_not_p08_fit",
+  "selection_basis": "first_three_report_mri_archives_with_complete_log_csv_and_720_trigger_task_runs_before_neural_outcomes",
+  "already_converted": ["191_RP_MRI_0006", "191_RP_MRI_0007", "191_RP_MRI_0008", "191_RP_MRI_0009"],
+  "pending": [
+    {"archive": "report/223_RP_MRI.tar", "series": "223_RP_MRI_0006", "dicom_count": 720},
+    {"archive": "report/223_RP_MRI.tar", "series": "223_RP_MRI_0007", "dicom_count": 720},
+    {"archive": "report/223_RP_MRI.tar", "series": "223_RP_MRI_0008", "dicom_count": 720},
+    {"archive": "report/223_RP_MRI.tar", "series": "223_RP_MRI_0009", "dicom_count": 720},
+    {"archive": "report/223_RP_MRI.tar", "series": "223_RP_MRI_0010", "dicom_count": 720},
+    {"archive": "report/238_RP_MRI.tar", "series": "238_RP_MRI_0006", "dicom_count": 720},
+    {"archive": "report/238_RP_MRI.tar", "series": "238_RP_MRI_0007", "dicom_count": 720},
+    {"archive": "report/238_RP_MRI.tar", "series": "238_RP_MRI_0008", "dicom_count": 720},
+    {"archive": "report/238_RP_MRI.tar", "series": "238_RP_MRI_0009", "dicom_count": 720}
+  ],
+  "max_parallel_conversions": 2,
+  "scratch_reserve_bytes": 500000000000,
+  "scratch_reserve_files": 50000
+}

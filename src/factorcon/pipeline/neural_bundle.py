@@ -168,6 +168,10 @@ def load_bundle(
         "raw_preprocessing_performed_here": False,
         "independent_unit": value["independent_unit"],
     }
+    if "transfer_bridge" in value:
+        metadata["transfer_bridge"] = value["transfer_bridge"]
+    if "sensory_definition" in value:
+        metadata["sensory_definition"] = value["sensory_definition"]
     result.validate()
     # Detect a changed input during parsing/calibration before publishing any result.
     for check in (record, value["arrays"], *proofs):
