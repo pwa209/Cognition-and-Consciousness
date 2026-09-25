@@ -71,6 +71,10 @@ and the other seven were dependency-pending. These are conversions only, not
 validated BOLD preprocessing, E/R calibration, P06 or P08 fits. A report-only
 cohort cannot by itself establish the report/no-report R contrast; the
 no-report imaging/timing lane and independent scale bridge still require work.
+At the next receipt check, both initial jobs had completed successfully with
+four-dimensional `110 × 110 × 64 × 720` images. Jobs `21821873` and
+`21821874` were eligible but scheduler-priority-pending; the other five
+remained dependency-pending. No later conversion is claimed complete.
 
 The same scheduler snapshot showed the masked P09 array with 25 active
 four-core tasks, two completed array tasks, six failed array tasks and one
