@@ -354,3 +354,14 @@ This ledger is part of the transparent non-preregistered record. Add entries chr
   `harmonization_ready` or queue its neural/P08 phases until full schema,
   timing, and independent anchor checks are done. This change addresses
   measurement validity, not scientific result direction; see the P08 audit.
+
+- **2026-09-25 BMVP MRI conversion pilot (not P08 activation):** The owner
+  elected to continue with already acquired BMVP material and not request
+  additional data by email. Read-only compute-node inventory showed that the
+  report-MRI exemplar's lone NIfTI is 3D structural, while functional DICOM
+  series are present; no-report has one archive with explicit 4D BOLD NIfTIs.
+  Add a bounded, fixed-series DICOM conversion pilot on personal scratch with
+  temporary extraction and hashed provenance. Conversion checks geometry only;
+  do not treat it as event synchronization, neural preprocessing, disjoint
+  calibration, or a common E/R anchor. The new restricted E–R transfer remains
+  exploratory and not yet estimable. No scientific result controls this work.

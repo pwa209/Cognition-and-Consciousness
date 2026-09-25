@@ -16,6 +16,14 @@
 > progress toward P04, not P04 completion or a verified P06 bundle. At 08:51
 > UTC, P09 had 42/1,000 replicate IDs recorded across 25 running batches.
 
+> **BMVP imaging pilot, 2026-09-25:** inventory inspection identified 37
+> report-MRI archives with DICOM, and 65/67 no-report archives with DICOM.
+> Only one no-report archive has explicitly named 4D BOLD NIfTIs; the inspected
+> report-MRI NIfTI is structural. A fixed 720-DICOM-series conversion pilot is
+> scripted for a compute node with transient files on personal scratch. It is
+> P04 preparation, not a multi-family P08 fit. The owner chose no author email
+> or new-data request; the separate exploratory E–R route continues on BMVP.
+
 > **Transient-quota recovery follow-up, 2026-09-23:** the 61,755-entry failed MRI
 > work tree was checksum-archived and retired successfully, reducing personal scratch
 > use to 791K/1M files. Qualification 21571206 and archive 21571207 completed. MRI

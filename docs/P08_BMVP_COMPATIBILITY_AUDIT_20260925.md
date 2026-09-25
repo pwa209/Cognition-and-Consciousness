@@ -118,3 +118,57 @@ contact upon request; it does not establish a downloadable, verified raw
 participant-level neural bundle for this project. It is a possible future
 access inquiry, not a substitute for the missing BMVP calibration or a queued
 second-family P08 run.
+
+## MRI-cohort census and restricted-transfer decision, 25 September 2026
+
+Read-only inspections ran as one-core Slurm jobs on Rorqual. In the verified
+P03 inventory, all 37 report-MRI archives have DICOM and one NIfTI each, but
+none has a NIfTI named as functional BOLD. The inspected report-MRI NIfTI is
+3D (256 × 256 × 176), hence structural rather than an fMRI time series. Of
+67 no-report archives, 65 contain DICOM, nine contain NIfTI, and only one
+archive contains explicitly named BOLD NIfTI runs. Its six such runs have
+600/700 volumes at 1 s TR. This is an imaging-file census, not a qualified
+cohort: conversion, run/event synchronization, preprocessing, and disjoint
+calibration remain. The personal `/scratch` quota readout showed 11.62 TB and
+824,826 files used; any conversion must keep temporary DICOM material bounded
+and avoid exploding the file count.
+
+The owner asked to pursue **both** routes. Route A is a separately labeled,
+exploratory E–R transfer between masked fMRI and BMVP, conditional on a
+validated common report/visibility measurement link and fixed neural feature
+units. It must not be presented as the original E–K_content–R P08. Route B
+seeks an independent masking/content fMRI family with raw participant-level
+neural data and defensible links for E, K_content, R and S. The original P08
+remains not estimable with BMVP alone, irrespective of Route A's outcome.
+
+Initial external-source audit: [Hatamimajoumerd et al. (2022)](https://doi.org/10.1016/j.cub.2022.07.068)
+has an attractive animal/object masking and report/no-report design, but the
+paper offers ROI-level/code resources and states that additional reanalysis
+material is available from its lead contact upon request. A public raw neural
+bundle has not been verified. [Stein et al. (2021)](https://doi.org/10.1371/journal.pbio.3001241)
+has face/house masking, trialwise category and subjective visibility responses,
+and 43 fMRI participants, but its OSF availability statement establishes
+quantitative observations underlying published figures, not a verified raw
+participant-level fMRI release. The openly available [OIID](https://www.nature.com/articles/s41597-025-05414-w)
+is an occlusion/recognition study; its 10–90% physical occlusion conditions
+cannot automatically be interpreted as E reports. None of these has been
+promoted to a second P08 family or downloaded on this evidence alone.
+
+The owner subsequently chose to continue with already acquired BMVP data and
+not to request new data by email. No author was contacted. The external-source
+search is retained as context, not an active acquisition route.
+
+## Predeclared single-series conversion pilot
+
+The report-MRI exemplar has DICOM series with 3, 60, 270, 270, 720, 720,
+720 and 720 files (from the P03 member inventory). The fixed first pilot is
+`report/191_RP_MRI.tar`, series `191_RP_MRI_0006` (720 DICOM files).
+`scripts/alliance/bmvp_mri_pilot.py` validates the entire TAR member list,
+extracts only those 720 members into a temporary directory **inside personal
+scratch**, invokes the Alliance-provided `dcm2niix` on a scheduled compute
+node, checks for a single four-dimensional NIfTI with a time unit in seconds,
+hashes persistent conversion outputs, and deletes the temporary DICOM copies.
+Original archives are untouched. The output is a conversion-only pilot:
+event-to-scan alignment, usable task runs, preprocessing, participant split,
+and cross-family E/R/feature anchors remain unverified. A conversion SUCCESS
+must never be promoted to P04/P06/P08 success.
