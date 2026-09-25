@@ -1,5 +1,15 @@
 # Phase-mapped implementation roadmap
 
+> **P08 build update, 2026-09-25:** a guarded exploratory E–R transfer branch
+> is versioned and installed on Rorqual, but no two-family fit is queued or
+> scientifically estimable yet. Nine preselected BMVP report-MRI conversions
+> (`21821871`–`21821879`) are submitted with two-job concurrency; two were
+> running at first reconciliation. The original masked-only P08 receipt remains
+> `not_applicable`. BMVP event alignment, no-report neural coverage,
+> preprocessing, independent measurement/feature calibration and a verified
+> second P06 bundle remain before a genuine multi-family P08 can run. See
+> [the evidence checkpoint](EMPIRICAL_RESULTS_CHECKPOINT_20260925.md).
+
 > **Rorqual checkpoint, 2026-09-25:** the masked-fMRI P07 lane is operationally
 > complete (all 30 M0–M5 evaluation rows; no optimizer-start failures). Its
 > packed P09 robustness array now permits 25 simultaneous four-core tasks and

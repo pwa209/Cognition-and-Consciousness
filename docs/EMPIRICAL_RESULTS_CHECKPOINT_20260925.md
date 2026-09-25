@@ -59,3 +59,23 @@ a verified BMVP neural bundle, fixed common feature/condition units and an
 independent report-measurement bridge. Source-only calibration, not held-out
 neural outcomes, must determine that bridge. There is no valid multi-family
 P08 score at this checkpoint.
+
+## Subsequent technical submission (same date)
+
+Immutable source `4be3a343a475b9f686fd5424fc72d2407908dca4` was installed
+on personal Rorqual scratch. A dry run and fresh personal-quota/reserve check
+passed. Nine fixed report-MRI DICOM conversions for `223` and `238` were
+submitted as jobs `21821871`–`21821879`, with at most two two-core jobs active.
+At the first scheduler reconciliation, `21821871` and `21821872` were RUNNING
+and the other seven were dependency-pending. These are conversions only, not
+validated BOLD preprocessing, E/R calibration, P06 or P08 fits. A report-only
+cohort cannot by itself establish the report/no-report R contrast; the
+no-report imaging/timing lane and independent scale bridge still require work.
+
+The same scheduler snapshot showed the masked P09 array with 25 active
+four-core tasks, two completed array tasks, six failed array tasks and one
+pending array range. P10 `21744878` was pending. This Slurm task count is not
+the number of successful bootstrap replicates, which remained 277/1,000 at
+the last hash-checked receipt census. Failed tasks require explicit recovery
+before a complete 1,000-replicate uncertainty summary; they are not dropped
+because of a scientific result.
