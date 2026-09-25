@@ -326,3 +326,19 @@ This ledger is part of the transparent non-preregistered record. Add entries chr
   prior successful extraction ZIPs are reused only by an explicit same-run,
   manifest-verified producer release. The prior failure and all excluded-run
   records remain preserved. See conf/masked_noise_recovery_20260924.yaml.
+
+- **2026-09-25 P09 scheduling acceleration and P08 compatibility audit:** The
+  existing 50-task × 20-replicate P09 array (`21744877`) was already running
+  with a concurrency cap of two four-core tasks. After confirming no failures,
+  ownership, account, resource request and remaining tasks, raise only
+  `ArrayTaskThrottle` to 25 (at most 100 allocated CPUs). Keep all replicate
+  IDs, seeds, statistical specifications, output files and failure receipts
+  unchanged. This is an execution-time change, not outcome-dependent selection.
+  The scheduler subsequently ran 25 tasks concurrently. The separate BMVP
+  audit found usable report/no-report trial schemas but no verified BMVP neural
+  bundle or externally justified E/R-and-feature anchor shared with masked
+  fMRI. Do not submit a nominal multi-family P08 by relabeling these scales;
+  preserve the existing single-family `not_applicable` receipt and define a
+  restricted E–R estimand only after independent calibration. These are
+  technical estimability conditions, never scientific result gates. See
+  docs/P08_BMVP_COMPATIBILITY_AUDIT_20260925.md.

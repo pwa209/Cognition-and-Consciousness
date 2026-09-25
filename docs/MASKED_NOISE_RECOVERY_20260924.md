@@ -39,3 +39,30 @@ terminal states. The NOISE ledger excludes only
 receipts and all detailed provenance are retained on personal scratch; no
 participant-level data are committed here. This is an operational checkpoint,
 not a scientific finding or a claim that the full multi-family study is done.
+
+## Execution checkpoint, 25 September 2026
+
+P07 job `21744875` completed cleanly in 3:39:38, using 14:26:02 aggregate CPU
+on four cores. All 30 intended rows (five evaluation participants × M0–M5)
+were scored with finite held-out values; all 120 recorded outer-fit optimizer
+starts converged. This establishes operational completeness, not a preferred
+scientific model. Conditional design-draw uncertainty and five independent
+evaluation participants remain interpretive limits; no P07 rerun is indicated
+by this diagnostic audit.
+
+At 08:09 UTC, the owner-authorized packed P09 array `21744877` had its
+simultaneous-task throttle raised from 2 to 25 without changing its 50 tasks,
+20 replicates per task, seeds, configuration or prior outputs. Each task uses
+four CPUs. By 08:25 UTC, 25 tasks were running (100 allocated CPUs), with
+remaining array work held by the task limit; P10 `21744878` remained pending
+on its dependency. The scheduler may change live occupancy. The remote
+operational receipt is retained under this run's `operations/noise-recovery/`
+directory as `p09-throttle-20260925.json`; data and logs remain on personal
+scratch, not the shared `/project` allocation.
+At 08:39 UTC, `diskusage_report` showed personal scratch at 12 TB/20 TB
+and 823K/1,000K files; the packed P09 campaign remains inside the current
+file-count limit. This is a live quota snapshot, not a reservation for later
+BMVP extraction.
+
+The BMVP compatibility audit is recorded separately in
+[P08_BMVP_COMPATIBILITY_AUDIT_20260925.md](P08_BMVP_COMPATIBILITY_AUDIT_20260925.md).

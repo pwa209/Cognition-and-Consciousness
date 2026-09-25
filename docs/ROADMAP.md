@@ -1,5 +1,14 @@
 # Phase-mapped implementation roadmap
 
+> **Rorqual checkpoint, 2026-09-25:** the masked-fMRI P07 lane is operationally
+> complete (all 30 M0–M5 evaluation rows; no optimizer-start failures). Its
+> packed P09 robustness array now permits 25 simultaneous four-core tasks and
+> reached 100 allocated CPUs; P10 waits for P09. The single-family P08 receipt
+> remains `not_applicable`. BMVP P03 is complete, but its P04–P06 neural lane
+> and independent common E/R/feature anchor are not yet ready, so a new
+> multi-family P08 is not queued. See the [execution checkpoint](MASKED_NOISE_RECOVERY_20260924.md)
+> and [P08 compatibility audit](P08_BMVP_COMPATIBILITY_AUDIT_20260925.md).
+
 > **Transient-quota recovery follow-up, 2026-09-23:** the 61,755-entry failed MRI
 > work tree was checksum-archived and retired successfully, reducing personal scratch
 > use to 791K/1M files. Qualification 21571206 and archive 21571207 completed. MRI
