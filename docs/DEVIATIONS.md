@@ -365,3 +365,11 @@ This ledger is part of the transparent non-preregistered record. Add entries chr
   do not treat it as event synchronization, neural preprocessing, disjoint
   calibration, or a common E/R anchor. The new restricted E–R transfer remains
   exploratory and not yet estimable. No scientific result controls this work.
+
+- **2026-09-25 BMVP report-MRI timing pilot:** The original report archive's
+  PsychoPy log was found to contain 720 scanner triggers for each of the four
+  720-volume task series, with first task trials about ten seconds after the
+  first trigger. Add a fixed, versioned behavioral-log/CSV alignment check and
+  DICOM inter-run clock cross-check. This validates a pilot run origin only,
+  not the complete BMVP neural bundle or any cross-family E/R anchor. Retain
+  calibration trains and the isolated trigger as distinct, never as task runs.

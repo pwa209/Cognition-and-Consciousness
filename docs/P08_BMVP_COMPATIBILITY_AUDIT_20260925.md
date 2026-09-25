@@ -172,3 +172,24 @@ Original archives are untouched. The output is a conversion-only pilot:
 event-to-scan alignment, usable task runs, preprocessing, participant split,
 and cross-family E/R/feature anchors remain unverified. A conversion SUCCESS
 must never be promoted to P04/P06/P08 success.
+
+## Independent report-MRI clock pilot, 25 September 2026
+
+The fixed report exemplar's PsychoPy `.log` contains exactly four long
+`Keypress: 5` trigger trains of 720 entries, plus two earlier 270-entry
+calibration trains and one isolated late trigger. The four long trains have
+starts at 1386.8777, 2158.5457, 2919.6478 and 3687.3724 seconds on the
+behavioral clock. Each task block has 32 trials; its first trial is 10.0173,
+10.0173, 10.0172 and 10.0166 seconds after the corresponding train start.
+The converted DICOM series `0006`–`0009` each have 720 volumes at 1 s TR.
+Their scanner start-time intervals track the behavioral trigger-train intervals
+within about 0.3 s. This supports a fixed run-order/event-origin mapping
+without selecting on BOLD outcomes. The companion `logs_anon.txt` is empty;
+the PsychoPy log, not that file, supplies the triggers.
+
+`factorcon.pipeline.bmvp_timing` and `scripts/alliance/bmvp_timing_pilot.py`
+make these non-neural checks executable with explicit run/trial/trigger counts,
+cadence and DICOM interval tolerances, plus a personal-scratch status/provenance
+receipt. This is a **report-exemplar timing pilot only**. It does not verify
+slice timing, motion/QC, all BMVP subjects, independent E measurement, common
+feature units, or multi-family P08. No missing report is coded as E=0.
