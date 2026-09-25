@@ -193,3 +193,21 @@ cadence and DICOM interval tolerances, plus a personal-scratch status/provenance
 receipt. This is a **report-exemplar timing pilot only**. It does not verify
 slice timing, motion/QC, all BMVP subjects, independent E measurement, common
 feature units, or multi-family P08. No missing report is coded as E=0.
+
+Immutable Rorqual release `05ebff9e6d4f62e1466d60c0262edbc98a03982a`
+ran the check as one-core Slurm job `21818154`. Its personal-scratch receipt is
+`SUCCESS`, with four runs and scanner-minus-trigger inter-run residuals
+−0.058, −0.135 and +0.278 seconds. The work used the owner's scratch
+(`12/20 TB`, `830k/1,000k` files reported before submission), not `/project`.
+
+A separate read-only census of `601_NRP.tar` found two MRI behavioral logs:
+the center-relevant session has five 700-trigger task trains and the
+quadrant-relevant session has four; each also has a 600-trigger calibration
+train. Their task CSVs have 24 trials per task block. A second compute-node
+count found exactly **one** trial onset outside a task scan: center-relevant
+block 3, 707.916 seconds after its first trigger despite a 700-volume,
+1-second train. The other 215 of 216 no-report task-trial onsets fall within
+their respective trains. That one onset is a technical exception to resolve
+or mark unavailable for neural analysis; it is not evidence about E and must
+not be silently shifted or discarded because of a model result. No no-report
+run has yet been promoted to a P04/P06 bundle.
