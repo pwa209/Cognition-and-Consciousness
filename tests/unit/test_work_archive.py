@@ -7,7 +7,7 @@ import tarfile
 import pytest
 
 from factorcon.util import hash_file
-from factorcon.work_archive import pack, retire, verify_archive, work_target
+from factorcon.work_archive import bmvp_work_target, pack, retire, verify_archive, work_target
 
 
 def fixture(tmp_path):
@@ -109,3 +109,18 @@ def test_pack_failure_preserves_source_and_marker(tmp_path, monkeypatch):
     with pytest.raises(FileExistsError):
         pack(root, work, dest)
     assert pack(root, work, root / "archives/mri-work/dry", dry_run=True)["dry_run"]
+
+
+def test_bmvp_work_archive_is_scoped_and_recoverable(tmp_path):
+    """A BMVP scratch work tree may be retired only after byte-verified packing."""
+    root = tmp_path.resolve() / "study"
+    work = root / "analysis/bmvp-report/PREPROCESS/123-191/work"
+    work.mkdir(parents=True)
+    (work / "intermediate.bin").write_bytes(b"bounded fixture")
+    destination = root / "archives/bmvp-work/123-191"
+    assert bmvp_work_target(root, work) == work
+    with pytest.raises(ValueError):
+        bmvp_work_target(root, root / "analysis/bmvp-report/PREPROCESS/123-191/derivatives")
+    assert pack(root, work, destination, category="bmvp-work")["status"] == "VERIFIED"
+    assert retire(root, work, destination, category="bmvp-work")["status"] == "RETIRED"
+    assert not work.exists()

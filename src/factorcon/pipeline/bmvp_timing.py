@@ -15,6 +15,26 @@ from factorcon.errors import IntegrityError
 _TRIGGER = re.compile(r"^([0-9]+(?:\.[0-9]+)?)\s+DATA\s+Keypress: 5\s*$")
 
 
+def dicom_time_seconds(value: str) -> float:
+    """Parse dcm2niix AcquisitionTime into seconds after midnight; metadata only."""
+    if ":" in value:
+        parts = value.split(":")
+        if len(parts) != 3:
+            raise ValueError("invalid colon DICOM time")
+        hour, minute, second = int(parts[0]), int(parts[1]), float(parts[2])
+    else:
+        head, dot, frac = value.partition(".")
+        head = head.zfill(6)
+        if len(head) != 6:
+            raise ValueError("invalid compact DICOM time")
+        hour = int(head[:2])
+        minute = int(head[2:4])
+        second = float(head[4:] + (dot + frac if dot else ""))
+    if not (0 <= hour < 24 and 0 <= minute < 60 and 0 <= second < 60):
+        raise ValueError("DICOM time outside clock range")
+    return 3600 * hour + 60 * minute + second
+
+
 @dataclass(frozen=True, slots=True)
 class BmvpRunTiming:
     """One report run; times are seconds on the behavioral clock, no neural fit."""

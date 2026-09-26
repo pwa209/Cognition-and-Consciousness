@@ -27,6 +27,18 @@ def work_target(root: Path, work: Path) -> Path:
     return work
 
 
+def bmvp_work_target(root: Path, work: Path) -> Path:
+    """Accept only a numeric BMVP report-preprocessing attempt's work tree."""
+    expected = root / "analysis/bmvp-report/PREPROCESS"
+    if (
+        root.resolve() != root or work.resolve() != work or work.name != "work"
+        or work.parent.parent != expected
+        or not re.fullmatch(r"\d+-(?:191|223|238)", work.parent.name)
+    ):
+        raise ValueError("only an exact BMVP report MRI work tree is permitted")
+    return work
+
+
 def environment_target(root: Path, environment: Path) -> Path:
     """Accept only numeric qualification environments; explicitly protect current MRI/P05 runtimes.
 
@@ -47,6 +59,8 @@ def environment_target(root: Path, environment: Path) -> Path:
 def _target(root: Path, path: Path, category: str) -> None:
     if category == "mri-work":
         work_target(root, path)
+    elif category == "bmvp-work":
+        bmvp_work_target(root, path)
     elif category == "environments":
         environment_target(root, path)
     else:

@@ -411,3 +411,13 @@ This ledger is part of the transparent non-preregistered record. Add entries chr
   then depends only on the live original and retry P09 arrays. It uses the
   identical 1,000-ID graph and unchanged analysis source, redirecting only
   the 95 technical retry IDs. This is scheduler repair, not a scientific gate.
+
+- **2026-09-26 BMVP report-MRI preprocessing extension:** Add a fixed,
+  event-aligned BIDS preparation and serial fMRIPrep stage for the previously
+  selected three report-MRI participants (13 runs). The extension rehashes
+  converted inputs, validates raw TAR paths and trigger/event correspondence,
+  records onset-only durations honestly, and safely archives each successful
+  fMRIPrep work tree to protect file-count headroom. It does not select runs
+  by neural outcomes, infer E from missing reports, claim independent E/R
+  calibration, change the original P08 receipt, or activate a multi-family
+  fit. See BMVP_REPORT_PREPROCESS_20260926.md.

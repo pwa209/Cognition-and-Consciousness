@@ -11,29 +11,9 @@ from pathlib import Path
 from typing import Any
 
 from factorcon.alliance import read_source_record, validate_fresh_root
-from factorcon.pipeline.bmvp_timing import align_report_mri_timing
+from factorcon.pipeline.bmvp_timing import align_report_mri_timing, dicom_time_seconds
 from factorcon.pipeline.empirical import safe_tar_members
 from factorcon.util import atomic_write_json, hash_file, load_structured, utc_now
-
-
-def dicom_time_seconds(value: str) -> float:
-    """Parse a dcm2niix AcquisitionTime into seconds after midnight; no neural data."""
-    if ":" in value:
-        parts = value.split(":")
-        if len(parts) != 3:
-            raise ValueError("invalid colon DICOM time")
-        hour, minute, second = int(parts[0]), int(parts[1]), float(parts[2])
-    else:
-        head, dot, frac = value.partition(".")
-        head = head.zfill(6)
-        if len(head) != 6:
-            raise ValueError("invalid compact DICOM time")
-        hour = int(head[:2])
-        minute = int(head[2:4])
-        second = float(head[4:] + (dot + frac if dot else ""))
-    if not (0 <= hour < 24 and 0 <= minute < 60 and 0 <= second < 60):
-        raise ValueError("DICOM time outside clock range")
-    return 3600 * hour + 60 * minute + second
 
 
 def run_pilot(root: Path, *, job: str) -> dict[str, Any]:

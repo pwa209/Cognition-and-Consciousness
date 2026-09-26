@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "family": "bmvp",
+  "scope": "three_participant_report_mri_bids_preparation_not_p08",
+  "scientific_gates": false,
+  "selection_basis": "first_three_complete_report_mri_logs_and_720_trigger_runs_before_neural_outcomes",
+  "participants": [
+    {"id": "191", "series": ["0006", "0007", "0008", "0009"], "conversion_jobs": ["21792878", "21792930", "21792934", "21792929"]},
+    {"id": "223", "series": ["0006", "0007", "0008", "0009", "0010"], "conversion_jobs": ["21821871", "21821872", "21821873", "21821874", "21821875"]},
+    {"id": "238", "series": ["0006", "0007", "0008", "0009"], "conversion_jobs": ["21821876", "21821877", "21821878", "21821879"]}
+  ],
+  "expected_volumes_per_run": 720,
+  "expected_trials_per_run": 32,
+  "tr_seconds": 1.0,
+  "event_duration_seconds": 0.0,
+  "event_duration_interpretation": "onset_impulse_only_source_duration_not_verified",
+  "fmriprep": {
+    "version": "25.1.3",
+    "image": "/cvmfs/containers.computecanada.ca/content/containers/fmriprep-25.1.1",
+    "nprocs": 8,
+    "omp_nthreads": 4,
+    "memory_mb": 56000,
+    "output_spaces": ["MNI152NLin2009cAsym:res-2", "T1w"],
+    "skull_strip_template": "OASIS30ANTs",
+    "reconstruction": false,
+    "spatial_smoothing": false
+  },
+  "cross_family_e_scale_validated": false,
+  "cross_family_feature_units_validated": false,
+  "calibration_status": "not_established"
+}
