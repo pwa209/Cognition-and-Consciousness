@@ -133,12 +133,10 @@ def align_report_mri_timing(
         if any(t < train[0] or t >= train[0] + expected_volumes_per_run * tr_seconds for t in trials):
             raise IntegrityError("report task onset lies outside its scanner run")
         first_trial = trials[0]
-        # The first task trial follows exactly the pretask trigger sequence;
-        # require independent log/CSV agreement to within 100 ms.
-        if (
-            not train[expected_pretrial_triggers] <= first_trial < train[expected_pretrial_triggers + 1]
-            or abs(first_trial - train[expected_pretrial_triggers]) > 0.1
-        ):
+        # Independent PsychoPy/trigger clocks can differ on either side of
+        # the nominal pretrial trigger. Retain the original 100 ms bound;
+        # requiring a positive sign would reject a sub-millisecond skew.
+        if abs(first_trial - train[expected_pretrial_triggers]) > 0.1:
             raise IntegrityError("report block does not align to expected trigger index")
         gaps = [b - a for a, b in zip(train, train[1:])]
         results.append(

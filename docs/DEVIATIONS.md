@@ -421,3 +421,16 @@ This ledger is part of the transparent non-preregistered record. Add entries chr
   by neural outcomes, infer E from missing reports, claim independent E/R
   calibration, change the original P08 receipt, or activate a multi-family
   fit. See BMVP_REPORT_PREPROCESS_20260926.md.
+
+- **2026-09-26 BMVP scanner-trigger clock tolerance correction:** The first
+  PREPARE attempt (Slurm 21862964) failed on participant 223, run 1, because
+  its first task trial was 0.000555 seconds *before* trigger 10. The original
+  rule allowed a 0.1-second absolute clock difference but also required the
+  trial to be after that trigger. A compute-node, outcome-blind audit of all
+  13 runs found this single sign mismatch; all first trials were within the
+  existing 0.1-second bound. Accept either sign while retaining the same
+  bound, raw scanner-relative onset, complete trigger/trial counts, cadence,
+  run bounds, and DICOM inter-run checks. The failed attempt and cancelled
+  successors remain as provenance; a new immutable release and fresh jobs
+  are required. This is technical clock alignment, not an outcome-driven
+  selection or a cross-family scale validation.

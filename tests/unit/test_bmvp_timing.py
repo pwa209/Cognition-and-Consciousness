@@ -60,6 +60,16 @@ def test_wrong_block_or_onset_rejects_run() -> None:
         align(log, csv.replace(b"MOVIE,102.01,1", b"MOVIE,103.01,1"))
 
 
+def test_submillisecond_pretrigger_skew_is_within_symmetric_clock_tolerance() -> None:
+    """A first trial 0.5 ms before trigger two retains its raw onset."""
+    log, csv = fixture()
+    skewed = csv.replace(b"MOVIE,102.01,1", b"MOVIE,101.9995,1")
+    result = align(log, skewed)
+    assert result[0].first_trial_onset_seconds == pytest.approx(1.9995)
+    with pytest.raises(IntegrityError, match="expected trigger index"):
+        align(log, csv.replace(b"MOVIE,102.01,1", b"MOVIE,101.899,1"))
+
+
 def test_nonmonotonic_triggers_and_bad_expectation_reject() -> None:
     """Neither malformed logs nor impossible scanner parameters enter P04."""
     log, csv = fixture()
