@@ -434,3 +434,14 @@ This ledger is part of the transparent non-preregistered record. Add entries chr
   successors remain as provenance; a new immutable release and fresh jobs
   are required. This is technical clock alignment, not an outcome-driven
   selection or a cross-family scale validation.
+
+- **2026-09-26 BMVP compute-node container module correction:** The second
+  preparation succeeded (21863173: 3 participants, 13 runs), but its first
+  fMRIPrep job (21863174) failed before image processing because `apptainer`
+  was not on the job PATH; Slurm cancelled its dependent jobs. A separate
+  compute-node smoke test loaded `fmriprep/25.1.1`, resolved `apptainer`, and
+  returned fMRIPrep v25.1.3 from the declared container. The replacement
+  dispatcher loads that module explicitly in a Bash login shell for each
+  preprocessing job. The previous receipts remain intact; a new immutable
+  release and fresh Slurm jobs are required. No scientific contrasts or
+  results are changed.

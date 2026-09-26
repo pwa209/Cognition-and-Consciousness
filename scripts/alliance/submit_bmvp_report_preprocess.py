@@ -41,15 +41,18 @@ def commands(root: Path, source: Path, operations: Path, jobs: dict[str, str] | 
     previous = jobs.get("PREPARE")
     for participant in ("191", "223", "238"):
         dependency = [f"--dependency=afterok:{previous}"] if previous else []
+        run = export + (
+            f"{shlex.quote(str(python))} {shlex.quote(str(source / 'scripts/alliance/bmvp_report_preprocess.py'))} "
+            f"--root {shlex.quote(str(root))} --prepared-job {jobs.get('PREPARE', '<PREPARE_JOB>')} "
+            f"--participant {participant} --job $SLURM_JOB_ID"
+        )
         result[f"PREPROCESS-{participant}"] = base + [
             f"--job-name=fc-bmvp-preproc-{participant}", "--time=1-12:00:00",
             "--cpus-per-task=8", "--mem=64G",
             f"--output={operations}/PREPROCESS-{participant}-%j.log", *dependency,
-            "--wrap", export + (
-                f"{shlex.quote(str(python))} {shlex.quote(str(source / 'scripts/alliance/bmvp_report_preprocess.py'))} "
-                f"--root {shlex.quote(str(root))} --prepared-job {jobs.get('PREPARE', '<PREPARE_JOB>')} "
-                f"--participant {participant} --job $SLURM_JOB_ID"
-            ),
+            # The qualified container module supplies apptainer on compute nodes.
+            # sbatch --wrap uses /bin/sh; load the module in an explicit Bash login shell.
+            "--wrap", "bash -lc " + shlex.quote("module load fmriprep/25.1.1; " + run),
         ]
         previous = jobs.get(f"PREPROCESS-{participant}")
     return result

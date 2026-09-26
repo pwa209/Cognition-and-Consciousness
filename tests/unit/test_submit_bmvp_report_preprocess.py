@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib.util
+import shlex
 import sys
 from pathlib import Path
 
@@ -39,3 +40,8 @@ def test_qualification_then_serial_preprocessing() -> None:
         "PREPROCESS-191", "PREPROCESS-223", "PREPROCESS-238"
     ))
     assert all("--no-requeue" in value for value in commands.values())
+    for participant in ("191", "223", "238"):
+        shell, flag, body = shlex.split(commands[f"PREPROCESS-{participant}"][-1])
+        assert (shell, flag) == ("bash", "-lc")
+        assert body.startswith("module load fmriprep/25.1.1; ")
+        assert f"--participant {participant}" in body
