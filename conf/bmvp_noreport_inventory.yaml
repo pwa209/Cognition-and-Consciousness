@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "family": "bmvp",
+  "scope": "metadata_only_all_verified_noreport_archives_not_P08",
+  "selection_basis": "all_67_P03_verified_noreport_archives_before_neural_outcomes",
+  "expected_noreport_archives": 67,
+  "expected_report_mri_archives": 37,
+  "expected_participant_overlap": 2,
+  "max_csv_bytes": 2000000,
+  "read_voxel_data": false,
+  "infer_absent_experience_from_unrequested_report": false,
+  "cross_family_calibration_validated": false,
+  "scientific_gates": false
+}

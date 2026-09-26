@@ -445,3 +445,16 @@ This ledger is part of the transparent non-preregistered record. Add entries chr
   preprocessing job. The previous receipts remain intact; a new immutable
   release and fresh Slurm jobs are required. No scientific contrasts or
   results are changed.
+
+- **2026-09-26 dual-track P08 exploration:** The owner authorized a separately
+  labelled observable-report cross-family benchmark *in addition to* the
+  intended E–R P08. This is a different estimand, not a substitute or a
+  positive transfer result. Its measured-response categories, source-only
+  neural-feature units, grouped holdouts and nuisance treatment must be
+  declared and validated before fitting. The E–R P08 still needs independent
+  experience-evidence calibration; the original fuller E–K_content–R
+  comparison remains not estimable with BMVP. As a first outcome-blind step,
+  inventory all 67 P03-verified no-report archives on a compute node,
+  retaining unsupported CSVs as holds and never inferring E=0 from an
+  unrequested response. Neither inventory nor successful fMRIPrep is a P08
+  result or a scientific stopping rule.
