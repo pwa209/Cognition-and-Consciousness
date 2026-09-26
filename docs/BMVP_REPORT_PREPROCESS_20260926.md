@@ -65,3 +65,34 @@ durable submission receipts with `squeue`/`sacct` before any retry. A Slurm
 COMPLETED state is insufficient: inspect SUCCESS markers, output hashes,
 per-run counts, and archived-work receipts. Do not promote P08 on the basis
 of successful fMRIPrep alone.
+
+## Rorqual execution checkpoint (26 September 2026, 19:06 UTC)
+
+The first immutable release `a93debe600319bbabb3084aa21d5e5452012e7c9`
+qualified, but PREPARE `21862964` failed on a sub-millisecond behavioral-clock
+sign discrepancy. Its three fMRIPrep successors were cancelled before starting.
+The outcome-blind 13-run timing audit justified the bounded symmetric correction
+in `0afe38f5ce85463826a1d0e8495104c4ddbae1ec`. That release's PREPARE
+`21863173` completed with 3 participants and 13 runs. Its first fMRIPrep job
+`21863174` failed before imaging because the cluster container module was not
+loaded; its successors were cancelled. A separate compute-node and exact
+`sbatch --wrap` smoke test both resolved `apptainer` and returned fMRIPrep
+v25.1.3 after `module load fmriprep/25.1.1`.
+
+The current immutable release is `4d55ec8bcfa4d5fac999aa9923b15eff29ee22f8`.
+QUALIFY `21864041` and PREPARE `21864042` have completed successfully;
+PREPARE's receipt records 3 participants and 13 runs. PREPROCESS-191 `21864043`
+is RUNNING with the container startup check passed; PREPROCESS-223 `21864044`
+and PREPROCESS-238 `21864045` are dependency-pending, one at a time. None has
+a SUCCESS derivative receipt yet. All failed attempts and their records remain
+intact; no raw archive or completed output was deleted.
+
+A read-only P03 ledger census found 37 report-MRI and 67 no-report BMVP
+archives, with only two participant IDs present in both classes. Among the
+fixed three report-MRI participants, only `238` has a no-report archive.
+Archive presence is not task/run alignment or an independent measurement
+bridge. It does not yet support a validated cross-study E/R scale or a new
+multi-family P08 fit. The next technical route is to finish these derivatives,
+audit additional no-report run/event coverage and disjoint calibration
+participants, then test whether common E/R and neural feature units can be
+established without target-outcome fitting. If not, retain `not_estimable`.
