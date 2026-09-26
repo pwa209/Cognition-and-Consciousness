@@ -35,9 +35,9 @@ participant-data mirror. No scientific result is a stopping gate.
   Original P10 `21744878` was dependency-pending at the last check.
 - A dry-run-verified, exact 95-ID P09 retry was submitted as Slurm array
   `21842371` (at most four concurrent four-core tasks) using the unchanged
-  analysis release. One retry task had completed and four were running at
-  the latest scheduler check; per-replicate success totals still need receipt
-  verification. The
+  analysis release. The latest hash-checked retry receipt census found one
+  successful original replicate ID, four running and 90 not started, with no
+  retry failure yet; these are time-stamped counts. The
   first attempt to submit a new P10 was rejected by Slurm because its
   dependency named already-completed, aged-out jobs. Its `UNCERTAIN` receipt
   is preserved; scheduler queue/accounting showed **no** first P10 job. A

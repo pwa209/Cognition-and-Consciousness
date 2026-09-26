@@ -65,3 +65,8 @@ for dependency; the original P09 array had 16 completed and six failed
 scheduler tasks with 24 running, while retry `21842371` had one completed
 task and four running. These scheduler counts are not scientific result or
 per-replicate success counts. The first rejected P10 receipt remains intact.
+
+A later read-only census of the 95 retry IDs found one hash-verified P09
+SUCCESS receipt, four RUNNING receipts and 90 not yet started; no retry error
+receipt was present. P10 `21842472` remained dependency-pending. This is not
+the final bootstrap or inferential result.
