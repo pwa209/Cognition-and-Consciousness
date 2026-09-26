@@ -8,6 +8,12 @@
 > to eight and a fixed 95-replicate-only retry plus reconciled P10 is being
 > prepared. Start with [CURRENT_STATE.md](CURRENT_STATE.md) for the live handoff.
 
+> **26 September recovery update:** exact 95-ID retry array `21842371` is
+> running; reconciled P10 `21842472` is queued behind it and the original P09
+> array. Already successful replicate receipts remain untouched. The first
+> P10 submission was rejected by an aged Slurm dependency and is preserved as
+> an uncertain, non-job receipt; the accepted second submission is separate.
+
 > **P08 build update, 2026-09-25:** a guarded exploratory E–R transfer branch
 > is versioned and installed on Rorqual, but no two-family fit is queued or
 > scientifically estimable yet. Nine preselected BMVP report-MRI conversions

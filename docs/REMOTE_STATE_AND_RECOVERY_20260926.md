@@ -55,3 +55,13 @@ therefore independently verifies those completed predecessor receipts and
 builds a second P10 submission depending only on the still-live original and
 retry P09 arrays. It preserves the first receipt and writes a separate
 reconciliation record. No scientific setting or result is changed.
+
+Immutable reconciler source `c1e3aad7989f9b4d9d0c6a86f635f3012f841dba`
+was installed and its remote dry run passed after hash-checking BUNDLE, P07,
+P08, both releases, and the P10 input. Slurm accepted replacement P10
+`21842472`, with durable `P10-reconciled-v2.json` and
+`P10-reconciliation.json` receipts. At the immediate check it was PENDING
+for dependency; the original P09 array had 16 completed and six failed
+scheduler tasks with 24 running, while retry `21842371` had one completed
+task and four running. These scheduler counts are not scientific result or
+per-replicate success counts. The first rejected P10 receipt remains intact.
