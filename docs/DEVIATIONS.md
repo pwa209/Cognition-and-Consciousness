@@ -402,3 +402,12 @@ This ledger is part of the transparent non-preregistered record. Add entries chr
   analysis source, then submit a new P10 with all original/retry paths. The
   original P10 remains a provenance record. No scientific gate or selective
   result exclusion is introduced. See REMOTE_STATE_AND_RECOVERY_20260926.md.
+
+- **2026-09-26 reconciled P10 dependency:** The 95-ID P09 retry submitted,
+  but the first new P10 submission was rejected because it depended on
+  already-completed predecessor job IDs no longer accepted by Slurm. Preserve
+  the uncertain submission receipt and verify that no P10 job exists. The
+  replacement P10 verifies BUNDLE/P07/P08 from hash-bound SUCCESS receipts,
+  then depends only on the live original and retry P09 arrays. It uses the
+  identical 1,000-ID graph and unchanged analysis source, redirecting only
+  the 95 technical retry IDs. This is scheduler repair, not a scientific gate.

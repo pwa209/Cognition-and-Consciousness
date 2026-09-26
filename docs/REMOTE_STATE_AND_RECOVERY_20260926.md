@@ -35,3 +35,23 @@ that redirects only those 95 paths to the retry job and keeps all other
 original P09 paths. New attempts and the new report never overwrite old ones.
 Actual retry/P10 job IDs and receipts must be appended here after verified
 submission. This is operational repair, not a post-hoc scientific exclusion.
+
+## Submission and dependency reconciliation
+
+Immutable source `2535a9a26423129234e733ba7ae41c0315f6e758` was installed
+on the personal fresh run; the remote dry run returned exactly 95 IDs after
+checking the old batch/replicate receipts and quota headroom. Slurm accepted
+retry array `21842371` at a maximum of four concurrent four-core tasks. The
+first four were RUNNING at the immediate queue check. The original 25
+successful IDs were not resubmitted.
+
+The same dispatcher created a lossless P10 input but its P10 `sbatch` failed:
+`sbatch --test-only` reported `allocation failure: Job dependency problem`
+because the command named already-completed older BUNDLE/P07/P08 jobs that
+Slurm no longer accepts as dependencies. The durable
+`P10-reconciled.json` receipt remains `UNCERTAIN`; queue and accounting searches
+found no job with that name. `scripts/alliance/submit_masked_p10_reconciliation.py`
+therefore independently verifies those completed predecessor receipts and
+builds a second P10 submission depending only on the still-live original and
+retry P09 arrays. It preserves the first receipt and writes a separate
+reconciliation record. No scientific setting or result is changed.

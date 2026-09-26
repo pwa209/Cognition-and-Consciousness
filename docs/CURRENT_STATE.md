@@ -33,6 +33,14 @@ participant-data mirror. No scientific result is a stopping gate.
   new attempts. New-start throttle was reduced from 25 to 8 on 26 September
   to protect the quota service; this changes no scientific setting or seed.
   Original P10 `21744878` was dependency-pending at the last check.
+- A dry-run-verified, exact 95-ID P09 retry was submitted as Slurm array
+  `21842371` (at most four concurrent four-core tasks) using the unchanged
+  analysis release. Its first four tasks were RUNNING at reconciliation. The
+  first attempt to submit a new P10 was rejected by Slurm because its
+  dependency named already-completed, aged-out jobs. Its `UNCERTAIN` receipt
+  is preserved; scheduler queue/accounting showed **no** first P10 job. A
+  separate, hash-guarded P10 reconciler is being prepared to depend only on
+  the original and retry P09 arrays after verifying completed predecessors.
 - All nine BMVP report-MRI conversion jobs `21821871`–`21821879` were Slurm
   COMPLETED with exit code 0. Their per-series status JSONs were also checked:
   all nine say SUCCESS, each lists two hashed output artifacts and one
@@ -45,13 +53,12 @@ participant-data mirror. No scientific result is a stopping gate.
 
 ## Immediate operational sequence
 
-1. Finish and submit the versioned P09 quota-recovery dispatcher only after
-   local tests, immutable source deployment, remote dry run, and exact
-   scheduler/receipt reconciliation. Retry the 95 missing original IDs at
-   low concurrency; retain the 25 already successful IDs and all six failures.
-2. Queue a new P10 with a graph that links 905 original P09 receipt paths and
-   95 retry paths, waiting for both P09 jobs to terminate. The old P10 may
-   produce a provisional incomplete report; never erase it.
+1. Monitor P09 retry `21842371` and original array `21744877` by Slurm and
+   per-replicate receipts. Preserve all original and retry attempts.
+2. Deploy and dry-run `submit_masked_p10_reconciliation.py`; queue one new P10
+   with a graph linking 905 original P09 receipt paths and 95 retry paths.
+   Wait for both P09 arrays to terminate. The old P10 may produce a provisional
+   incomplete report; never erase it.
 3. Rehash each of the nine BMVP conversion outputs on a scheduled compute
    node, then continue the separate event-alignment, no-report imaging,
    preprocessing and independent E/R/feature calibration work. Conversion
