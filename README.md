@@ -14,6 +14,12 @@ The journal ambition is Nature or Science, with Nature Human Behaviour as a real
 
 ## Current state
 
+For the latest Rorqual job IDs, verified outputs, unresolved work, and restart
+instructions, begin with [docs/CURRENT_STATE.md](docs/CURRENT_STATE.md). This
+GitHub-tracked record is the project handoff; the local D: drive is not required
+to recover the plan. Participant data, credentials, and large derivatives remain
+only in authorized storage, not in this repository.
+
 **Compute Canada, 2026-09-16:** a fresh deployment is running on personal Rorqual
 scratch, with owner authorization for acquisition and ready analysis phases. WM
 download/validation/harmonization completed; further acquisition and independent

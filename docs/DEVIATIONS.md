@@ -392,3 +392,13 @@ This ledger is part of the transparent non-preregistered record. Add entries chr
   check, not evidence that a declared bridge is scientifically valid and not
   a result-based stopping rule. BMVP preprocessing and bridge validation are
   still required before a real cross-family fit can be queued.
+
+- **2026-09-26 P09 quota-service recovery:** Six packed bootstrap array tasks
+  stopped on personal-quota-report timeouts, after 25 total replicate SUCCESS
+  receipts; their model results did not determine retries. Lower new-start
+  concurrency from 25 to 8 to reduce quota-service pressure. Preserve the
+  original attempts and all 1,000 replicate IDs/seeds. Retry only the 95
+  technically missing IDs at four concurrent Slurm tasks using the unchanged
+  analysis source, then submit a new P10 with all original/retry paths. The
+  original P10 remains a provenance record. No scientific gate or selective
+  result exclusion is introduced. See REMOTE_STATE_AND_RECOVERY_20260926.md.

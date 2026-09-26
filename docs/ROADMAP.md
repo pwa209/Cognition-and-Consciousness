@@ -1,5 +1,13 @@
 # Phase-mapped implementation roadmap
 
+> **26 September 2026 operational update:** all nine BMVP conversion jobs
+> `21821871`–`21821879` finished with Slurm exit 0 and per-series SUCCESS
+> receipts; independent output-byte rehashing and neural preprocessing remain.
+> Six original P09 packed tasks failed on personal-quota-report timeouts, while
+> 25 successes inside them remain preserved. New-start concurrency was reduced
+> to eight and a fixed 95-replicate-only retry plus reconciled P10 is being
+> prepared. Start with [CURRENT_STATE.md](CURRENT_STATE.md) for the live handoff.
+
 > **P08 build update, 2026-09-25:** a guarded exploratory E–R transfer branch
 > is versioned and installed on Rorqual, but no two-family fit is queued or
 > scientifically estimable yet. Nine preselected BMVP report-MRI conversions

@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "scope": "retry_only_technically_missing_p09_replicates",
+  "root": "/scratch/pwa209/cognition-and-consciousness/fresh-20260916",
+  "analysis_source": "27ce5d1d4c565b5e5506fb4dce5e0843cd3b8dbe",
+  "batch_source": "9acd74a5a23c2b280d855f6904272d1e413e67e1",
+  "qualification_job": "21744804",
+  "original_p09_job": "21744877",
+  "original_p10_job": "21744878",
+  "original_p09_input_sha256": "711a3a6bf72b417b88c54d3d779f1857d18295f591201f8f1e3f17c7e708f530",
+  "failed_batch_completed_prefixes": {
+    "4": [80, 81, 82],
+    "6": [120, 121, 122, 123, 124, 125],
+    "7": [140, 141, 142, 143],
+    "8": [160, 161, 162, 163],
+    "23": [460, 461, 462, 463],
+    "24": [480, 481, 482, 483]
+  },
+  "retry_concurrency": 4,
+  "scratch_reserve_bytes": 500000000000,
+  "scratch_reserve_files": 50000,
+  "scientific_gates": false
+}
