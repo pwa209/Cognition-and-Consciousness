@@ -22,6 +22,28 @@ participant-data mirror. No scientific result is a stopping gate.
 
 ## Verified checkpoint
 
+### Latest BMVP/P08 continuation, 26 September 2026, 20:09 UTC
+
+This paragraph supersedes the older BMVP conversion-only bullets below; it
+does not update the separate P09/P10 counts. BMVP report-MRI PREPARE `21864042`
+has a SUCCESS receipt for 3 participants and 13 event-aligned runs. Serial
+fMRIPrep jobs `21864043` (RUNNING for 191), `21864044` (pending for 223) and
+`21864045` (pending for 238) are on personal Rorqual scratch. No BMVP
+preprocessing SUCCESS receipt or P06 bundle exists yet. The all-archive,
+metadata-only no-report MRI inventory is running as job `21866972`; its
+first of 67 archives was inspected at the latest check. Rorqual qualification
+for its immutable release `3b5c397d1885ac7eca78987fdd00ae60680cf8d0`
+passed 306 tests with 3 optional-dependency skips. The owner authorized two
+separate P08 routes—intended E–R and a narrower observable-report benchmark—
+subject to their respective independent measurement/feature contracts. Neither
+fit is queued or scored. See [dual-track plan](P08_DUAL_TRACK_20260926.md).
+
+The earlier masked-only P08 `21744876` remains operationally SUCCESS but
+scientifically `not_applicable` because it had one family. The user removed
+the recurring study-progress monitor; existing Slurm jobs continue without it.
+
+### Earlier checkpoint (preserved history)
+
 - Masked P06 `21744874` and P07 `21744875` completed. P07 scored all 30
   participant-by-model rows; five evaluation participants are too few for a
   model-winner claim. Existing P08 `21744876` is a hash-verified *single-family
