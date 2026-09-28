@@ -56,6 +56,24 @@ continuation gate.
    record the missing result rather than silently treating the analysis as
    complete.
 
-Archive and dispatch Slurm IDs, release hash, post-archive quota and final P10
-coverage/results remain to be added after actual scheduler and output checks.
-This document does not claim these jobs have been submitted or completed.
+The archive and dispatcher submission receipts follow. Post-archive quota,
+the resulting P09/P10 job IDs, and final coverage/results require later
+scheduler and output checks; submission is not completion.
+
+## Submission receipt, 28 September 2026
+
+GitHub commit `5d9655d7817bbf43ba4641fd447ab61879fac047` was installed as a
+hash-verified source-only release under the personal study root; the installer
+verified 313 source files. The cluster-side P09/P10 dry run verified 112
+successful first redraws, identified only replicate 914 for a technical retry,
+and observed 4,000 free personal-scratch files before consolidation. The new
+archive and dispatcher batch files were LF-normalized into their operations
+directories, checked with `bash -n`, and accepted by Slurm's test mode; the
+source release itself was not edited.
+
+Slurm accepted archive job **21980380** and dispatcher job **21980382** with
+`afterok:21980380`. Both were pending at submission. The archive attempt is
+bounded to `21450700-3/work`; the dispatcher will submit the new P09 and P10
+jobs only after successful archive retirement and a fresh personal-quota check.
+Their eventual IDs and outcomes are not yet known. The historical failure,
+original derivatives, and original P09/P10 records remain untouched.
