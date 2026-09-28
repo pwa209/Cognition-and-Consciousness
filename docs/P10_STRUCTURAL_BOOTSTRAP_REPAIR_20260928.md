@@ -40,3 +40,20 @@ hash-verified release.
 The new interval is an unadjusted percentile summary at fixed families,
 conditions and external calibration. It is not a validated small-sample
 coverage statement, an unconditional interval, or a multi-family P08 result.
+
+## Rorqual submission receipt (28 September 2026)
+
+The verified source-only release is
+`42b52abb743b09d1e168843d098bae6a6cbe260c` on personal scratch under
+`/scratch/pwa209/cognition-and-consciousness/fresh-20260916`. Its transfer
+SHA-256 was `297BD007E0E6C3F62C34C0C3FD9FB5EC518C9717F942A0990B34E3DFBF2A9546`;
+the installer verified 306 source files. The cluster-side dry run reported
+exactly 113 structural IDs and a concurrency limit of eight retry tasks.
+
+Slurm accepted P09 structural redraw array `21943233` and dependent P10
+conditional report `21943235` at 2026-09-28 07:23:36 UTC. The durable receipts
+are in `operations/p10-structural-repair/42b52abb743b09d1e168843d098bae6a6cbe260c/`
+under that personal scratch root. At submission, both jobs were pending; P10
+was pending on the P09 dependency. This is a submission record, not a claim
+that redraws or the new report have completed. The original P10 job `21842472`
+and all original failure records are preserved.
