@@ -458,3 +458,17 @@ This ledger is part of the transparent non-preregistered record. Add entries chr
   retaining unsupported CSVs as holds and never inferring E=0 from an
   unrequested response. Neither inventory nor successful fMRIPrep is a P08
   result or a scientific stopping rule.
+- **2026-09-28 conditional P09/P10 structural-bootstrap repair:** The original
+  masked-fMRI P09 completed all 1,000 scheduler attempts, but 113 pre-specified
+  group resamples contained fewer than three distinct participants, making the
+  nested estimator undefined. Original P10 `21842472` correctly withheld all
+  percentile intervals and preserved 887 scored and 113 failed draws. A new,
+  separately versioned campaign deterministically redraws only those 113
+  structurally invalid multiplicity vectors until each family has at least
+  three distinct groups; numerical failures are never redrawn because of model
+  scores or direction. The original 887 valid draws, original failures and
+  report stay unchanged. A new P10 may report percentile intervals only from
+  1,000 completed draws and labels their target as **conditional on structural
+  estimability**, with the initial 113/1,000 failure fraction retained. It
+  does not establish unconditional coverage or overcome the five-participant
+  sample-size limitation. See P10_STRUCTURAL_BOOTSTRAP_REPAIR_20260928.md.

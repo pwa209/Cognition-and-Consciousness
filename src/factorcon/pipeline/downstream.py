@@ -90,6 +90,85 @@ def bootstrap_shard(
     return result
 
 
+def retry_structurally_invalid_bootstrap(
+    datasets: tuple[PatternData, ...],
+    *,
+    replicate: int,
+    seed: int,
+    options: dict[str, Any],
+    original_multiplicities: dict[str, dict[str, int]],
+    max_redraws: int = 1000,
+) -> dict[str, Any]:
+    """Refit one originally non-estimable subject draw, conditional on >=3 groups.
+
+    Group IDs are independent participants, multiplicities are dimensionless,
+    and scores remain nats per scored dimension. The original draw is verified
+    byte-for-byte by identity and is never replaced because of its score. Only
+    structurally invalid group counts trigger deterministic redraws; all model
+    fitting and tuning remain inside the evaluator's training folds. This is a
+    conditional bootstrap, not an unconditional 1,000-draw percentile interval.
+    """
+    validate_collection(datasets)
+    if (
+        replicate < 0
+        or seed < 0
+        or max_redraws < 1
+        or any(d.group_weights is not None for d in datasets)
+    ):
+        raise ValueError("original unweighted groups and positive redraw budget required")
+
+    def draw(attempt: int) -> tuple[tuple[PatternData, ...], dict[str, dict[str, int]], bool]:
+        stream = [seed, replicate] if attempt == 0 else [seed, replicate, attempt]
+        rng = np.random.default_rng(np.random.SeedSequence(stream))
+        sampled: list[PatternData] = []
+        multiplicities: dict[str, dict[str, int]] = {}
+        estimable = True
+        for data in datasets:
+            n = len(data.group_ids)
+            counts = np.bincount(rng.integers(0, n, n), minlength=n)
+            keep = np.flatnonzero(counts)
+            multiplicities[data.family] = dict(zip(data.group_ids, counts.tolist(), strict=True))
+            estimable &= len(keep) >= 3
+            sampled.append(replace(data.subset(keep), group_weights=counts[keep].astype(float)))
+        return tuple(sampled), multiplicities, estimable
+
+    _, initial, initial_estimable = draw(0)
+    if initial != original_multiplicities or initial_estimable:
+        raise ValueError("original draw identity or structural failure not verified")
+    for attempt in range(1, max_redraws + 1):
+        sampled, multiplicities, estimable = draw(attempt)
+        if not estimable:
+            continue
+        result: dict[str, Any] = {
+            "replicate": replicate,
+            "seed": seed,
+            "multiplicities": multiplicities,
+            "original_multiplicities": initial,
+            "draw_attempt": attempt,
+            "structurally_rejected_draws": attempt,
+            "sampling_policy": "conditional_min_three_unique_groups_per_family_v1",
+        }
+        try:
+            evaluation = evaluate_patterns(sampled, **options)
+            result.update(
+                status="completed",
+                evaluation=evaluation,
+                scores=paired_pattern_summary(evaluation, tuple(d.family for d in datasets)),
+            )
+        except (ValueError, np.linalg.LinAlgError) as exc:
+            result.update(status="failed", reason=f"{type(exc).__name__}: {exc}")
+        return result
+    return {
+        "replicate": replicate,
+        "seed": seed,
+        "original_multiplicities": initial,
+        "structurally_rejected_draws": max_redraws + 1,
+        "sampling_policy": "conditional_min_three_unique_groups_per_family_v1",
+        "status": "failed",
+        "reason": "no structurally estimable draw within deterministic redraw budget",
+    }
+
+
 def report_results(
     output: Path,
     *,
@@ -98,12 +177,15 @@ def report_results(
     bootstrap: list[dict[str, Any]],
     requested_replicates: int,
     coverage: list[dict[str, Any]],
+    bootstrap_design: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Write auditable per-group nats and paired nats/dimension, retaining every failure.
 
     Percentile intervals are unadjusted subject-bootstrap intervals at fixed families,
     conditions and external calibration. No p-values/equivalence or manuscript claims
     are fabricated. A successful report may document unsuccessful upstream jobs.
+    A supplied design labels a separately versioned conditional bootstrap;
+    the independent unit remains the participant, not a trial or electrode.
     """
     if requested_replicates < 2 or not families or len(set(families)) != len(families):
         raise ValueError("unique declared families and >=2 requested replicates required")
@@ -184,6 +266,7 @@ def report_results(
         bootstrap_coverage=[
             {k: b[k] for k in ("replicate", "status", "reason") if k in b} for b in bootstrap
         ],
+        **({"bootstrap_design": bootstrap_design} if bootstrap_design is not None else {}),
         missing_bootstrap_replicates=sorted(set(range(requested_replicates)) - set(indices)),
         scope="fixed_conditions_fixed_families_external_calibration_fixed",
         multiplicity_adjusted=False,

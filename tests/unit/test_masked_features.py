@@ -34,7 +34,10 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 def test_source_timing_and_missing_reports():
-    behavior = (ROOT / "tests/fixtures/masked_timing/behavior.csv").read_bytes()
+    # Git for Windows may check out this text fixture with CRLF line endings.
+    behavior = (
+        (ROOT / "tests/fixtures/masked_timing/behavior.csv").read_bytes().replace(b"\r\n", b"\n")
+    )
     trials = behavior_trials(behavior)
     assert [t["trial"] for t in trials] == [1, 2]
     assert trials[1]["report"] == -1

@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "root": "/scratch/pwa209/cognition-and-consciousness/fresh-20260916",
+  "analysis_release": "27ce5d1d4c565b5e5506fb4dce5e0843cd3b8dbe",
+  "reconciled_input_release": "2535a9a26423129234e733ba7ae41c0315f6e758",
+  "original_p10_job": "21842472",
+  "original_p06_job": "21744874",
+  "seed": 260830,
+  "requested_replicates": 1000,
+  "expected_structural_failures": 113,
+  "retry_concurrency": 8,
+  "max_redraws_per_replicate": 1000,
+  "structural_failure_reason": "ValueError: nested evaluation requires >=3 independent groups per family",
+  "sampling_policy": "conditional_min_three_unique_groups_per_family_v1",
+  "scientific_gates": false
+}
