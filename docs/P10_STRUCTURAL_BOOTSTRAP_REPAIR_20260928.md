@@ -26,6 +26,13 @@ bootstrap distribution conditional on that structural event. The initial
 failure fraction, source hashes, original P10 job and exact result-path mapping
 are included in the new report provenance.
 
+The first cluster preflight stopped because the older source release uses LF
+line endings and the Windows-packaged repair release uses CRLF. All 21 compared
+Python/YAML scientific and scoring files matched after newline normalization.
+The repair now accepts only that text-format difference for compatibility;
+each release still independently verifies its original byte-level file hashes,
+and any substantive content change still aborts the mixed-release analysis.
+
 The new interval is an unadjusted percentile summary at fixed families,
 conditions and external calibration. It is not a validated small-sample
 coverage statement, an unconditional interval, or a multi-family P08 result.

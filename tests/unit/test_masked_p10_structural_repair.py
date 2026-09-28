@@ -18,6 +18,29 @@ def module(monkeypatch):
     return masked_p10_structural_repair
 
 
+def test_model_compatibility_accepts_only_line_ending_changes(tmp_path, monkeypatch):
+    script = module(monkeypatch)
+    old, new = tmp_path / "old", tmp_path / "new"
+    files = (
+        "conf/analysis_spec.yaml",
+        "conf/downstream_plan.yaml",
+        "src/factorcon/config.py",
+        "src/factorcon/util.py",
+        "src/factorcon/pipeline/patterns.py",
+        "src/factorcon/models/fit.py",
+        "src/factorcon/stats/splits.py",
+    )
+    for name in files:
+        for root, content in ((old, b"a\nb\n"), (new, b"a\r\nb\r\n")):
+            path = root / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(content)
+    script.verify_model_compatibility(old, new)
+    (new / "src/factorcon/stats/splits.py").write_bytes(b"a\r\nc\r\n")
+    with pytest.raises(ValueError, match=r"stats/splits\.py"):
+        script.verify_model_compatibility(old, new)
+
+
 def test_repaired_graph_redirects_exact_structural_ids(monkeypatch):
     script = module(monkeypatch)
     old = Path(

@@ -72,7 +72,12 @@ def verify_release(root: Path, source: Path) -> None:
 
 
 def verify_model_compatibility(original: Path, current: Path) -> None:
-    """Reject mixing old/new P09 draws if scoring code or declared units changed."""
+    """Reject scientific changes while tolerating source-only LF/CRLF conversion.
+
+    Both releases must first pass their independent raw-byte manifest checks. The
+    compatibility comparison below covers only Python/YAML text and does not
+    relax either release's SHA-256 provenance.
+    """
     fixed = (
         "conf/analysis_spec.yaml",
         "conf/downstream_plan.yaml",
@@ -90,11 +95,18 @@ def verify_model_compatibility(original: Path, current: Path) -> None:
             str(path.relative_to(current)).replace("\\", "/")
             for path in sorted((current / directory).glob("*.py"))
         )
-    if any(
-        not (original / name).is_file() or hash_file(original / name) != hash_file(current / name)
-        for name in files
-    ):
-        raise ValueError("model/score code or scientific configuration differs from original P09")
+    for name in files:
+        before, after = original / name, current / name
+        if not before.is_file() or not after.is_file():
+            raise ValueError(f"model/score source missing from a verified release: {name}")
+        if hash_file(before) == hash_file(after):
+            continue
+        if before.read_bytes().replace(b"\r\n", b"\n") != after.read_bytes().replace(
+            b"\r\n", b"\n"
+        ):
+            raise ValueError(
+                f"model/score code or scientific configuration differs from original P09: {name}"
+            )
 
 
 def original_evidence(
