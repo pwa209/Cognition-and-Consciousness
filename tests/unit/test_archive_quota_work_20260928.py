@@ -45,15 +45,67 @@ def test_quiescence_rejects_any_other_live_study_job(tmp_path, monkeypatch):
     script = module(monkeypatch)
     monkeypatch.setattr(script, "terminal", lambda *_: ["FAILED"])
     root = tmp_path
+    source = root / "releases" / ("a" * 40) / "source"
 
     def queue_with(job):
         return SimpleNamespace(stdout=f"123|{root}|self\n{job}|{root}|other\n")
 
     monkeypatch.setattr(script.subprocess, "run", lambda *_args, **_kwargs: queue_with("999"))
     with pytest.raises(ValueError, match="another live study job"):
-        script.check_quiescence(root, "123")
+        script.check_quiescence(root, source, "123")
     monkeypatch.setattr(script.subprocess, "run", lambda *_args, **_kwargs: queue_with("123"))
-    assert script.check_quiescence(root, "123")["source_job_states"] == ["FAILED"]
+    assert script.check_quiescence(root, source, "123")["source_job_states"] == ["FAILED"]
     monkeypatch.setattr(script, "terminal", lambda *_: ["RUNNING"])
     with pytest.raises(ValueError, match="terminal FAILED"):
-        script.check_quiescence(root, "123")
+        script.check_quiescence(root, source, "123")
+
+
+def test_only_exact_afterok_pending_dispatcher_is_inert(tmp_path, monkeypatch):
+    script = module(monkeypatch)
+    monkeypatch.setattr(script, "terminal", lambda *_: ["FAILED"])
+    root = tmp_path
+    source = root / "releases" / ("a" * 40) / "source"
+    source_batch = source / "scripts/alliance/dispatch_p10_technical_20260928.sbatch"
+    source_batch.parent.mkdir(parents=True)
+    source_batch.write_bytes(b"#!/bin/bash\r\necho ready\r\n")
+    operations = root / "operations/p10-technical-completion" / source.parent.name
+    operations.mkdir(parents=True)
+    queued_batch = operations / source_batch.name
+    queued_batch.write_bytes(b"#!/bin/bash\necho ready\n")
+    command = [
+        "sbatch", "--parsable", "--job-name=fc-p10-technical-dispatch",
+        f"--chdir={root}", "--dependency=afterok:123",
+        f"--export=ALL,FACTORCON_ALLIANCE_ROOT={root},FACTORCON_RELEASE={source}",
+        str(queued_batch),
+    ]
+    receipt = {"status": "SUBMITTED", "job_id": "999", "command": command}
+    receipt_path = operations / "dispatch-submit.json"
+    receipt_path.write_text(json.dumps(receipt))
+
+    def query(args, **_kwargs):
+        if args[0] == "squeue":
+            return SimpleNamespace(stdout=f"123|{root}|self\n999|{root}|dispatcher\n")
+        return SimpleNamespace(
+            stdout="JobId=999 JobName=fc-p10-technical-dispatch "
+            "JobState=PENDING Dependency=afterok:123"
+        )
+
+    monkeypatch.setattr(script.subprocess, "run", query)
+    checked = script.check_quiescence(root, source, "123")
+    assert checked["inactive_afterok_dispatchers"] == ["999"]
+    receipt["command"][4] = "--dependency=afterany:123"
+    receipt_path.write_text(json.dumps(receipt))
+    with pytest.raises(ValueError, match="another live study job"):
+        script.check_quiescence(root, source, "123")
+    receipt["command"][4] = "--dependency=afterok:123"
+    receipt_path.write_text(json.dumps(receipt))
+    monkeypatch.setattr(
+        script.subprocess, "run",
+        lambda args, **_kwargs: SimpleNamespace(
+            stdout=(f"123|{root}|self\n999|{root}|dispatcher\n") if args[0] == "squeue"
+            else "JobId=999 JobName=fc-p10-technical-dispatch "
+            "JobState=RUNNING Dependency=(null)"
+        ),
+    )
+    with pytest.raises(ValueError, match="another live study job"):
+        script.check_quiescence(root, source, "123")

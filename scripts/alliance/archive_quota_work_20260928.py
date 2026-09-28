@@ -26,8 +26,52 @@ MIN_FREE_FILES_FOR_ARCHIVE = 50
 BYTE_RESERVE = 500_000_000_000
 
 
-def check_quiescence(root: Path, job: str) -> dict[str, Any]:
-    """Refuse archiving while any other job uses this study root."""
+def pending_dependent_dispatcher(root: Path, source: Path, archive_job: str, job: str) -> bool:
+    """Permit only an inert dispatcher that cannot run before this archive succeeds."""
+    operations = root / "operations/p10-technical-completion" / source.parent.name
+    receipt_path = operations / "dispatch-submit.json"
+    if not receipt_path.is_file():
+        return False
+    receipt = load_structured(receipt_path)
+    script = operations / "dispatch_p10_technical_20260928.sbatch"
+    normalized = (
+        source / "scripts/alliance/dispatch_p10_technical_20260928.sbatch"
+    ).read_bytes().replace(b"\r\n", b"\n")
+    command = receipt.get("command")
+    if (
+        receipt.get("status") != "SUBMITTED"
+        or receipt.get("job_id") != job
+        or not isinstance(command, list)
+        or len(command) < 2
+        or command[0] != "sbatch"
+        or command[-1] != str(script)
+        or "--job-name=fc-p10-technical-dispatch" not in command
+        or f"--dependency=afterok:{archive_job}" not in command
+        or f"--chdir={root}" not in command
+        or (
+            f"--export=ALL,FACTORCON_ALLIANCE_ROOT={root},FACTORCON_RELEASE={source}"
+            not in command
+        )
+        or not script.is_file()
+        or script.read_bytes() != normalized
+    ):
+        return False
+    details = subprocess.run(
+        ["scontrol", "show", "job", "-o", job],
+        capture_output=True,
+        text=True,
+        check=True,
+        timeout=45,
+    ).stdout
+    return (
+        "JobState=PENDING" in details
+        and "JobName=fc-p10-technical-dispatch" in details
+        and f"Dependency=afterok:{archive_job}" in details
+    )
+
+
+def check_quiescence(root: Path, source: Path, job: str) -> dict[str, Any]:
+    """Reject live consumers except an exact, verified afterok-pending dispatcher."""
     states = terminal(ATTEMPT.split("-", 1)[0])
     if not states or any(state != "FAILED" for state in states):
         raise ValueError("exact historical MRI job must remain terminal FAILED")
@@ -39,16 +83,24 @@ def check_quiescence(root: Path, job: str) -> dict[str, Any]:
         timeout=45,
     ).stdout
     study_jobs = []
+    inactive_dispatchers = []
     for line in queue.splitlines():
         if str(root) not in line:
             continue
         active = line.split("|", 1)[0].split("_", 1)[0]
         if active != job:
-            raise ValueError(f"another live study job may use MRI work: {active}")
+            if not pending_dependent_dispatcher(root, source, job, active):
+                raise ValueError(f"another live study job may use MRI work: {active}")
+            inactive_dispatchers.append(active)
+            continue
         study_jobs.append(active)
     if job not in study_jobs:
         raise ValueError("archive job absent from live scheduler census")
-    return {"source_job_states": states, "checked_utc": utc_now()}
+    return {
+        "source_job_states": states,
+        "inactive_afterok_dispatchers": inactive_dispatchers,
+        "checked_utc": utc_now(),
+    }
 
 
 def historical_work(root: Path) -> tuple[Path, Path]:
@@ -103,7 +155,7 @@ def run(root: Path, source: Path, job: str) -> dict[str, Any]:
     signal.signal(signal.SIGTERM, stop)
     record()
     try:
-        details["quiescence_before"] = check_quiescence(root, job)
+        details["quiescence_before"] = check_quiescence(root, source, job)
         survey = pack(root, work, destination, dry_run=True)
         if survey["members"] != EXPECTED_MEMBERS:
             raise ValueError("MRI work member count changed from independent census")
@@ -118,7 +170,7 @@ def run(root: Path, source: Path, job: str) -> dict[str, Any]:
         record()
         print("ARCHIVE_BEGIN", json.dumps(survey), flush=True)
         packed = pack(root, work, destination)
-        details["quiescence_after_copy"] = check_quiescence(root, job)
+        details["quiescence_after_copy"] = check_quiescence(root, source, job)
         retired = retire(root, work, destination)
         after = read_personal_quota()
         details.update(

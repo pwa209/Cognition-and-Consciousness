@@ -77,3 +77,15 @@ bounded to `21450700-3/work`; the dispatcher will submit the new P09 and P10
 jobs only after successful archive retirement and a fresh personal-quota check.
 Their eventual IDs and outcomes are not yet known. The historical failure,
 original derivatives, and original P09/P10 records remain untouched.
+
+### First archive job stopped at its quiescence guard
+
+Job 21980380 ran ten scoped Linux tests successfully, then refused to begin
+packing because its conservative live-job census saw the dependent, still-pending
+dispatcher 21980382. It failed at 20:10:04 UTC **before creating an archive or
+removing any work files**. Slurm canceled 21980382 because its `afterok`
+dependency failed. Both job logs and receipts are preserved. The follow-up
+release permits only the exact recorded dispatcher while Slurm independently
+confirms it is `PENDING` with `afterok` on the current archive job; every other
+study consumer still blocks retirement. Tests cover a wrong dependency and a
+running dispatcher. New scheduler IDs require separate submission receipts.
