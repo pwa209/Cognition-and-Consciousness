@@ -109,6 +109,22 @@ def verify_model_compatibility(original: Path, current: Path) -> None:
             )
 
 
+def scheduler_script(source: Path, operations: Path) -> Path:
+    """Use a verified source batch script with the LF line endings Slurm requires."""
+    original = source / "scripts/alliance/masked_p10_structural_repair.sbatch"
+    if not original.is_file():
+        raise ValueError("verified source is missing the P10 batch script")
+    normalized = original.read_bytes().replace(b"\r\n", b"\n")
+    path = operations / "masked_p10_structural_repair.sbatch"
+    if path.exists():
+        if path.read_bytes() != normalized:
+            raise ValueError("existing P10 scheduler script differs from verified source")
+    else:
+        with path.open("xb") as handle:
+            handle.write(normalized)
+    return path
+
+
 def original_evidence(
     root: Path, plan: dict[str, Any]
 ) -> tuple[Path, str, dict[str, Any], tuple[int, ...]]:
@@ -466,7 +482,7 @@ def dispatch(root: Path, source: Path, *, dry_run: bool = False) -> dict[str, An
         else:
             atomic_write_json(repair_input, value)
         common = f"ALL,FACTORCON_ALLIANCE_ROOT={root},FACTORCON_RELEASE={source}"
-        script = source / "scripts/alliance/masked_p10_structural_repair.sbatch"
+        script = scheduler_script(source, operations)
         p09 = [
             "sbatch",
             "--parsable",

@@ -32,6 +32,10 @@ Python/YAML scientific and scoring files matched after newline normalization.
 The repair now accepts only that text-format difference for compatibility;
 each release still independently verifies its original byte-level file hashes,
 and any substantive content change still aborts the mixed-release analysis.
+Slurm also requires LF-only batch files: dispatch derives one immutable LF copy
+from the verified release into its operations directory and refuses to reuse
+that copy if its contents change. Python source files remain in the original
+hash-verified release.
 
 The new interval is an unadjusted percentile summary at fixed families,
 conditions and external calibration. It is not a validated small-sample

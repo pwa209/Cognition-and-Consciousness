@@ -41,6 +41,21 @@ def test_model_compatibility_accepts_only_line_ending_changes(tmp_path, monkeypa
         script.verify_model_compatibility(old, new)
 
 
+def test_scheduler_copy_has_unix_line_endings_and_is_immutable(tmp_path, monkeypatch):
+    script = module(monkeypatch)
+    source, operations = tmp_path / "source", tmp_path / "operations"
+    operations.mkdir()
+    original = source / "scripts/alliance/masked_p10_structural_repair.sbatch"
+    original.parent.mkdir(parents=True)
+    original.write_bytes(b"#!/usr/bin/env bash\r\necho ready\r\n")
+    copy = script.scheduler_script(source, operations)
+    assert copy.read_bytes() == b"#!/usr/bin/env bash\necho ready\n"
+    assert script.scheduler_script(source, operations) == copy
+    copy.write_bytes(b"different\n")
+    with pytest.raises(ValueError, match="scheduler script differs"):
+        script.scheduler_script(source, operations)
+
+
 def test_repaired_graph_redirects_exact_structural_ids(monkeypatch):
     script = module(monkeypatch)
     old = Path(
