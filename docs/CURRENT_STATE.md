@@ -1,5 +1,8 @@
 # Current study state (26 September 2026)
 
+> For the later 28 September P09/P10 quota failure and bounded recovery plan,
+> see [P09/P10 inode completion](P09_P10_INODE_COMPLETION_20260928.md).
+
 This is the maintained GitHub handoff for the transparent, non-preregistered
 secondary analysis. It is a timestamped snapshot, **not** a live scheduler or
 participant-data mirror. No scientific result is a stopping gate.

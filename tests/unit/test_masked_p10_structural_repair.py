@@ -95,6 +95,40 @@ def test_repaired_graph_redirects_exact_structural_ids(monkeypatch):
         script.repaired_graph(original, (0, 0, *range(2, 113)), "12345", old, new)
 
 
+def test_technical_completion_replaces_only_quota_failed_attempt(monkeypatch):
+    script = module(monkeypatch)
+    release_root = Path("/scratch/pwa209/cognition-and-consciousness/fresh-test/releases")
+    old = release_root / ("a" * 40) / "source"
+    first = release_root / ("b" * 40) / "source"
+    original = {
+        "results": [
+            {"phase": "P07", "status": "analysis/downstream/P07/1/status.json"},
+            {"phase": "P08", "status": "analysis/downstream/P08/2/status.json"},
+            *(
+                {
+                    "phase": "P09", "replicate": i,
+                    "status": f"analysis/downstream/P09/original-{i}/status.json",
+                }
+                for i in range(1000)
+            ),
+        ]
+    }
+    failed = tuple([*range(112), 914])
+    graph = script.technically_completed_graph(original, failed, old, first, "55555")
+    assert graph["technical_retry_overrides"] == {"914": "55555"}
+    assert graph["retry_job"] == script.FIRST_RETRY_JOB
+    by_id = {row["replicate"]: row for row in graph["results"] if row["phase"] == "P09"}
+    assert by_id[914]["status"] == "analysis/downstream/P09/55555-914/status.json"
+    assert by_id[914]["source_release"] == str(first)
+    assert by_id[914]["original_status"] == original["results"][916]["status"]
+    assert by_id[0]["status"] == f"analysis/downstream/P09/{script.FIRST_RETRY_JOB}-0/status.json"
+    assert by_id[113]["status"] == "analysis/downstream/P09/original-113/status.json"
+    with pytest.raises(ValueError, match="new numeric"):
+        script.technically_completed_graph(original, failed, old, first, script.FIRST_RETRY_JOB)
+    with pytest.raises(ValueError, match="unique structural retry"):
+        script.technically_completed_graph(original, tuple(range(113)), old, first, "55555")
+
+
 def test_report_failure_marker_and_immutable_restart(tmp_path, monkeypatch):
     script = module(monkeypatch)
     root = tmp_path / "fresh-test"

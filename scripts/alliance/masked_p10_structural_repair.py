@@ -36,6 +36,9 @@ from factorcon.util import atomic_write_json, ensure_within, hash_file, load_str
 PLAN = "conf/masked_p10_structural_repair_20260928.yaml"
 OLD_INPUT = "operations/p09-quota-recovery/2535a9a26423129234e733ba7ae41c0315f6e758/P10-input.json"
 POLICY = "conditional_min_three_unique_groups_per_family_v1"
+FIRST_RETRY_RELEASE = "42b52abb743b09d1e168843d098bae6a6cbe260c"
+FIRST_RETRY_JOB = "21943233"
+QUOTA_FAILED_REPLICATE = 914
 
 
 def checked_plan(root: Path, source: Path) -> dict[str, Any]:
@@ -202,6 +205,33 @@ def repaired_graph(
     }
 
 
+def technically_completed_graph(
+    original: dict[str, Any],
+    failed: tuple[int, ...],
+    original_source: Path,
+    first_retry_source: Path,
+    replacement_job: str,
+) -> dict[str, Any]:
+    """Replace only the quota-failed attempt, never the original bootstrap draw."""
+    if not replacement_job.isdigit() or replacement_job == FIRST_RETRY_JOB:
+        raise ValueError("a new numeric technical-retry job is required")
+    graph = repaired_graph(
+        original, failed, FIRST_RETRY_JOB, original_source, first_retry_source
+    )
+    matches = [
+        row for row in graph["results"]
+        if row.get("phase") == "P09" and row.get("replicate") == QUOTA_FAILED_REPLICATE
+    ]
+    if len(matches) != 1 or QUOTA_FAILED_REPLICATE not in failed:
+        raise ValueError("quota-failed replicate is not a unique structural retry")
+    matches[0]["status"] = (
+        f"analysis/downstream/P09/{replacement_job}-{QUOTA_FAILED_REPLICATE}/status.json"
+    )
+    graph["retry_job"] = FIRST_RETRY_JOB
+    graph["technical_retry_overrides"] = {str(QUOTA_FAILED_REPLICATE): replacement_job}
+    return graph
+
+
 def run_retry(
     root: Path, source: Path, input_path: Path, replicate: int, job: str
 ) -> dict[str, Any]:
@@ -305,8 +335,21 @@ def run_report(root: Path, source: Path, input_path: Path, job: str) -> dict[str
     original, campaign_hash, original_graph, failed = original_evidence(root, plan)
     graph = load_structured(input_path)
     retry_job = graph.get("retry_job")
-    expected = repaired_graph(original_graph, failed, retry_job, original, source)
-    expected["retry_job"] = retry_job
+    if "technical_retry_overrides" in graph:
+        first_retry_source = root / "releases" / FIRST_RETRY_RELEASE / "source"
+        verify_release(root, first_retry_source)
+        verify_model_compatibility(original, source)
+        if retry_job != FIRST_RETRY_JOB or set(graph["technical_retry_overrides"]) != {
+            str(QUOTA_FAILED_REPLICATE)
+        }:
+            raise ValueError("unexpected technical-retry mapping")
+        replacement_job = graph["technical_retry_overrides"][str(QUOTA_FAILED_REPLICATE)]
+        expected = technically_completed_graph(
+            original_graph, failed, original, first_retry_source, replacement_job
+        )
+    else:
+        expected = repaired_graph(original_graph, failed, retry_job, original, source)
+        expected["retry_job"] = retry_job
     expected["original_graph_sha256"] = hash_file(root / OLD_INPUT)
     if graph != expected:
         raise ValueError("new P10 input differs from fixed source/ID mapping")
@@ -393,6 +436,9 @@ def run_report(root: Path, source: Path, input_path: Path, job: str) -> dict[str
             "small_group_coverage_validated": False,
             "original_p10_job": plan["original_p10_job"],
         }
+        if "technical_retry_overrides" in graph:
+            design["technical_retry_overrides"] = graph["technical_retry_overrides"]
+            design["first_retry_job"] = FIRST_RETRY_JOB
         result = report_results(
             attempt,
             families=tuple(graph["families"]),
@@ -537,11 +583,150 @@ def dispatch(root: Path, source: Path, *, dry_run: bool = False) -> dict[str, An
         return receipt
 
 
+def dispatch_technical_completion(
+    root: Path, source: Path, *, dry_run: bool = False
+) -> dict[str, Any]:
+    """Recompute only quota-failed ID 914, then report the fixed 1,000-ID graph.
+
+    The first 112 structural redraws and all 887 original scored draws stay at
+    their existing, independently verified paths. No observed score selects an
+    attempt. A new Slurm identity preserves the failed first retry and its log.
+    """
+    import fcntl
+
+    root = validate_fresh_root(root)
+    verify_release(root, source)
+    plan = checked_plan(root, source)
+    original, campaign_hash, original_graph, failed = original_evidence(root, plan)
+    verify_release(root, original)
+    verify_model_compatibility(original, source)
+    first_source = root / "releases" / FIRST_RETRY_RELEASE / "source"
+    verify_release(root, first_source)
+    verify_model_compatibility(original, first_source)
+    first_operations = root / "operations/p10-structural-repair" / FIRST_RETRY_RELEASE
+    first_p09_input = first_operations / "P09-input.json"
+    p09_info = load_structured(first_p09_input)
+    if (
+        p09_info.get("stage") != "P09_STRUCTURAL_RETRY"
+        or tuple(p09_info.get("failed_ids", ())) != failed
+        or p09_info.get("original_graph_sha256") != hash_file(root / OLD_INPUT)
+    ):
+        raise ValueError("first structural-redraw input changed")
+    expected_first = repaired_graph(
+        original_graph, failed, FIRST_RETRY_JOB, original, first_source
+    )
+    expected_first["retry_job"] = FIRST_RETRY_JOB
+    expected_first["original_graph_sha256"] = hash_file(root / OLD_INPUT)
+    if load_structured(first_operations / "P10-input.json") != expected_first:
+        raise ValueError("first structural-report mapping changed")
+    for replicate in failed:
+        status = root / "analysis/downstream/P09" / f"{FIRST_RETRY_JOB}-{replicate}" / "status.json"
+        if replicate == QUOTA_FAILED_REPLICATE:
+            stale = load_structured(status)
+            if stale.get("status") not in {"RUNNING", "FAILED"} or (
+                status.parent / "result.json"
+            ).exists():
+                raise ValueError("quota-failed attempt unexpectedly has a result")
+            continue
+        read_predecessor(root, status, first_source, campaign_hash, "P09")
+        if load_structured(status.parent / "result.json").get("status") != "completed":
+            raise ValueError(f"structural redraw {replicate} is not scored")
+    old_log = first_operations / f"P09-{FIRST_RETRY_JOB}_{QUOTA_FAILED_REPLICATE}.log"
+    if "[Errno 122] Disk quota exceeded" not in old_log.read_text(errors="replace"):
+        raise ValueError("exact quota-failure evidence missing")
+    states = subprocess.run(
+        [
+            "sacct", "-n", "-P", "-j", f"{FIRST_RETRY_JOB}_{QUOTA_FAILED_REPLICATE}",
+            "--format=State",
+        ], capture_output=True, text=True, check=True, timeout=30,
+    ).stdout.splitlines()
+    if not states or states[0].split("|")[0].split()[0] != "FAILED":
+        raise ValueError("first technical-failure task is not terminal FAILED")
+    quota = read_personal_quota()
+    free_files = quota.limit_files - quota.used_files
+    free_bytes = quota.limit_bytes - quota.used_bytes
+    if dry_run:
+        return {
+            "dry_run": True,
+            "completed_structural_redraws": len(failed) - 1,
+            "technical_retry_replicate": QUOTA_FAILED_REPLICATE,
+            "free_files": free_files,
+            "free_bytes": free_bytes,
+        }
+    if free_files <= 50_000 or free_bytes <= 500_000_000_000:
+        raise ValueError("personal scratch reserve insufficient for technical completion")
+    operations = root / "operations/p10-technical-completion" / source.parent.name
+    operations.mkdir(parents=True, exist_ok=True)
+    with (operations / "dispatch.lock").open("a+") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        first_script = first_operations / "masked_p10_structural_repair.sbatch"
+        if first_script.read_bytes() != (
+            first_source / "scripts/alliance/masked_p10_structural_repair.sbatch"
+        ).read_bytes().replace(b"\r\n", b"\n"):
+            raise ValueError("first retry batch script differs from verified source")
+        new_script = scheduler_script(source, operations)
+        first_common = f"ALL,FACTORCON_ALLIANCE_ROOT={root},FACTORCON_RELEASE={first_source}"
+        p09 = [
+            "sbatch", "--parsable", "--job-name=fc-P09-quota-failed-914",
+            f"--output={operations}/P09-%A_%a.log",
+            f"--export={first_common},FACTORCON_REPAIR_STAGE=P09,"
+            f"FACTORCON_REPAIR_INPUT={first_p09_input},"
+            f"FACTORCON_REPAIR_INPUT_SHA256={hash_file(first_p09_input)}",
+            f"--array={QUOTA_FAILED_REPLICATE}", "--no-requeue", str(first_script),
+        ]
+        test = subprocess.run(
+            ["sbatch", "--test-only", *p09[1:]], capture_output=True, text=True, timeout=30
+        )
+        if test.returncode:
+            raise ValueError(f"P09 technical retry scheduler test failed: {test.stderr.strip()}")
+        replacement_job = submit_one(operations / "P09.json", p09)
+        p10_input = operations / "P10-input.json"
+        graph = technically_completed_graph(
+            original_graph, failed, original, first_source, replacement_job
+        )
+        graph["original_graph_sha256"] = hash_file(root / OLD_INPUT)
+        if p10_input.exists():
+            if load_structured(p10_input) != graph:
+                raise ValueError("existing technical-completion graph changed")
+        else:
+            atomic_write_json(p10_input, graph)
+        common = f"ALL,FACTORCON_ALLIANCE_ROOT={root},FACTORCON_RELEASE={source}"
+        p10 = [
+            "sbatch", "--parsable", "--job-name=fc-P10-conditional-completion",
+            f"--output={operations}/P10-%j.log",
+            f"--dependency=afterany:{replacement_job}",
+            f"--export={common},FACTORCON_REPAIR_STAGE=P10,"
+            f"FACTORCON_REPAIR_INPUT={p10_input},"
+            f"FACTORCON_REPAIR_INPUT_SHA256={hash_file(p10_input)}",
+            str(new_script),
+        ]
+        test = subprocess.run(
+            ["sbatch", "--test-only", *p10[1:]], capture_output=True, text=True, timeout=30
+        )
+        if test.returncode:
+            raise ValueError(f"P10 completion scheduler test failed: {test.stderr.strip()}")
+        report_job = submit_one(operations / "P10.json", p10)
+        receipt = {
+            "status": "SUBMITTED",
+            "source_release": str(source),
+            "first_retry_job": FIRST_RETRY_JOB,
+            "quota_failed_replicate": QUOTA_FAILED_REPLICATE,
+            "replacement_p09_job": replacement_job,
+            "conditional_p10_job": report_job,
+            "sampling_policy": POLICY,
+            "scientific_gate": None,
+        }
+        atomic_write_json(operations / "dispatch.json", receipt)
+        return receipt
+
+
 def main() -> int:
     """Run one immutable cluster attempt or submit the fixed repair graph."""
     parser = argparse.ArgumentParser()
     parser.add_argument("--root", type=Path, required=True)
-    parser.add_argument("--mode", choices=("retry", "report", "dispatch"), required=True)
+    parser.add_argument(
+        "--mode", choices=("retry", "report", "dispatch", "dispatch-technical"), required=True
+    )
     parser.add_argument("--input", type=Path)
     parser.add_argument("--input-sha256")
     parser.add_argument("--dry-run", action="store_true")
@@ -551,6 +736,8 @@ def main() -> int:
     source = Path(__file__).resolve().parents[2]
     if args.mode == "dispatch":
         result = dispatch(root, source, dry_run=args.dry_run)
+    elif args.mode == "dispatch-technical":
+        result = dispatch_technical_completion(root, source, dry_run=args.dry_run)
     else:
         verify_release(root, source)
         if args.input is None or args.input_sha256 is None:
