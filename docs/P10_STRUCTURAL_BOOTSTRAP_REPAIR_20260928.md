@@ -57,3 +57,17 @@ under that personal scratch root. At submission, both jobs were pending; P10
 was pending on the P09 dependency. This is a submission record, not a claim
 that redraws or the new report have completed. The original P10 job `21842472`
 and all original failure records are preserved.
+
+## Operational acceleration (28 September 2026)
+
+At 08:59:53 UTC, the live receipt census showed nine successful redraws,
+eight running, 96 without status, and no recorded failures. The array owner,
+source release, job name, four CPUs per task and existing `%8` throttle were
+verified before changing only Slurm `ArrayTaskThrottle` for job `21943233`
+from 8 to 20. `scontrol` returned success and then reported `%20`. This
+allows at most 80 allocated CPUs, subject to scheduler availability; it does
+not change replicate IDs, seeds, models, result paths or the P10 dependency.
+The cluster-side receipt is
+`operations/p10-structural-repair/42b52abb743b09d1e168843d098bae6a6cbe260c/p09-throttle-20-20260928.json`.
+The earlier 25-task setting in the original campaign led to quota-service
+timeouts, so this is a bounded increase, not an unqualified 100-core claim.
