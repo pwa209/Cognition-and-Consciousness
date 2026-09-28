@@ -89,3 +89,22 @@ release permits only the exact recorded dispatcher while Slurm independently
 confirms it is `PENDING` with `afterok` on the current archive job; every other
 study consumer still blocks retirement. Tests cover a wrong dependency and a
 running dispatcher. New scheduler IDs require separate submission receipts.
+
+### Corrected chain submitted
+
+The safety correction was synced at Git commit
+`fb170e3d0285810f77fb1a4331ead82b06f92e20`, installed as a new
+313-file, hash-verified personal-scratch source release. The P09/P10 preflight
+again verified 112 completed first redraws and only quota-failed ID 914; the
+personal quota still had approximately 4,000 free files. The batch copies in
+the operations directories were checked against their source hashes,
+LF-normalized, and accepted by `bash -n` and Slurm test mode.
+
+Archive job **21980950** was first submitted on hold. Dependent dispatcher
+**21980952** was then submitted with `afterok:21980950`, its receipt persisted,
+and the archive hold released. Both were pending at the immediate post-release
+check. This order prevents the archive from seeing a queued dispatcher before
+its identity receipt exists. The corrected guard still verifies Slurm's
+`PENDING` state and exact dependency during archive execution; any other live
+study job fails closed. These are submission receipts, not claims that the
+86,162-entry archive, P09 retry, or P10 report has completed.
