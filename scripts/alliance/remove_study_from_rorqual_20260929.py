@@ -61,8 +61,10 @@ def validate_target() -> dict[str, object]:
 
 def check_quiescence() -> dict[str, object]:
     own_job = os.environ.get("SLURM_JOB_ID")
-    lines = command(["squeue", "-h", "-u", OWNER, "-o", "%i|%j|%T"]).splitlines()
+    # -r expands compressed Slurm array ranges into inspectable task IDs.
+    lines = command(["squeue", "-r", "-h", "-u", OWNER, "-o", "%i|%j|%T"]).splitlines()
     seen = 0
+    inspected_arrays: set[str] = set()
     for line in lines:
         job_id, name, _state = line.split("|", 2)
         if job_id == own_job:
@@ -70,9 +72,13 @@ def check_quiescence() -> dict[str, object]:
         seen += 1
         if name.startswith("fc-") or "cogn" in name.lower() or "factorcon" in name.lower():
             raise RuntimeError(f"another study job is active: {job_id} {name}")
+        array_id = job_id.split("_", 1)[0]
+        if array_id in inspected_arrays:
+            continue
         detail = command(["scontrol", "show", "job", "-o", job_id])
         if str(ROOT) in detail:
             raise RuntimeError(f"another job references the study root: {job_id}")
+        inspected_arrays.add(array_id)
     return {"checked_utc": now(), "other_active_user_jobs_checked": seen}
 
 
